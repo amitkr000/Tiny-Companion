@@ -61,21 +61,19 @@ Action touch sensor:
 
 | Gesture | Normal Mode |
 | --- | --- |
-| Single/double/triple tap | Cycle display mode |
-| Long press | Enter Pomodoro and start |
+| Single/double/triple tap | Cycle non-Pomodoro display modes |
+| Long press | Exit any mode and return to idle faces |
 
 In Pomodoro mode:
 
 | Gesture | Pomodoro Action |
 | --- | --- |
-| Single tap | Start/pause |
-| Double tap | Reset |
-| Long press | Switch focus/break |
-| Triple tap | Move to next mode |
+| Short tap | Ignored |
+| Long press | Exit Pomodoro display and return to idle faces |
 
 ## Pomodoro
 
-Use the dashboard or action touch sensor to start Pomodoro mode.
+Use the hosted dashboard to start and control Pomodoro mode. Pomodoro is website-only so accidental physical touches do not break a focus session.
 
 Default timing:
 
@@ -116,6 +114,7 @@ The dashboard lets you:
 - Preview faces.
 - Trigger poke/feed/play/love/sleep/wake.
 - Start, pause, reset, and switch Pomodoro.
+- Exit Pomodoro or any other mode back to idle faces.
 - Configure reminders.
 - Configure weather location and timezone.
 - Override weather or season.

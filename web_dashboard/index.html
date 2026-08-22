@@ -57,6 +57,7 @@
             <button data-action="love">Love</button>
             <button data-action="sleep" class="secondary">Sleep</button>
             <button data-action="wake" class="secondary">Wake</button>
+            <button data-action="modeIdle" class="secondary">Exit to Idle</button>
           </div>
         </div>
       </section>
@@ -71,10 +72,11 @@
             <h2 id="pomoPhase">Focus</h2>
             <div class="timer" id="pomoTimer">25:00</div>
             <div class="button-row">
-              <button data-action="pomoStart">Start</button>
-              <button data-action="pomoPause" class="secondary">Pause</button>
+              <button id="pomoStartBtn" data-action="pomoStart">Start</button>
+              <button id="pomoPauseBtn" data-action="pomoPause" class="secondary">Pause</button>
               <button data-action="pomoReset" class="secondary">Reset</button>
               <button data-action="pomoSwitch" class="secondary">Switch Phase</button>
+              <button data-action="modeIdle" class="secondary">Exit to Idle</button>
             </div>
           </div>
           <form id="pomodoroForm" class="settings-grid">

@@ -83,6 +83,8 @@ function updateState(state) {
   updateMetrics(state);
   $("#pomoPhase").textContent = `${state.pomodoro?.phase || "Focus"} ${state.pomodoro?.running ? "running" : "paused"}`;
   $("#pomoTimer").textContent = formatTimer(state.pomodoro?.remainingSeconds);
+  $("#pomoStartBtn").disabled = Boolean(state.pomodoro?.running);
+  $("#pomoPauseBtn").disabled = !state.pomodoro?.running;
   $("#rawState").textContent = JSON.stringify(state, null, 2);
 }
 

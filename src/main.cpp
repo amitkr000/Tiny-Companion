@@ -262,12 +262,19 @@ static void startSetupPortal() {
 static CompanionMode nextCompanionMode(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Idle: return CompanionMode::Clock;
-    case CompanionMode::Clock: return CompanionMode::Pomodoro;
-    case CompanionMode::Pomodoro: return CompanionMode::Reminders;
+    case CompanionMode::Clock: return CompanionMode::Reminders;
+    case CompanionMode::Pomodoro: return CompanionMode::Idle;
     case CompanionMode::Reminders: return CompanionMode::Status;
     case CompanionMode::Status:
     default: return CompanionMode::Idle;
   }
+}
+
+static void exitToIdleMode() {
+  app.companionMode = CompanionMode::Idle;
+  app.hasReactionFace = false;
+  app.lastAction = "Idle mode";
+  saveCompanionState();
 }
 
 static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
@@ -321,31 +328,17 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
 static void handleActionGesture(TouchGesture gesture, uint32_t now) {
   if (gesture == TouchGesture::None) return;
 
-  if (app.companionMode == CompanionMode::Pomodoro) {
-    if (gesture == TouchGesture::SingleTap) {
-      pomodoro.startPause(now);
-      triggerReaction(app, pomodoro.phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro toggle", now);
-    } else if (gesture == TouchGesture::DoubleTap) {
-      pomodoro.reset(now);
-      triggerReaction(app, FaceId::Focused, "Pomodoro reset", now);
-    } else if (gesture == TouchGesture::LongPress) {
-      pomodoro.switchPhase(now);
-      triggerReaction(app, pomodoro.phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro phase", now);
-    } else if (gesture == TouchGesture::TripleTap) {
-      app.companionMode = nextCompanionMode(app.companionMode);
-      triggerReaction(app, FaceId::Proud, companionModeName(app.companionMode), now);
-    }
-  } else {
-    if (gesture == TouchGesture::SingleTap || gesture == TouchGesture::DoubleTap || gesture == TouchGesture::TripleTap) {
-      app.companionMode = nextCompanionMode(app.companionMode);
-      triggerReaction(app, FaceId::Proud, companionModeName(app.companionMode), now);
-    } else if (gesture == TouchGesture::LongPress) {
-      app.companionMode = CompanionMode::Pomodoro;
-      pomodoro.startPause(now);
-      triggerReaction(app, FaceId::Focused, "Pomodoro started", now);
-    }
+  if (gesture == TouchGesture::LongPress) {
+    exitToIdleMode();
+    return;
   }
 
+  if (app.companionMode == CompanionMode::Pomodoro) {
+    return;
+  }
+
+  app.companionMode = nextCompanionMode(app.companionMode);
+  triggerReaction(app, FaceId::Proud, companionModeName(app.companionMode), now);
   saveCompanionState();
 }
 

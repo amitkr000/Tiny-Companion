@@ -295,7 +295,7 @@ void WebDashboard::sendDashboardPage() {
   body += F("</section>");
 
   body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Fallback Actions</h2><div class=\"row actions\">");
-  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}};
+  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeIdle", "Exit to Idle"}};
   for (const auto &action : actions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -398,6 +398,10 @@ bool WebDashboard::applyAction(const String &action) {
   } else if (action == "forceWeather") {
     if (forceWeatherSync_) forceWeatherSync_();
     triggerReaction(*state_, FaceId::Proud, "Weather synced", now);
+  } else if (action == "modeIdle") {
+    state_->companionMode = CompanionMode::Idle;
+    state_->hasReactionFace = false;
+    state_->lastAction = "Idle mode";
   } else {
     return false;
   }

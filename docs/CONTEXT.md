@@ -29,7 +29,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Manual weather and season overrides from the dashboard.
 - Companion stats: fullness, happiness, and energy.
 - Face touch gestures: poke, feed, love, sleep/wake.
-- Action touch gestures: mode cycling and Pomodoro control.
+- Action touch gestures: mode cycling and universal exit to idle.
 - Pomodoro timer with configurable focus, short break, long break, and long-break rounds.
 - Hydration and stretch reminders.
 - OLED brightness, invert, and face-animation settings.
@@ -59,16 +59,14 @@ Idle faces appear when nothing urgent is happening:
 | Face touch | Triple tap | Love/play reaction |
 | Face touch | Long press | Sleep or wake |
 | Face touch | Repeated taps | Annoyed, then angry |
-| Action touch | Single tap outside Pomodoro | Cycle mode screen |
-| Action touch | Long press outside Pomodoro | Enter Pomodoro and start |
-| Action touch | Single tap in Pomodoro | Start/pause |
-| Action touch | Double tap in Pomodoro | Reset timer |
-| Action touch | Long press in Pomodoro | Switch focus/break phase |
-| Action touch | Triple tap in Pomodoro | Leave Pomodoro screen |
+| Action touch | Single/double/triple tap outside Pomodoro | Cycle non-Pomodoro mode screens |
+| Action touch | Short tap in Pomodoro | Ignored |
+| Action touch | Long press in any mode | Exit to idle faces |
+| Website | Pomodoro controls | Start, pause, reset, and switch phase |
 
 ## Dashboard/API Summary
 
-The hosted dashboard supports device discovery, face previews, touch-like actions, Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
+The hosted dashboard supports device discovery, face previews, touch-like actions, website-only Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
 
 The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard.
 
