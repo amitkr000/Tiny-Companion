@@ -2,7 +2,7 @@
 
 Tiny Companion is an ESP32-C3 desk companion with expressive OLED faces, two touch sensors, Pomodoro mode, reminders, Wi-Fi setup, a GitHub Pages dashboard, and weather/time/season/moon-based idle faces.
 
-The polished dashboard is hosted with GitHub Pages:
+The polished dashboard is hosted with GitHub Pages. The root Pages URL redirects to the dashboard:
 
 ```text
 https://amitkr000.github.io/Tiny-Companion/
