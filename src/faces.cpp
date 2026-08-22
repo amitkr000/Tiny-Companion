@@ -1,5 +1,7 @@
 #include "faces.h"
 
+#include <time.h>
+
 static String shortText(const String &text, size_t maxLen) {
   if (text.length() <= maxLen) return text;
   return text.substring(0, maxLen - 3) + "...";
@@ -131,6 +133,39 @@ static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
   display.print(state.stats.energy);
   display.drawRoundRect(82, 20, 30, 22, 5, SSD1306_WHITE);
   display.fillRect(89, 42, 16, 4, SSD1306_WHITE);
+}
+
+static uint32_t estimatedEpoch(const AppState &state, uint32_t now) {
+  if (state.weather.epochAtSync == 0 || state.weather.lastSyncAt == 0) {
+    return 0;
+  }
+  return state.weather.epochAtSync + ((now - state.weather.lastSyncAt) / 1000UL);
+}
+
+static void drawTimeWeatherInfo(Adafruit_SSD1306 &display, const AppState &state) {
+  uint32_t now = millis();
+  uint32_t epoch = estimatedEpoch(state, now);
+  char timeBuffer[8] = "--:--";
+  char dateBuffer[16] = "time sync";
+
+  if (epoch != 0) {
+    time_t localEpoch = epoch + state.weather.timezoneOffsetMinutes * 60L;
+    struct tm *timeInfo = gmtime(&localEpoch);
+    if (timeInfo) {
+      snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d", timeInfo->tm_hour, timeInfo->tm_min);
+      snprintf(dateBuffer, sizeof(dateBuffer), "%02d/%02d", timeInfo->tm_mday, timeInfo->tm_mon + 1);
+    }
+  }
+
+  WeatherTheme theme = state.weather.manualWeather ? state.weather.overrideTheme : state.weather.theme;
+  String weatherLine = state.weather.hasData || state.weather.manualWeather
+    ? String(weatherThemeName(theme)) + " " + String(state.weather.temperatureC, 0) + "C"
+    : "Weather sync";
+
+  drawCentered(display, timeBuffer, 14, 2);
+  drawCentered(display, shortText(dateBuffer, 16), 33);
+  drawCentered(display, shortText(weatherLine, 21), 44);
+  drawCentered(display, shortText(String(seasonThemeName(state.weather.season)) + " " + moonPhaseName(state.weather.moon), 21), 55);
 }
 
 static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &state) {
@@ -413,6 +448,8 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
         drawCentered(display, "Hydrate in", 14);
         drawCentered(display, String(reminders.minutesUntilHydration(millis())) + " min", 28, 2);
         drawCentered(display, "Stretch " + String(reminders.minutesUntilStretch(millis())) + "m", 54);
+      } else if (state.companionMode == CompanionMode::Idle && (millis() % (IDLE_FACE_MS + WEATHER_FACE_MS)) >= IDLE_FACE_MS) {
+        drawTimeWeatherInfo(display, state);
       } else {
         drawFace(display, state.currentFace, state);
       }
