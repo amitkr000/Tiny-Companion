@@ -8,6 +8,8 @@ class PomodoroTimer {
  public:
   void begin(const PomodoroSettings &settings);
   void update(uint32_t now);
+  void start(uint32_t now);
+  void pause(uint32_t now);
   void startPause(uint32_t now);
   void reset(uint32_t now);
   void switchPhase(uint32_t now);
@@ -32,4 +34,3 @@ class PomodoroTimer {
   uint32_t durationFor(PomodoroPhase phase) const;
   void setPhase(PomodoroPhase phase, uint32_t now, bool run);
 };
-

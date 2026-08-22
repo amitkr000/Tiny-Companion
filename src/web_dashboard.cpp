@@ -303,7 +303,7 @@ void WebDashboard::sendDashboardPage() {
     body += action[1];
     body += F("</button></form>");
   }
-  const char *pomoActions[][2] = {{"pomoStart", "Start/Pause"}, {"pomoReset", "Reset"}, {"pomoSwitch", "Switch phase"}};
+  const char *pomoActions[][2] = {{"pomoStart", "Start"}, {"pomoPause", "Pause"}, {"pomoReset", "Reset"}, {"pomoSwitch", "Switch phase"}};
   for (const auto &action : pomoActions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -368,6 +368,14 @@ bool WebDashboard::applyAction(const String &action) {
     state_->stats.happiness = clampStat(state_->stats.happiness + 15);
     triggerReaction(*state_, FaceId::Love, "Loved", now);
   } else if (action == "pomoStart") {
+    state_->companionMode = CompanionMode::Pomodoro;
+    pomodoro_->start(now);
+    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro started", now);
+  } else if (action == "pomoPause") {
+    state_->companionMode = CompanionMode::Pomodoro;
+    pomodoro_->pause(now);
+    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro paused", now);
+  } else if (action == "pomoToggle") {
     state_->companionMode = CompanionMode::Pomodoro;
     pomodoro_->startPause(now);
     triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro toggle", now);

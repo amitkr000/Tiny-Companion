@@ -24,6 +24,18 @@ void PomodoroTimer::update(uint32_t now) {
   }
 }
 
+void PomodoroTimer::start(uint32_t now) {
+  if (!running_) {
+    startPause(now);
+  }
+}
+
+void PomodoroTimer::pause(uint32_t now) {
+  if (running_) {
+    startPause(now);
+  }
+}
+
 void PomodoroTimer::startPause(uint32_t now) {
   if (running_) {
     remainingAtPause_ = remainingSeconds(now);
@@ -100,4 +112,3 @@ void PomodoroTimer::setPhase(PomodoroPhase phase, uint32_t now, bool run) {
   startedAt_ = now;
   running_ = run;
 }
-

@@ -360,16 +360,16 @@ FaceId selectFace(AppState &state, const PomodoroTimer &pomodoro, const Reminder
   if (state.deviceMode == DeviceMode::SetupPortal || state.deviceMode == DeviceMode::Connecting || state.deviceMode == DeviceMode::Booting) {
     return state.currentFace;
   }
+  if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - now) > 0) {
+    return state.reactionFace;
+  }
+  state.hasReactionFace = false;
   if (state.sleepRequested) return FaceId::Sleepy;
   if (state.companionMode == CompanionMode::Pomodoro) {
     return pomodoro.phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime;
   }
   if (state.activeReminder == ReminderKind::Hydration) return FaceId::Hydration;
   if (state.activeReminder == ReminderKind::Stretch) return FaceId::BreakTime;
-  if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - now) > 0) {
-    return state.reactionFace;
-  }
-  state.hasReactionFace = false;
   if (state.stats.energy < 18) return FaceId::Sleepy;
   if (state.stats.fullness < 18) return FaceId::Hungry;
   if (state.stats.happiness < 20) return FaceId::Lonely;
@@ -402,6 +402,8 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
         drawCentered(display, String(ip[0]) + "." + String(ip[1]) + ".", 28);
         drawCentered(display, String(ip[2]) + "." + String(ip[3]), 40);
         drawCentered(display, shortText(ssid, 18), 55);
+      } else if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - millis()) > 0) {
+        drawFace(display, state.currentFace, state);
       } else if (state.companionMode == CompanionMode::Pomodoro) {
         drawPomodoro(display, pomodoro);
       } else if (state.companionMode == CompanionMode::Status) {
