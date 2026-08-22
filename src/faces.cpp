@@ -336,7 +336,7 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       drawEyes(display, 24, 16, 16, 50);
       break;
   }
-  drawCentered(display, faceName(face), 11);
+  drawCentered(display, shortText(faceName(face), 21), 55);
 }
 
 void applyDisplaySettings(Adafruit_SSD1306 &display, const DisplaySettings &settings) {
