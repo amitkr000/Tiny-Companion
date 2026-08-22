@@ -1,5 +1,6 @@
 #include "web_dashboard.h"
 
+#include <ArduinoJson.h>
 #include <WiFi.h>
 
 #include "faces.h"
@@ -39,6 +40,33 @@ static String jsonEscape(const String &value) {
   return escaped;
 }
 
+void WebDashboard::addCorsHeaders() {
+  server_->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
+  server_->sendHeader(F("Access-Control-Allow-Methods"), F("GET, POST, OPTIONS"));
+  server_->sendHeader(F("Access-Control-Allow-Headers"), F("Content-Type"));
+  server_->sendHeader(F("Access-Control-Allow-Private-Network"), F("true"));
+  server_->sendHeader(F("Cache-Control"), F("no-store"));
+}
+
+void WebDashboard::sendJson(int code, const String &json) {
+  addCorsHeaders();
+  server_->send(code, F("application/json"), json);
+}
+
+void WebDashboard::sendJsonError(int code, const String &message) {
+  String json;
+  json.reserve(96);
+  json += F("{\"ok\":false,\"error\":\"");
+  json += jsonEscape(message);
+  json += F("\"}");
+  sendJson(code, json);
+}
+
+void WebDashboard::handleOptions() {
+  addCorsHeaders();
+  server_->send(204, F("text/plain"), "");
+}
+
 void WebDashboard::begin(WebServer &server, AppState &state, WeatherService &weather, PomodoroTimer &pomodoro, ReminderService &reminders) {
   server_ = &server;
   state_ = &state;
@@ -75,8 +103,22 @@ void WebDashboard::registerRoutes() {
   server_->on("/face", HTTP_POST, [this]() { handleFacePreview(); });
   server_->on("/settings", HTTP_POST, [this]() { handleSettings(); });
   server_->on("/api/state", HTTP_GET, [this]() { sendStateJson(); });
+  server_->on("/api/state", HTTP_OPTIONS, [this]() { handleOptions(); });
+  server_->on("/api/discover", HTTP_GET, [this]() { sendDiscoverJson(); });
+  server_->on("/api/discover", HTTP_OPTIONS, [this]() { handleOptions(); });
+  server_->on("/api/settings", HTTP_GET, [this]() { sendSettingsJson(); });
+  server_->on("/api/settings", HTTP_POST, [this]() { handleApiSettings(); });
+  server_->on("/api/settings", HTTP_OPTIONS, [this]() { handleOptions(); });
+  server_->on("/api/action", HTTP_POST, [this]() { handleApiAction(); });
+  server_->on("/api/action", HTTP_OPTIONS, [this]() { handleOptions(); });
+  server_->on("/api/face", HTTP_POST, [this]() { handleApiFace(); });
+  server_->on("/api/face", HTTP_OPTIONS, [this]() { handleOptions(); });
   server_->on("/reset", HTTP_GET, [this]() { handleForgetWifi(); });
   server_->onNotFound([this]() {
+    if (server_->method() == HTTP_OPTIONS) {
+      handleOptions();
+      return;
+    }
     Serial.print("[web] not found fallback: ");
     Serial.println(server_->uri());
     sendHomePage();
@@ -168,6 +210,7 @@ void WebDashboard::sendSetupPage() {
 }
 
 void WebDashboard::sendPlainOk() {
+  addCorsHeaders();
   server_->send(200, F("text/plain"), F("Tiny Companion web server OK"));
 }
 
@@ -207,8 +250,8 @@ void WebDashboard::sendStatusPage() {
 
 void WebDashboard::sendDashboardPage() {
   String body;
-  body.reserve(19000);
-  body += F("<header><div><h1>Tiny Companion</h1><p>Face-first desk companion dashboard.</p></div><span class=\"pill\">");
+  body.reserve(4200);
+  body += F("<header><div><h1>Tiny Companion</h1><p>Use the hosted dashboard for the full control UI.</p></div><span class=\"pill\">");
   body += WiFi.isConnected() ? F("Online") : F("Offline");
   body += F("</span></header>");
 
@@ -225,7 +268,9 @@ void WebDashboard::sendDashboardPage() {
   } else {
     body += F("<p class=\"status\">Not connected. Use setup mode to add Wi-Fi.</p>");
   }
-  body += F("<div class=\"row\" style=\"margin-top:12px\"><a class=\"button ghost\" href=\"/setup\">Wi-Fi setup</a><a class=\"button ghost\" href=\"/api/state\">State JSON</a></div></div>");
+  body += F("<div class=\"row\" style=\"margin-top:12px\"><a class=\"button\" href=\"");
+  body += HOSTED_DASHBOARD_URL;
+  body += F("\">Open hosted dashboard</a><a class=\"button ghost\" href=\"/api/state\">State JSON</a></div></div>");
 
   body += F("<div class=\"card\"><h2>Companion</h2>");
   body += metricBlock(F("Fullness"), state_->stats.fullness);
@@ -237,31 +282,7 @@ void WebDashboard::sendDashboardPage() {
   body += htmlEscape(state_->lastAction);
   body += F("</p></div>");
 
-  body += F("<div class=\"card\"><h2>Weather Context</h2><p class=\"status\">");
-  body += weatherThemeName(state_->weather.manualWeather ? state_->weather.overrideTheme : state_->weather.theme);
-  body += F("<br>");
-  body += String(state_->weather.temperatureC, 1);
-  body += F(" C, code ");
-  body += state_->weather.weatherCode;
-  body += F("<br>");
-  body += seasonThemeName(weather_->resolvedSeason(millis()));
-  body += F(", ");
-  body += moonPhaseName(state_->weather.moon);
-  body += F("</p><form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"forceWeather\"><button type=\"submit\">Sync weather</button></form></div>");
-  body += F("</section>");
-
-  body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Actions</h2><div class=\"row actions\">");
-  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"doneHydration", "Hydrated"}};
-  for (const auto &action : actions) {
-    body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
-    body += action[0];
-    body += F("\"><button type=\"submit\">");
-    body += action[1];
-    body += F("</button></form>");
-  }
-  body += F("</div></section>");
-
-  body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Pomodoro</h2><p class=\"status\">");
+  body += F("<div class=\"card\"><h2>Pomodoro</h2><p class=\"status\">");
   body += pomodoro_->phaseName();
   body += pomodoro_->isRunning() ? F(" running") : F(" paused");
   body += F("<br>Remaining ");
@@ -270,7 +291,18 @@ void WebDashboard::sendDashboardPage() {
   body += F(":");
   if (remaining % 60 < 10) body += F("0");
   body += String(remaining % 60);
-  body += F("</p><div class=\"row actions\">");
+  body += F("</p></div>");
+  body += F("</section>");
+
+  body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Fallback Actions</h2><div class=\"row actions\">");
+  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}};
+  for (const auto &action : actions) {
+    body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
+    body += action[0];
+    body += F("\"><button type=\"submit\">");
+    body += action[1];
+    body += F("</button></form>");
+  }
   const char *pomoActions[][2] = {{"pomoStart", "Start/Pause"}, {"pomoReset", "Reset"}, {"pomoSwitch", "Switch phase"}};
   for (const auto &action : pomoActions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
@@ -280,98 +312,6 @@ void WebDashboard::sendDashboardPage() {
     body += F("</button></form>");
   }
   body += F("</div></section>");
-
-  body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Face Preview</h2><div class=\"grid\">");
-  size_t faceCount;
-  const FaceSpec *specs = faceSpecs(faceCount);
-  for (size_t i = 0; i < faceCount; i++) {
-    body += F("<form class=\"mood");
-    if (specs[i].id == state_->currentFace) body += F(" active");
-    body += F("\" method=\"post\" action=\"/face\"><input type=\"hidden\" name=\"face\" value=\"");
-    body += specs[i].name;
-    body += F("\"><button type=\"submit\"><strong>");
-    body += specs[i].name;
-    body += F("</strong><span class=\"muted\">");
-    body += specs[i].description;
-    body += F("</span></button></form>");
-  }
-  body += F("</div></section>");
-
-  body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Settings</h2><form method=\"post\" action=\"/settings\"><div class=\"grid\"><div>");
-  body += F("<label>OLED brightness ");
-  body += state_->displaySettings.brightness;
-  body += F("%</label><input type=\"range\" min=\"1\" max=\"100\" name=\"brightness\" value=\"");
-  body += state_->displaySettings.brightness;
-  body += F("\"><label class=\"check\">");
-  body += checkboxInput(F("idleAnim"), state_->displaySettings.idleAnimationEnabled);
-  body += F("Show faces on OLED</label><label class=\"check\">");
-  body += checkboxInput(F("invert"), state_->displaySettings.inverted);
-  body += F("Invert OLED colors</label></div><div>");
-  body += F("<label>Focus minutes</label><input name=\"focus\" type=\"number\" min=\"1\" max=\"120\" value=\"");
-  body += state_->pomodoroSettings.focusMinutes;
-  body += F("\"><label>Short break minutes</label><input name=\"shortBreak\" type=\"number\" min=\"1\" max=\"60\" value=\"");
-  body += state_->pomodoroSettings.shortBreakMinutes;
-  body += F("\"><label>Long break minutes</label><input name=\"longBreak\" type=\"number\" min=\"1\" max=\"90\" value=\"");
-  body += state_->pomodoroSettings.longBreakMinutes;
-  body += F("\"><label>Rounds before long break</label><input name=\"rounds\" type=\"number\" min=\"1\" max=\"12\" value=\"");
-  body += state_->pomodoroSettings.roundsBeforeLongBreak;
-  body += F("\"></div><div>");
-  body += F("<label class=\"check\">");
-  body += checkboxInput(F("hydrationOn"), state_->reminderSettings.hydrationEnabled);
-  body += F("Hydration reminders</label><label>Hydration minutes</label><input name=\"hydration\" type=\"number\" min=\"5\" max=\"240\" value=\"");
-  body += state_->reminderSettings.hydrationMinutes;
-  body += F("\"><label class=\"check\">");
-  body += checkboxInput(F("stretchOn"), state_->reminderSettings.stretchEnabled);
-  body += F("Stretch reminders</label><label>Stretch minutes</label><input name=\"stretch\" type=\"number\" min=\"5\" max=\"240\" value=\"");
-  body += state_->reminderSettings.stretchMinutes;
-  body += F("\"></div><div>");
-  body += F("<label class=\"check\">");
-  body += checkboxInput(F("weatherOn"), state_->weather.enabled);
-  body += F("Weather sync</label><label>Latitude</label><input name=\"lat\" value=\"");
-  body += String(state_->weather.latitude, 4);
-  body += F("\"><label>Longitude</label><input name=\"lon\" value=\"");
-  body += String(state_->weather.longitude, 4);
-  body += F("\"><label>Timezone</label><input name=\"tz\" value=\"");
-  body += htmlEscape(state_->weather.timezone);
-  body += F("\"><label>UTC offset minutes</label><input name=\"tzOff\" type=\"number\" min=\"-720\" max=\"840\" value=\"");
-  body += state_->weather.timezoneOffsetMinutes;
-  body += F("\"></div><div>");
-  body += F("<label class=\"check\">");
-  body += checkboxInput(F("manualWeather"), state_->weather.manualWeather);
-  body += F("Manual weather override</label><label>Weather face</label><select name=\"weatherTheme\">");
-  const WeatherTheme themes[] = {WeatherTheme::Unknown, WeatherTheme::Sunny, WeatherTheme::Rainy, WeatherTheme::Cloudy, WeatherTheme::Stormy, WeatherTheme::Foggy, WeatherTheme::Windy, WeatherTheme::Hot, WeatherTheme::Cold};
-  for (WeatherTheme theme : themes) {
-    body += F("<option value=\"");
-    body += weatherThemeId(theme);
-    body += F("\"");
-    if (theme == state_->weather.overrideTheme) body += F(" selected");
-    body += F(">");
-    body += weatherThemeName(theme);
-    body += F("</option>");
-  }
-  body += F("</select><label class=\"check\">");
-  body += checkboxInput(F("manualSeason"), state_->weather.manualSeason);
-  body += F("Manual season override</label><label>Season face</label><select name=\"seasonTheme\">");
-  const SeasonTheme seasons[] = {SeasonTheme::Auto, SeasonTheme::Spring, SeasonTheme::Summer, SeasonTheme::Monsoon, SeasonTheme::Autumn, SeasonTheme::Winter};
-  for (SeasonTheme season : seasons) {
-    body += F("<option value=\"");
-    body += seasonThemeId(season);
-    body += F("\"");
-    if (season == state_->weather.overrideSeason) body += F(" selected");
-    body += F(">");
-    body += seasonThemeName(season);
-    body += F("</option>");
-  }
-  body += F("</select></div><div>");
-  body += F("<label>Tap window ms</label><input name=\"tapWindow\" type=\"number\" min=\"180\" max=\"900\" value=\"");
-  body += state_->touchSettings.tapWindowMs;
-  body += F("\"><label>Long press ms</label><input name=\"longPress\" type=\"number\" min=\"500\" max=\"2500\" value=\"");
-  body += state_->touchSettings.longPressMs;
-  body += F("\"><label>Annoyed poke count</label><input name=\"annoyedPokes\" type=\"number\" min=\"2\" max=\"12\" value=\"");
-  body += state_->touchSettings.annoyedPokeCount;
-  body += F("\"><label>Angry poke count</label><input name=\"angryPokes\" type=\"number\" min=\"3\" max=\"20\" value=\"");
-  body += state_->touchSettings.angryPokeCount;
-  body += F("\"></div></div><button type=\"submit\" style=\"margin-top:14px\">Save settings</button></form></section>");
 
   body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Hardware</h2><p class=\"muted\">OLED ");
   body += OLED_WIDTH;
@@ -393,6 +333,14 @@ void WebDashboard::sendDashboardPage() {
 void WebDashboard::handleAction() {
   String action = server_->hasArg("action") ? server_->arg("action") : server_->arg("name");
   action.trim();
+  if (!applyAction(action)) {
+    server_->send(400, F("text/plain"), F("Unknown action"));
+    return;
+  }
+  redirectHome();
+}
+
+bool WebDashboard::applyAction(const String &action) {
   uint32_t now = millis();
 
   if (action == "poke") {
@@ -443,23 +391,35 @@ void WebDashboard::handleAction() {
     if (forceWeatherSync_) forceWeatherSync_();
     triggerReaction(*state_, FaceId::Proud, "Weather synced", now);
   } else {
-    server_->send(400, F("text/plain"), F("Unknown action"));
-    return;
+    return false;
   }
 
   if (saveState_) saveState_();
-  redirectHome();
+  return true;
 }
 
 void WebDashboard::handleFacePreview() {
   String id = server_->arg("face");
-  FaceId face = faceFromId(id, state_->currentFace);
-  triggerReaction(*state_, face, String("Preview: ") + faceName(face), millis(), 7000);
-  if (saveState_) saveState_();
+  if (!applyFacePreview(id)) {
+    server_->send(400, F("text/plain"), F("Unknown face"));
+    return;
+  }
   redirectHome();
 }
 
+bool WebDashboard::applyFacePreview(const String &id) {
+  FaceId face = faceFromId(id, state_->currentFace);
+  triggerReaction(*state_, face, String("Preview: ") + faceName(face), millis(), 7000);
+  if (saveState_) saveState_();
+  return true;
+}
+
 void WebDashboard::handleSettings() {
+  applySettingsFromRequest();
+  redirectHome();
+}
+
+bool WebDashboard::applySettingsFromRequest() {
   if (server_->hasArg("brightness")) state_->displaySettings.brightness = constrain(server_->arg("brightness").toInt(), 1, 100);
   state_->displaySettings.inverted = server_->hasArg("invert");
   state_->displaySettings.idleAnimationEnabled = server_->hasArg("idleAnim");
@@ -492,7 +452,117 @@ void WebDashboard::handleSettings() {
   if (saveRuntime_) saveRuntime_();
   if (saveState_) saveState_();
   if (applyDisplay_) applyDisplay_();
-  redirectHome();
+  return true;
+}
+
+bool WebDashboard::applySettingsFromJson() {
+  String body = server_->arg("plain");
+  if (body.length() == 0) {
+    return false;
+  }
+
+  DynamicJsonDocument doc(2048);
+  if (deserializeJson(doc, body)) {
+    return false;
+  }
+
+  JsonObject root = doc.as<JsonObject>();
+  JsonObject display = root["display"];
+  if (!display.isNull()) {
+    if (!display["brightness"].isNull()) state_->displaySettings.brightness = constrain(display["brightness"].as<int>(), 1, 100);
+    if (!display["inverted"].isNull()) state_->displaySettings.inverted = display["inverted"].as<bool>();
+    if (!display["idleAnimationEnabled"].isNull()) state_->displaySettings.idleAnimationEnabled = display["idleAnimationEnabled"].as<bool>();
+  }
+
+  JsonObject pomo = root["pomodoro"];
+  if (!pomo.isNull()) {
+    if (!pomo["focusMinutes"].isNull()) state_->pomodoroSettings.focusMinutes = constrain(pomo["focusMinutes"].as<int>(), 1, 120);
+    if (!pomo["shortBreakMinutes"].isNull()) state_->pomodoroSettings.shortBreakMinutes = constrain(pomo["shortBreakMinutes"].as<int>(), 1, 60);
+    if (!pomo["longBreakMinutes"].isNull()) state_->pomodoroSettings.longBreakMinutes = constrain(pomo["longBreakMinutes"].as<int>(), 1, 90);
+    if (!pomo["roundsBeforeLongBreak"].isNull()) state_->pomodoroSettings.roundsBeforeLongBreak = constrain(pomo["roundsBeforeLongBreak"].as<int>(), 1, 12);
+  }
+
+  JsonObject reminder = root["reminders"];
+  if (!reminder.isNull()) {
+    if (!reminder["hydrationEnabled"].isNull()) state_->reminderSettings.hydrationEnabled = reminder["hydrationEnabled"].as<bool>();
+    if (!reminder["stretchEnabled"].isNull()) state_->reminderSettings.stretchEnabled = reminder["stretchEnabled"].as<bool>();
+    if (!reminder["hydrationMinutes"].isNull()) state_->reminderSettings.hydrationMinutes = constrain(reminder["hydrationMinutes"].as<int>(), 5, 240);
+    if (!reminder["stretchMinutes"].isNull()) state_->reminderSettings.stretchMinutes = constrain(reminder["stretchMinutes"].as<int>(), 5, 240);
+  }
+
+  JsonObject weather = root["weather"];
+  if (!weather.isNull()) {
+    if (!weather["enabled"].isNull()) state_->weather.enabled = weather["enabled"].as<bool>();
+    if (!weather["latitude"].isNull()) state_->weather.latitude = weather["latitude"].as<float>();
+    if (!weather["longitude"].isNull()) state_->weather.longitude = weather["longitude"].as<float>();
+    if (!weather["timezone"].isNull()) state_->weather.timezone = weather["timezone"].as<const char *>();
+    if (!weather["timezoneOffsetMinutes"].isNull()) state_->weather.timezoneOffsetMinutes = constrain(weather["timezoneOffsetMinutes"].as<int>(), -720, 840);
+    if (!weather["manualWeather"].isNull()) state_->weather.manualWeather = weather["manualWeather"].as<bool>();
+    if (!weather["manualSeason"].isNull()) state_->weather.manualSeason = weather["manualSeason"].as<bool>();
+    if (!weather["overrideTheme"].isNull()) state_->weather.overrideTheme = weatherThemeFromId(String(weather["overrideTheme"].as<const char *>()), state_->weather.overrideTheme);
+    if (!weather["overrideSeason"].isNull()) state_->weather.overrideSeason = seasonThemeFromId(String(weather["overrideSeason"].as<const char *>()), state_->weather.overrideSeason);
+  }
+
+  JsonObject touch = root["touch"];
+  if (!touch.isNull()) {
+    if (!touch["tapWindowMs"].isNull()) state_->touchSettings.tapWindowMs = constrain(touch["tapWindowMs"].as<int>(), 180, 900);
+    if (!touch["longPressMs"].isNull()) state_->touchSettings.longPressMs = constrain(touch["longPressMs"].as<int>(), 500, 2500);
+    if (!touch["annoyedPokeCount"].isNull()) state_->touchSettings.annoyedPokeCount = constrain(touch["annoyedPokeCount"].as<int>(), 2, 12);
+    if (!touch["angryPokeCount"].isNull()) state_->touchSettings.angryPokeCount = constrain(touch["angryPokeCount"].as<int>(), 3, 20);
+  }
+
+  pomodoro_->applySettings(state_->pomodoroSettings, millis());
+  reminders_->applySettings(state_->reminderSettings, millis());
+  weather_->saveSettings();
+  state_->lastAction = "Settings saved";
+  if (saveRuntime_) saveRuntime_();
+  if (saveState_) saveState_();
+  if (applyDisplay_) applyDisplay_();
+  return true;
+}
+
+void WebDashboard::handleApiAction() {
+  DynamicJsonDocument doc(256);
+  String body = server_->arg("plain");
+  String action;
+  if (body.length() > 0 && !deserializeJson(doc, body)) {
+    action = doc["action"] | "";
+  }
+  if (action.length() == 0 && server_->hasArg("action")) {
+    action = server_->arg("action");
+  }
+  action.trim();
+  if (!applyAction(action)) {
+    sendJsonError(400, "Unknown action");
+    return;
+  }
+  sendStateJson();
+}
+
+void WebDashboard::handleApiFace() {
+  DynamicJsonDocument doc(256);
+  String body = server_->arg("plain");
+  String face;
+  if (body.length() > 0 && !deserializeJson(doc, body)) {
+    face = doc["face"] | "";
+  }
+  if (face.length() == 0 && server_->hasArg("face")) {
+    face = server_->arg("face");
+  }
+  face.trim();
+  if (face.length() == 0 || !applyFacePreview(face)) {
+    sendJsonError(400, "Unknown face");
+    return;
+  }
+  sendStateJson();
+}
+
+void WebDashboard::handleApiSettings() {
+  if (!applySettingsFromJson()) {
+    sendJsonError(400, "Invalid settings JSON");
+    return;
+  }
+  sendSettingsJson();
 }
 
 void WebDashboard::handleWifiSave() {
@@ -515,6 +585,80 @@ void WebDashboard::handleWifiSave() {
 void WebDashboard::handleForgetWifi() {
   server_->send(200, F("text/html"), pageShell(F("Wi-Fi Removed"), F("<h1>Saved Wi-Fi Removed</h1><p>The setup network will be available again after restart.</p>")));
   if (forgetWifi_) forgetWifi_();
+}
+
+void WebDashboard::sendDiscoverJson() {
+  String json;
+  json.reserve(900);
+  json += F("{\"ok\":true,\"device\":\"");
+  json += jsonEscape(DEVICE_NAME);
+  json += F("\",\"apiVersion\":1,\"hostname\":\"");
+  json += MDNS_HOSTNAME;
+  json += F(".local\",\"hostedDashboard\":\"");
+  json += HOSTED_DASHBOARD_URL;
+  json += F("\",\"ip\":\"");
+  json += WiFi.isConnected() ? WiFi.localIP().toString() : WiFi.softAPIP().toString();
+  json += F("\",\"mode\":\"");
+  json += deviceModeName(state_->deviceMode);
+  json += F("\",\"setupSsid\":\"");
+  json += SETUP_AP_SSID;
+  json += F("\",\"endpoints\":[\"/api/state\",\"/api/action\",\"/api/face\",\"/api/settings\",\"/api/discover\"]}");
+  sendJson(200, json);
+}
+
+void WebDashboard::sendSettingsJson() {
+  String json;
+  json.reserve(1800);
+  json += F("{\"ok\":true,\"display\":{\"brightness\":");
+  json += state_->displaySettings.brightness;
+  json += F(",\"inverted\":");
+  json += state_->displaySettings.inverted ? F("true") : F("false");
+  json += F(",\"idleAnimationEnabled\":");
+  json += state_->displaySettings.idleAnimationEnabled ? F("true") : F("false");
+  json += F("},\"pomodoro\":{\"focusMinutes\":");
+  json += state_->pomodoroSettings.focusMinutes;
+  json += F(",\"shortBreakMinutes\":");
+  json += state_->pomodoroSettings.shortBreakMinutes;
+  json += F(",\"longBreakMinutes\":");
+  json += state_->pomodoroSettings.longBreakMinutes;
+  json += F(",\"roundsBeforeLongBreak\":");
+  json += state_->pomodoroSettings.roundsBeforeLongBreak;
+  json += F("},\"reminders\":{\"hydrationEnabled\":");
+  json += state_->reminderSettings.hydrationEnabled ? F("true") : F("false");
+  json += F(",\"stretchEnabled\":");
+  json += state_->reminderSettings.stretchEnabled ? F("true") : F("false");
+  json += F(",\"hydrationMinutes\":");
+  json += state_->reminderSettings.hydrationMinutes;
+  json += F(",\"stretchMinutes\":");
+  json += state_->reminderSettings.stretchMinutes;
+  json += F("},\"weather\":{\"enabled\":");
+  json += state_->weather.enabled ? F("true") : F("false");
+  json += F(",\"latitude\":");
+  json += String(state_->weather.latitude, 4);
+  json += F(",\"longitude\":");
+  json += String(state_->weather.longitude, 4);
+  json += F(",\"timezone\":\"");
+  json += jsonEscape(state_->weather.timezone);
+  json += F("\",\"timezoneOffsetMinutes\":");
+  json += state_->weather.timezoneOffsetMinutes;
+  json += F(",\"manualWeather\":");
+  json += state_->weather.manualWeather ? F("true") : F("false");
+  json += F(",\"manualSeason\":");
+  json += state_->weather.manualSeason ? F("true") : F("false");
+  json += F(",\"overrideTheme\":\"");
+  json += weatherThemeId(state_->weather.overrideTheme);
+  json += F("\",\"overrideSeason\":\"");
+  json += seasonThemeId(state_->weather.overrideSeason);
+  json += F("\"},\"touch\":{\"tapWindowMs\":");
+  json += state_->touchSettings.tapWindowMs;
+  json += F(",\"longPressMs\":");
+  json += state_->touchSettings.longPressMs;
+  json += F(",\"annoyedPokeCount\":");
+  json += state_->touchSettings.annoyedPokeCount;
+  json += F(",\"angryPokeCount\":");
+  json += state_->touchSettings.angryPokeCount;
+  json += F("}}");
+  sendJson(200, json);
 }
 
 void WebDashboard::sendStateJson() {
@@ -558,5 +702,5 @@ void WebDashboard::sendStateJson() {
   json += F("\",\"moon\":\"");
   json += moonPhaseName(state_->weather.moon);
   json += F("\"}}");
-  server_->send(200, F("application/json"), json);
+  sendJson(200, json);
 }

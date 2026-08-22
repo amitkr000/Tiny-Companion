@@ -29,6 +29,14 @@ docs/
   CONTEXT.md
   PROJECT_STRUCTURE.md
   USER_MANUAL.md
+
+web_dashboard/
+  index.html            GitHub Pages dashboard shell
+  styles.css            Hosted dashboard visual design
+  app.js                Device discovery, API calls, UI state
+
+.github/workflows/
+  pages.yml             GitHub Pages deployment workflow
 ```
 
 ## Data Flow
@@ -50,7 +58,7 @@ The face renderer selects the final face using priority:
 5. Stat-driven needs.
 6. Weather/time/season/moon idle face.
 
-The dashboard reads and writes the same `AppState`. Settings are saved to ESP32 Preferences/NVS.
+The hosted GitHub Pages dashboard talks to the ESP32 through JSON API routes. Settings are saved to ESP32 Preferences/NVS.
 
 ## Where To Add Things
 
@@ -77,4 +85,4 @@ Add a new setting by updating:
 - The relevant settings struct in `include/companion_state.h`.
 - `loadRuntimeSettings()` and `saveRuntimeSettings()` in `src/main.cpp`, or `WeatherService` for weather settings.
 - The settings form and parser in `src/web_dashboard.cpp`.
-
+- The hosted dashboard form and API payload in `web_dashboard/app.js`.

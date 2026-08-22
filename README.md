@@ -1,6 +1,14 @@
 # Tiny Companion ESP32 Firmware
 
-Tiny Companion is an ESP32-C3 desk companion with expressive OLED faces, two touch sensors, Pomodoro mode, reminders, Wi-Fi setup, a local dashboard, and weather/time/season/moon-based idle faces.
+Tiny Companion is an ESP32-C3 desk companion with expressive OLED faces, two touch sensors, Pomodoro mode, reminders, Wi-Fi setup, a GitHub Pages dashboard, and weather/time/season/moon-based idle faces.
+
+The polished dashboard is hosted with GitHub Pages:
+
+```text
+https://amitkr000.github.io/Tiny-Companion/
+```
+
+The ESP32 hosts the first-boot Wi-Fi setup page plus a small local API for the hosted dashboard.
 
 ## Hardware
 
@@ -25,7 +33,7 @@ Password: none
 Setup page: http://192.168.4.1
 ```
 
-After it joins Wi-Fi, open the IP shown on the OLED to use the dashboard.
+After it joins Wi-Fi, open the hosted dashboard and enter the IP shown on the OLED.
 The IP address is shown for about 30 seconds after connection, then the companion returns to face mode.
 
 To force setup mode, hold either touch sensor while powering on. This clears saved Wi-Fi credentials and starts the setup network again.
@@ -52,4 +60,4 @@ If the board does not enter flashing mode automatically, hold `BOOT`, plug in US
 - [Project structure](docs/PROJECT_STRUCTURE.md)
 - [User manual](docs/USER_MANUAL.md)
 
-The existing `mobile_app` folder is optional future work. This firmware currently uses the ESP32-hosted web dashboard as the main control surface.
+The existing `mobile_app` folder is optional future work. The GitHub Pages web dashboard is the main control surface.

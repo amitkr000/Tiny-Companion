@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <DNSServer.h>
 #include <Preferences.h>
+#include <ESPmDNS.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -35,6 +36,7 @@ bool runtimeSoundEnabled = ENABLE_SOUND;
 bool forceSetupOnBoot = false;
 bool webServerStarted = false;
 bool webRoutesRegistered = false;
+bool mdnsStarted = false;
 uint32_t lastFrameAt = 0;
 uint32_t lastConnectAttemptAt = 0;
 uint32_t connectingStartedAt = 0;
@@ -141,6 +143,21 @@ static void startWebServer() {
   Serial.println("[web] server started");
 }
 
+static void startMdns() {
+  if (mdnsStarted || !WiFi.isConnected()) {
+    return;
+  }
+  if (MDNS.begin(MDNS_HOSTNAME)) {
+    MDNS.addService("http", "tcp", 80);
+    mdnsStarted = true;
+    Serial.print("[mdns] http://");
+    Serial.print(MDNS_HOSTNAME);
+    Serial.println(".local");
+  } else {
+    Serial.println("[mdns] failed");
+  }
+}
+
 static bool connectToSavedWifi(uint32_t timeoutMs) {
   if (savedSsid.length() == 0) {
     return false;
@@ -167,6 +184,7 @@ static bool connectToSavedWifi(uint32_t timeoutMs) {
       app.showIpUntil = millis() + ONLINE_IP_SCREEN_MS;
       app.currentMessage = "Connected";
       startWebServer();
+      startMdns();
       weather.syncTime();
       weather.update(millis(), true);
       toneOnce(1568, 55);
@@ -414,6 +432,10 @@ void loop() {
 
   if (portalRunning) {
     dnsServer.processNextRequest();
+  }
+
+  if (WiFi.isConnected()) {
+    startMdns();
   }
 
   server.handleClient();

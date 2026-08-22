@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tiny Companion Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>Tiny Companion</h1>
+          <p id="connectionCopy">Connect to your ESP32 on the same Wi-Fi.</p>
+        </div>
+        <div class="status-chip" id="statusChip">Offline</div>
+      </header>
+
+      <section class="connect-panel">
+        <div class="input-row">
+          <label for="deviceAddress">Device address</label>
+          <input id="deviceAddress" placeholder="192.168.1.45 or tinycompanion.local">
+          <button id="connectBtn">Connect</button>
+          <button id="scanBtn" class="secondary">Scan</button>
+        </div>
+        <p class="hint" id="connectHint">Try the IP shown on the OLED. Browser local-network permission may be required.</p>
+      </section>
+
+      <nav class="tabs" aria-label="Dashboard sections">
+        <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="faces">Faces</button>
+        <button class="tab" data-tab="pomodoro">Pomodoro</button>
+        <button class="tab" data-tab="reminders">Reminders</button>
+        <button class="tab" data-tab="weather">Weather</button>
+        <button class="tab" data-tab="device">Device</button>
+      </nav>
+
+      <section class="tab-panel active" id="overview">
+        <div class="overview-grid">
+          <div class="face-stage">
+            <div class="oled">
+              <div class="face-label" id="faceLabel">neutral</div>
+              <div class="face-art" id="faceArt">
+                <span></span><span></span>
+              </div>
+            </div>
+          </div>
+          <div class="metrics">
+            <div class="metric"><span>Fullness</span><meter id="fullness" min="0" max="100" value="0"></meter><strong id="fullnessText">--</strong></div>
+            <div class="metric"><span>Happiness</span><meter id="happiness" min="0" max="100" value="0"></meter><strong id="happinessText">--</strong></div>
+            <div class="metric"><span>Energy</span><meter id="energy" min="0" max="100" value="0"></meter><strong id="energyText">--</strong></div>
+          </div>
+          <div class="quick-actions">
+            <button data-action="poke">Poke</button>
+            <button data-action="feed">Feed</button>
+            <button data-action="play">Play</button>
+            <button data-action="love">Love</button>
+            <button data-action="sleep" class="secondary">Sleep</button>
+            <button data-action="wake" class="secondary">Wake</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="faces">
+        <div class="face-grid" id="faceGrid"></div>
+      </section>
+
+      <section class="tab-panel" id="pomodoro">
+        <div class="split">
+          <div>
+            <h2 id="pomoPhase">Focus</h2>
+            <div class="timer" id="pomoTimer">25:00</div>
+            <div class="button-row">
+              <button data-action="pomoStart">Start/Pause</button>
+              <button data-action="pomoReset" class="secondary">Reset</button>
+              <button data-action="pomoSwitch" class="secondary">Switch Phase</button>
+            </div>
+          </div>
+          <form id="pomodoroForm" class="settings-grid">
+            <label>Focus minutes<input name="focusMinutes" type="number" min="1" max="120"></label>
+            <label>Short break<input name="shortBreakMinutes" type="number" min="1" max="60"></label>
+            <label>Long break<input name="longBreakMinutes" type="number" min="1" max="90"></label>
+            <label>Rounds<input name="roundsBeforeLongBreak" type="number" min="1" max="12"></label>
+            <button type="submit">Save Pomodoro</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="reminders">
+        <form id="reminderForm" class="settings-grid">
+          <label class="check"><input name="hydrationEnabled" type="checkbox"> Hydration reminders</label>
+          <label>Hydration minutes<input name="hydrationMinutes" type="number" min="5" max="240"></label>
+          <label class="check"><input name="stretchEnabled" type="checkbox"> Stretch reminders</label>
+          <label>Stretch minutes<input name="stretchMinutes" type="number" min="5" max="240"></label>
+          <button type="submit">Save Reminders</button>
+        </form>
+        <div class="button-row">
+          <button data-action="doneHydration">Hydrated</button>
+          <button data-action="doneStretch">Stretched</button>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="weather">
+        <form id="weatherForm" class="settings-grid">
+          <label class="check"><input name="enabled" type="checkbox"> Weather sync</label>
+          <label>Latitude<input name="latitude" inputmode="decimal"></label>
+          <label>Longitude<input name="longitude" inputmode="decimal"></label>
+          <label>Timezone<input name="timezone"></label>
+          <label>UTC offset minutes<input name="timezoneOffsetMinutes" type="number" min="-720" max="840"></label>
+          <label class="check"><input name="manualWeather" type="checkbox"> Manual weather</label>
+          <label>Weather override<select name="overrideTheme" id="weatherThemeSelect"></select></label>
+          <label class="check"><input name="manualSeason" type="checkbox"> Manual season</label>
+          <label>Season override<select name="overrideSeason" id="seasonSelect"></select></label>
+          <button type="submit">Save Weather</button>
+        </form>
+        <button data-action="forceWeather">Sync Now</button>
+      </section>
+
+      <section class="tab-panel" id="device">
+        <form id="deviceForm" class="settings-grid">
+          <label>OLED brightness<input name="brightness" type="range" min="1" max="100"></label>
+          <label class="check"><input name="inverted" type="checkbox"> Invert display</label>
+          <label class="check"><input name="idleAnimationEnabled" type="checkbox"> Show animated faces</label>
+          <label>Tap window ms<input name="tapWindowMs" type="number" min="180" max="900"></label>
+          <label>Long press ms<input name="longPressMs" type="number" min="500" max="2500"></label>
+          <label>Annoyed poke count<input name="annoyedPokeCount" type="number" min="2" max="12"></label>
+          <label>Angry poke count<input name="angryPokeCount" type="number" min="3" max="20"></label>
+          <button type="submit">Save Device</button>
+        </form>
+        <pre id="rawState">{}</pre>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

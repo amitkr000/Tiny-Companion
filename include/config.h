@@ -4,6 +4,8 @@
 
 // Device identity shown on the OLED and setup pages.
 static constexpr const char *DEVICE_NAME = "Tiny Companion";
+static constexpr const char *HOSTED_DASHBOARD_URL = "https://amitkr000.github.io/Tiny-Companion/";
+static constexpr const char *MDNS_HOSTNAME = "tinycompanion";
 
 // ESP32-hosted Wi-Fi setup portal. Connect a phone/computer to this access
 // point, then open http://192.168.4.1 to send home Wi-Fi details.

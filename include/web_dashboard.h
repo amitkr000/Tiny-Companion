@@ -20,7 +20,10 @@ class WebDashboard {
   void sendSetupPage();
   void sendStatusPage();
   void sendStateJson();
+  void sendSettingsJson();
+  void sendDiscoverJson();
   void sendPlainOk();
+  void handleOptions();
 
  private:
   WebServer *server_ = nullptr;
@@ -39,11 +42,21 @@ class WebDashboard {
   String scanOptions();
   String metricBlock(const String &label, uint8_t value);
   String checkboxInput(const String &name, bool checked);
+  void addCorsHeaders();
+  void sendJson(int code, const String &json);
+  void sendJsonError(int code, const String &message);
+  bool applyAction(const String &action);
+  bool applyFacePreview(const String &id);
+  bool applySettingsFromRequest();
+  bool applySettingsFromJson();
   void redirectHome();
   void sendDashboardPage();
   void handleAction();
   void handleFacePreview();
   void handleSettings();
+  void handleApiAction();
+  void handleApiFace();
+  void handleApiSettings();
   void handleWifiSave();
   void handleForgetWifi();
   void handleCaptivePortal();

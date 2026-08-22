@@ -35,7 +35,12 @@ Setup page: http://192.168.4.1
 
 Connect your phone or computer to that network, open `http://192.168.4.1`, choose your home Wi-Fi, enter the password, and save.
 
-After connection, the OLED shows online status. Open the ESP32 IP address in a browser to use the dashboard.
+After connection, the OLED shows online status. Open the hosted dashboard and enter the ESP32 IP address:
+
+```text
+https://amitkr000.github.io/Tiny-Companion/
+```
+
 The IP address stays on screen for about 30 seconds, then Tiny Companion returns to face mode.
 
 To force setup mode, hold either touch sensor while powering on the ESP32. This clears saved Wi-Fi credentials and starts the setup network again.
@@ -107,6 +112,7 @@ Manual weather and season overrides are available in the dashboard.
 
 The dashboard lets you:
 
+- Connect to the ESP32 by saved IP, manual IP, `tinycompanion.local`, or best-effort local scan.
 - Preview faces.
 - Trigger poke/feed/play/love/sleep/wake.
 - Start, pause, reset, and switch Pomodoro.
@@ -117,6 +123,8 @@ The dashboard lets you:
 - Tune touch timing and poke anger threshold.
 - View JSON status at `/api/state`.
 - Forget Wi-Fi and return to setup.
+
+If your browser blocks local-network access from the hosted page, open `http://ESP32_IP/api/state` once directly or use another browser/device on the same Wi-Fi.
 
 ## Common Faces
 

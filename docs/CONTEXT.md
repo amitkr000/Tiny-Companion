@@ -20,7 +20,8 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 
 - OLED face system with weather, time, moon, season, action, reaction, reminder, and system faces.
 - Wi-Fi setup portal at `TinyBotSetup`.
-- Local dashboard after Wi-Fi connection.
+- GitHub Pages hosted dashboard after Wi-Fi connection.
+- ESP32 fallback page plus local JSON API.
 - Open-Meteo weather sync using latitude, longitude, and timezone.
 - NTP time sync with last-known-time fallback.
 - Local moon phase calculation.
@@ -67,9 +68,9 @@ Idle faces appear when nothing urgent is happening:
 
 ## Dashboard/API Summary
 
-The dashboard supports Wi-Fi setup, face previews, touch-like actions, Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
+The hosted dashboard supports device discovery, face previews, touch-like actions, Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
 
-The `/api/state` endpoint returns device mode, companion mode, IP/SSID, face, stats, Pomodoro state, weather theme, temperature, season, and moon phase.
+The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard.
 
 ## Current Limitations
 
@@ -77,6 +78,7 @@ The `/api/state` endpoint returns device mode, companion mode, IP/SSID, face, st
 - No movement is possible without motors or servos.
 - Battery percentage is not accurate unless a safe ADC voltage divider is added and configured.
 - Weather requires Wi-Fi. Offline behavior uses saved weather and approximate time.
+- Browser local-network protections may require manual IP entry or local-network permission for the hosted dashboard.
 - The Flutter `mobile_app` folder is not part of this firmware pass and remains optional future work.
 
 ## Future Expansion Ideas
