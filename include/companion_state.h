@@ -16,6 +16,7 @@ enum class CompanionMode : uint8_t {
   Idle,
   Clock,
   Pomodoro,
+  Break,
   Reminders,
   Status,
 };

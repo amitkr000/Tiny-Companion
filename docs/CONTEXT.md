@@ -29,7 +29,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Manual weather and season overrides from the dashboard.
 - Companion stats: fullness, happiness, and energy.
 - Face touch gestures: poke, feed, love, sleep/wake.
-- Action touch gestures: mode cycling and universal exit to idle.
+- Action touch gestures: long-press mode cycling with automatic return to face mode.
 - Pomodoro timer with configurable focus, short break, long break, and long-break rounds.
 - Hydration and stretch reminders.
 - OLED brightness, invert, and face-animation settings.
@@ -59,14 +59,15 @@ Idle faces appear when nothing urgent is happening:
 | Face touch | Triple tap | Love/play reaction |
 | Face touch | Long press | Sleep or wake |
 | Face touch | Repeated taps | Annoyed, then angry |
-| Action touch | Single/double/triple tap outside Pomodoro | Cycle non-Pomodoro mode screens |
-| Action touch | Short tap in Pomodoro | Ignored |
-| Action touch | Long press in any mode | Exit to idle faces |
+| Action touch | Single/double/triple tap | Reserved for current/future mode actions |
+| Action touch | Long press | Cycle Face, Pomodoro, Break, Clock, Reminders, and Status modes |
+| Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |
 | Website | Pomodoro controls | Start, pause, reset, and switch phase |
+| Website | Mode test controls | Cycle mode, Face mode, Pomodoro mode, and Break mode |
 
 ## Dashboard/API Summary
 
-The hosted dashboard supports device discovery, face previews, touch-like actions, website-only Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
+The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, website-only Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
 
 The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard.
 

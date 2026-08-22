@@ -40,6 +40,41 @@ static String jsonEscape(const String &value) {
   return escaped;
 }
 
+static CompanionMode nextDashboardMode(CompanionMode mode) {
+  switch (mode) {
+    case CompanionMode::Idle: return CompanionMode::Pomodoro;
+    case CompanionMode::Pomodoro: return CompanionMode::Break;
+    case CompanionMode::Break: return CompanionMode::Clock;
+    case CompanionMode::Clock: return CompanionMode::Reminders;
+    case CompanionMode::Reminders: return CompanionMode::Status;
+    case CompanionMode::Status:
+    default: return CompanionMode::Idle;
+  }
+}
+
+static CompanionMode modeForPomodoroPhase(const PomodoroTimer &pomodoro) {
+  return pomodoro.phase() == PomodoroPhase::Focus ? CompanionMode::Pomodoro : CompanionMode::Break;
+}
+
+static void prepareDashboardMode(CompanionMode mode, PomodoroTimer &pomodoro, uint32_t now) {
+  if (pomodoro.isRunning()) {
+    return;
+  }
+  if (mode == CompanionMode::Pomodoro && pomodoro.phase() != PomodoroPhase::Focus) {
+    pomodoro.selectPhase(PomodoroPhase::Focus, now);
+  } else if (mode == CompanionMode::Break && pomodoro.phase() == PomodoroPhase::Focus) {
+    pomodoro.selectPhase(PomodoroPhase::ShortBreak, now);
+  }
+}
+
+static void setDashboardMode(AppState &state, PomodoroTimer &pomodoro, CompanionMode mode, uint32_t now) {
+  prepareDashboardMode(mode, pomodoro, now);
+  state.companionMode = mode;
+  state.hasReactionFace = false;
+  state.lastAction = companionModeName(mode);
+  state.lastInteractionAt = now;
+}
+
 void WebDashboard::addCorsHeaders() {
   server_->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
   server_->sendHeader(F("Access-Control-Allow-Methods"), F("GET, POST, OPTIONS"));
@@ -295,7 +330,7 @@ void WebDashboard::sendDashboardPage() {
   body += F("</section>");
 
   body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Fallback Actions</h2><div class=\"row actions\">");
-  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeIdle", "Exit to Idle"}};
+  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}, {"modeBreak", "Break mode"}};
   for (const auto &action : actions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -368,24 +403,24 @@ bool WebDashboard::applyAction(const String &action) {
     state_->stats.happiness = clampStat(state_->stats.happiness + 15);
     triggerReaction(*state_, FaceId::Love, "Loved", now);
   } else if (action == "pomoStart") {
-    state_->companionMode = CompanionMode::Pomodoro;
     pomodoro_->start(now);
+    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
     triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro started", now);
   } else if (action == "pomoPause") {
-    state_->companionMode = CompanionMode::Pomodoro;
     pomodoro_->pause(now);
+    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
     triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro paused", now);
   } else if (action == "pomoToggle") {
-    state_->companionMode = CompanionMode::Pomodoro;
     pomodoro_->startPause(now);
+    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
     triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro toggle", now);
   } else if (action == "pomoReset") {
-    state_->companionMode = CompanionMode::Pomodoro;
     pomodoro_->reset(now);
-    triggerReaction(*state_, FaceId::Focused, "Pomodoro reset", now);
+    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
+    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro reset", now);
   } else if (action == "pomoSwitch") {
-    state_->companionMode = CompanionMode::Pomodoro;
     pomodoro_->switchPhase(now);
+    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
     triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro phase", now);
   } else if (action == "doneHydration") {
     reminders_->markDone(ReminderKind::Hydration, now);
@@ -398,10 +433,14 @@ bool WebDashboard::applyAction(const String &action) {
   } else if (action == "forceWeather") {
     if (forceWeatherSync_) forceWeatherSync_();
     triggerReaction(*state_, FaceId::Proud, "Weather synced", now);
-  } else if (action == "modeIdle") {
-    state_->companionMode = CompanionMode::Idle;
-    state_->hasReactionFace = false;
-    state_->lastAction = "Idle mode";
+  } else if (action == "modeCycle") {
+    setDashboardMode(*state_, *pomodoro_, nextDashboardMode(state_->companionMode), now);
+  } else if (action == "modeIdle" || action == "modeFace") {
+    setDashboardMode(*state_, *pomodoro_, CompanionMode::Idle, now);
+  } else if (action == "modePomodoro") {
+    setDashboardMode(*state_, *pomodoro_, CompanionMode::Pomodoro, now);
+  } else if (action == "modeBreak") {
+    setDashboardMode(*state_, *pomodoro_, CompanionMode::Break, now);
   } else {
     return false;
   }

@@ -61,15 +61,17 @@ Action touch sensor:
 
 | Gesture | Normal Mode |
 | --- | --- |
-| Single/double/triple tap | Cycle non-Pomodoro display modes |
-| Long press | Exit any mode and return to idle faces |
+| Single/double/triple tap | Reserved for the current mode or future modes |
+| Long press | Cycle modes: Face, Pomodoro, Break, Clock, Reminders, Status |
 
 In Pomodoro mode:
 
 | Gesture | Pomodoro Action |
 | --- | --- |
 | Short tap | Ignored |
-| Long press | Exit Pomodoro display and return to idle faces |
+| Long press | Cycle to the next mode |
+
+If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
 
 ## Pomodoro
 
@@ -113,8 +115,8 @@ The dashboard lets you:
 - Connect to the ESP32 by saved IP, manual IP, `tinycompanion.local`, or best-effort local scan.
 - Preview faces.
 - Trigger poke/feed/play/love/sleep/wake.
+- Test mode cycling with Face, Pomodoro, Break, and Cycle Mode buttons.
 - Start, pause, reset, and switch Pomodoro.
-- Exit Pomodoro or any other mode back to idle faces.
 - Configure reminders.
 - Configure weather location and timezone.
 - Override weather or season.

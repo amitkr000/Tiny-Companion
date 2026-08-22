@@ -13,6 +13,7 @@ class PomodoroTimer {
   void startPause(uint32_t now);
   void reset(uint32_t now);
   void switchPhase(uint32_t now);
+  void selectPhase(PomodoroPhase phase, uint32_t now);
   void applySettings(const PomodoroSettings &settings, uint32_t now);
 
   bool isRunning() const;

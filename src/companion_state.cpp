@@ -177,10 +177,11 @@ const char *companionModeName(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Clock: return "Clock";
     case CompanionMode::Pomodoro: return "Pomodoro";
+    case CompanionMode::Break: return "Break";
     case CompanionMode::Reminders: return "Reminders";
     case CompanionMode::Status: return "Status";
     case CompanionMode::Idle:
-    default: return "Idle";
+    default: return "Face";
   }
 }
 

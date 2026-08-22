@@ -261,20 +261,61 @@ static void startSetupPortal() {
 
 static CompanionMode nextCompanionMode(CompanionMode mode) {
   switch (mode) {
-    case CompanionMode::Idle: return CompanionMode::Clock;
+    case CompanionMode::Idle: return CompanionMode::Pomodoro;
+    case CompanionMode::Pomodoro: return CompanionMode::Break;
+    case CompanionMode::Break: return CompanionMode::Clock;
     case CompanionMode::Clock: return CompanionMode::Reminders;
-    case CompanionMode::Pomodoro: return CompanionMode::Idle;
     case CompanionMode::Reminders: return CompanionMode::Status;
     case CompanionMode::Status:
     default: return CompanionMode::Idle;
   }
 }
 
-static void exitToIdleMode() {
-  app.companionMode = CompanionMode::Idle;
+static void prepareModePreview(CompanionMode mode, uint32_t now) {
+  if (pomodoro.isRunning()) {
+    return;
+  }
+  if (mode == CompanionMode::Pomodoro && pomodoro.phase() != PomodoroPhase::Focus) {
+    pomodoro.selectPhase(PomodoroPhase::Focus, now);
+  } else if (mode == CompanionMode::Break && pomodoro.phase() == PomodoroPhase::Focus) {
+    pomodoro.selectPhase(PomodoroPhase::ShortBreak, now);
+  }
+}
+
+static void selectCompanionMode(CompanionMode mode, uint32_t now) {
+  prepareModePreview(mode, now);
+  app.companionMode = mode;
   app.hasReactionFace = false;
-  app.lastAction = "Idle mode";
+  app.lastAction = companionModeName(mode);
+  app.lastInteractionAt = now;
   saveCompanionState();
+}
+
+static bool currentModeIsStarted() {
+  if (app.companionMode == CompanionMode::Pomodoro) {
+    return pomodoro.isRunning() && pomodoro.phase() == PomodoroPhase::Focus;
+  }
+  if (app.companionMode == CompanionMode::Break) {
+    return (pomodoro.isRunning() && pomodoro.phase() != PomodoroPhase::Focus) || app.activeReminder != ReminderKind::None;
+  }
+  return false;
+}
+
+static void autoReturnToFaceMode(uint32_t now) {
+  if (app.companionMode == CompanionMode::Idle) {
+    return;
+  }
+  if (currentModeIsStarted()) {
+    app.lastInteractionAt = now;
+    return;
+  }
+  if (app.lastInteractionAt == 0) {
+    app.lastInteractionAt = now;
+    return;
+  }
+  if (now - app.lastInteractionAt >= MODE_PREVIEW_TIMEOUT_MS) {
+    selectCompanionMode(CompanionMode::Idle, now);
+  }
 }
 
 static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
@@ -329,16 +370,16 @@ static void handleActionGesture(TouchGesture gesture, uint32_t now) {
   if (gesture == TouchGesture::None) return;
 
   if (gesture == TouchGesture::LongPress) {
-    exitToIdleMode();
+    selectCompanionMode(nextCompanionMode(app.companionMode), now);
     return;
   }
 
-  if (app.companionMode == CompanionMode::Pomodoro) {
+  if (app.companionMode == CompanionMode::Pomodoro || app.companionMode == CompanionMode::Break) {
     return;
   }
 
-  app.companionMode = nextCompanionMode(app.companionMode);
-  triggerReaction(app, FaceId::Proud, companionModeName(app.companionMode), now);
+  app.lastAction = String(companionModeName(app.companionMode)) + " action";
+  app.lastInteractionAt = now;
   saveCompanionState();
 }
 
@@ -457,6 +498,7 @@ void loop() {
     handleActionGesture(actionTouch.update(now), now);
   }
 
+  autoReturnToFaceMode(now);
   decayStats(now);
   renderNow();
 }

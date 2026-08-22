@@ -59,6 +59,10 @@ void PomodoroTimer::switchPhase(uint32_t now) {
   }
 }
 
+void PomodoroTimer::selectPhase(PomodoroPhase phase, uint32_t now) {
+  setPhase(phase, now, false);
+}
+
 bool PomodoroTimer::isRunning() const {
   return running_;
 }

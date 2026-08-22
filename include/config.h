@@ -28,7 +28,7 @@ static constexpr bool OLED_FLIP_180 = false;
 
 // Optional inputs/outputs. Set to -1 to disable.
 // FACE_TOUCH_PIN is the "pet" sensor: poke, feed, love, sleep/wake.
-// ACTION_TOUCH_PIN is the mode/action sensor: Pomodoro controls and future mode input.
+// ACTION_TOUCH_PIN is the mode/action sensor: long-press mode cycle and future mode input.
 static constexpr int FACE_TOUCH_PIN = 1;
 static constexpr int ACTION_TOUCH_PIN = 2;
 static constexpr int BUZZER_PIN = -1;
@@ -41,6 +41,7 @@ static constexpr uint32_t CLOCK_FACE_MS = 5000;
 static constexpr uint32_t WEATHER_FACE_MS = 4500;
 static constexpr uint32_t NOTIFICATION_FACE_MS = 6500;
 static constexpr uint32_t NAVIGATION_REFRESH_MS = 350;
+static constexpr uint32_t MODE_PREVIEW_TIMEOUT_MS = 20000;
 static constexpr uint32_t WEATHER_SYNC_INTERVAL_MS = 30UL * 60UL * 1000UL;
 static constexpr uint32_t STATS_DECAY_INTERVAL_MS = 5UL * 60UL * 1000UL;
 

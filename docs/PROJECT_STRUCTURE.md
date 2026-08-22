@@ -43,7 +43,7 @@ web_dashboard/
 
 `main.cpp` owns the global `AppState` and calls each service from `loop()`.
 
-Touch input produces gestures. Face-touch gestures update stats and reaction faces. Action-touch gestures cycle modes or control Pomodoro.
+Touch input produces gestures. Face-touch gestures update stats and reaction faces. Action-touch long-press cycles modes; short taps are reserved for the active mode or future mode actions.
 
 Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face.
 
@@ -71,7 +71,8 @@ Add a new OLED face in:
 Add a new touch gesture behavior in `src/main.cpp`:
 
 - `handleFaceGesture()` for companion/pet actions.
-- `handleActionGesture()` for mode-specific actions.
+- `handleActionGesture()` for mode cycling and mode-specific actions.
+- `autoReturnToFaceMode()` for returning paused/preview modes to idle faces.
 
 Add a new mode by updating:
 

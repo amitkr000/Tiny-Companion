@@ -368,6 +368,7 @@ FaceId selectFace(AppState &state, const PomodoroTimer &pomodoro, const Reminder
   if (state.companionMode == CompanionMode::Pomodoro) {
     return pomodoro.phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime;
   }
+  if (state.companionMode == CompanionMode::Break) return FaceId::BreakTime;
   if (state.activeReminder == ReminderKind::Hydration) return FaceId::Hydration;
   if (state.activeReminder == ReminderKind::Stretch) return FaceId::BreakTime;
   if (state.stats.energy < 18) return FaceId::Sleepy;
@@ -404,7 +405,7 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
         drawCentered(display, shortText(ssid, 18), 55);
       } else if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - millis()) > 0) {
         drawFace(display, state.currentFace, state);
-      } else if (state.companionMode == CompanionMode::Pomodoro) {
+      } else if (state.companionMode == CompanionMode::Pomodoro || state.companionMode == CompanionMode::Break) {
         drawPomodoro(display, pomodoro);
       } else if (state.companionMode == CompanionMode::Status) {
         drawStats(display, state);
