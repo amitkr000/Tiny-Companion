@@ -744,9 +744,9 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
       } else if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - now) > 0) {
         drawFace(display, state.currentFace, state);
       } else if (state.companionMode == CompanionMode::Idle && state.homePanel == HomePanel::Pomodoro) {
-        drawPomodoro(display, pomodoro);
+        drawFace(display, FaceId::Pomodoro, state);
       } else if (state.companionMode == CompanionMode::Idle && state.homePanel == HomePanel::Hydration) {
-        drawHydrationStatus(display, reminders);
+        drawFace(display, FaceId::Hydration, state);
       } else if (state.companionMode == CompanionMode::Pomodoro) {
         drawPomodoro(display, pomodoro);
       } else if (state.companionMode == CompanionMode::Status) {
