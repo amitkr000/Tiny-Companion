@@ -66,7 +66,9 @@ Face mode uses a repeating 60-second idle loop whenever nothing urgent is happen
 | Face touch | First touch of a new local day | Greets the saved user name |
 | Face mode | No recent touch | Loops 50s cheerful face, 5s alternating weather-or-time face, 5s time/weather info |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
-| Action touch | Single/double/triple tap | Reserved for current/future mode actions |
+| Action touch | Single tap in Pomodoro mode | Start or pause Pomodoro |
+| Action touch | Double tap in Pomodoro mode | Reset Pomodoro |
+| Action touch | Triple tap | Reserved for current/future mode actions |
 | Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, Status, and Setting modes |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |
 | Website | Pomodoro controls | Start, pause, and reset |
@@ -74,7 +76,7 @@ Face mode uses a repeating 60-second idle loop whenever nothing urgent is happen
 
 ## Dashboard/API Summary
 
-The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, website-only Pomodoro controls, reminder settings, weather settings, user name, display settings, and touch timing. Actions, face previews, settings writes, and Wi-Fi reset require the per-device access token shown on the ESP32 local dashboard.
+The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, Pomodoro controls, reminder settings, weather settings, user name, display settings, and touch timing. Actions, face previews, settings writes, and Wi-Fi reset require the per-device access token shown on the ESP32 local dashboard.
 
 The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard. Settings reads/writes and all state-changing routes require `X-Tiny-Token` or a matching `token` form/query parameter.
 

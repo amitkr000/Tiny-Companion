@@ -72,14 +72,16 @@ In Pomodoro mode:
 
 | Gesture | Pomodoro Action |
 | --- | --- |
-| Short tap | Ignored |
+| Single tap | Start or pause Pomodoro |
+| Double tap | Reset Pomodoro |
+| Triple tap | Reserved |
 | Long press | Cycle to the next mode |
 
 If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
 
 ## Pomodoro
 
-Use the hosted dashboard to start and control Pomodoro mode. Pomodoro is website-only so accidental physical touches do not interrupt the timer.
+Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, single tap starts/pauses and double tap resets.
 
 Default timing:
 

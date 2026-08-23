@@ -19,12 +19,26 @@ bool PomodoroModeHandler::isStarted(const ModeContext &context) const {
   return context.pomodoro && context.pomodoro->isRunning();
 }
 
-ModeActionResult PomodoroModeHandler::onSinglePress(ModeContext &, uint32_t) {
-  return ModeActionResult::None;
+ModeActionResult PomodoroModeHandler::onSinglePress(ModeContext &context, uint32_t now) {
+  if (!context.pomodoro || !context.ready()) {
+    return ModeActionResult::None;
+  }
+  context.pomodoro->startPause(now);
+  context.state->lastAction = context.pomodoro->isRunning() ? "Pomodoro started" : "Pomodoro paused";
+  context.state->lastInteractionAt = now;
+  context.save();
+  return ModeActionResult::StateChanged;
 }
 
-ModeActionResult PomodoroModeHandler::onDoublePress(ModeContext &, uint32_t) {
-  return ModeActionResult::None;
+ModeActionResult PomodoroModeHandler::onDoublePress(ModeContext &context, uint32_t now) {
+  if (!context.pomodoro || !context.ready()) {
+    return ModeActionResult::None;
+  }
+  context.pomodoro->reset(now);
+  context.state->lastAction = "Pomodoro reset";
+  context.state->lastInteractionAt = now;
+  context.save();
+  return ModeActionResult::StateChanged;
 }
 
 ModeActionResult PomodoroModeHandler::onTriplePress(ModeContext &, uint32_t) {
