@@ -1,7 +1,6 @@
 #pragma once
 
 #include "companion_mode_handler.h"
-#include "modes/clock_mode.h"
 #include "modes/face_mode.h"
 #include "modes/pomodoro_mode.h"
 #include "modes/reminders_mode.h"
@@ -21,7 +20,6 @@ class ModeManager {
   ModeContext context_;
   FaceModeHandler faceMode_;
   PomodoroModeHandler pomodoroMode_;
-  ClockModeHandler clockMode_;
   RemindersModeHandler remindersMode_;
   StatusModeHandler statusMode_;
   SettingsModeHandler settingsMode_;

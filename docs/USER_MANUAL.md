@@ -65,23 +65,23 @@ Action touch sensor:
 
 | Gesture | Normal Mode |
 | --- | --- |
-| Single/double/triple tap | Reserved for the current mode or future modes |
-| Long press | Cycle modes: Face, Pomodoro, Clock, Reminders, Status, Setting |
+| Single tap | Cycle modes: Face, Pomodoro, Reminders, Status, Setting |
+| Long press | Start or stop the current mode function when available |
 
 In Pomodoro mode:
 
 | Gesture | Pomodoro Action |
 | --- | --- |
-| Single tap | Start or pause Pomodoro |
+| Single tap | Cycle to the next mode |
 | Double tap | Reset Pomodoro |
 | Triple tap | Reserved |
-| Long press | Cycle to the next mode |
+| Long press | Start or pause Pomodoro |
 
-If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
+In Reminders mode, long press starts or stops hydration reminders. If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
 
 ## Pomodoro
 
-Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, single tap starts/pauses and double tap resets.
+Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, long press starts/pauses and double tap resets.
 
 Default timing:
 
@@ -160,7 +160,7 @@ If actions or settings show an access-token error, open `http://ESP32_IP/`, copy
 
 ## Setting Mode
 
-Long-press the Action touch sensor until Setting mode appears. It shows the ESP32 IP address and access token for connecting the hosted web dashboard. If left alone, it returns to Face mode after the normal preview timeout.
+Single-tap the Action touch sensor until Setting mode appears. It shows the ESP32 IP address and access token for connecting the hosted web dashboard. If left alone, it returns to Face mode after the normal preview timeout.
 
 ## Charging And Power
 

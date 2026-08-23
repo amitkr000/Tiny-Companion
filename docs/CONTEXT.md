@@ -31,7 +31,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Companion stats: fullness, happiness, and energy.
 - User name setting for first-boot greetings and first-touch-of-day greetings.
 - Face touch gestures: poke, feed, love/play, and long-press pet/rub affection.
-- Action touch gestures: delegated through per-mode handler classes, with long-press mode cycling and automatic return to face mode.
+- Action touch gestures: delegated through per-mode handler classes, with single-press mode cycling and automatic return to face mode.
 - Face mode shows only the face and visual effects, without labels, status icons, or extra text.
 - Pomodoro timer with configurable duration.
 - Hydration and stretch reminders.
@@ -66,13 +66,14 @@ Face mode uses a repeating 60-second idle loop whenever nothing urgent is happen
 | Face touch | First touch of a new local day | Greets the saved user name |
 | Face mode | No recent touch | Loops 50s cheerful face, 5s alternating weather-or-time face, 5s time/weather info |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
-| Action touch | Single tap in Pomodoro mode | Start or pause Pomodoro |
+| Action touch | Single tap | Cycle Face, Pomodoro, Reminders, Status, and Setting modes |
 | Action touch | Double tap in Pomodoro mode | Reset Pomodoro |
 | Action touch | Triple tap | Reserved for current/future mode actions |
-| Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, Status, and Setting modes |
+| Action touch | Long press in Pomodoro mode | Start or pause Pomodoro |
+| Action touch | Long press in Reminders mode | Start or stop hydration reminders |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |
 | Website | Pomodoro controls | Start, pause, and reset |
-| Website | Mode test controls | Cycle mode, Face mode, Pomodoro mode, and Setting mode |
+| Website | Mode test controls | Cycle mode, Face mode, Pomodoro mode, Reminders mode, and Setting mode |
 
 ## Dashboard/API Summary
 

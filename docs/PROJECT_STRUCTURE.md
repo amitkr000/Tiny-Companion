@@ -53,7 +53,7 @@ Touch input produces gestures. Face-touch gestures update stats, greetings, pett
 
 Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face in the 60-second face-mode loop.
 
-Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive. Pomodoro mode supports Action-touch single press for start/pause, double press for reset, and long press for mode cycling.
+Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive. Pomodoro mode supports Action-touch long press for start/pause, double press for reset, and single press for mode cycling.
 
 The face renderer selects the final face using priority:
 

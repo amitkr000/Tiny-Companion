@@ -91,7 +91,6 @@ CompanionModeHandler *ModeManager::handlerFor(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Idle: return &faceMode_;
     case CompanionMode::Pomodoro: return &pomodoroMode_;
-    case CompanionMode::Clock: return &clockMode_;
     case CompanionMode::Reminders: return &remindersMode_;
     case CompanionMode::Status: return &statusMode_;
     case CompanionMode::Settings: return &settingsMode_;
@@ -103,7 +102,6 @@ const CompanionModeHandler *ModeManager::handlerFor(CompanionMode mode) const {
   switch (mode) {
     case CompanionMode::Idle: return &faceMode_;
     case CompanionMode::Pomodoro: return &pomodoroMode_;
-    case CompanionMode::Clock: return &clockMode_;
     case CompanionMode::Reminders: return &remindersMode_;
     case CompanionMode::Status: return &statusMode_;
     case CompanionMode::Settings: return &settingsMode_;
@@ -114,8 +112,7 @@ const CompanionModeHandler *ModeManager::handlerFor(CompanionMode mode) const {
 CompanionMode ModeManager::nextMode(CompanionMode mode) const {
   switch (mode) {
     case CompanionMode::Idle: return CompanionMode::Pomodoro;
-    case CompanionMode::Pomodoro: return CompanionMode::Clock;
-    case CompanionMode::Clock: return CompanionMode::Reminders;
+    case CompanionMode::Pomodoro: return CompanionMode::Reminders;
     case CompanionMode::Reminders: return CompanionMode::Status;
     case CompanionMode::Status: return CompanionMode::Settings;
     case CompanionMode::Settings:

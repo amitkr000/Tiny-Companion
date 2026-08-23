@@ -19,7 +19,7 @@ bool PomodoroModeHandler::isStarted(const ModeContext &context) const {
   return context.pomodoro && context.pomodoro->isRunning();
 }
 
-ModeActionResult PomodoroModeHandler::onSinglePress(ModeContext &context, uint32_t now) {
+ModeActionResult PomodoroModeHandler::onLongPress(ModeContext &context, uint32_t now) {
   if (!context.pomodoro || !context.ready()) {
     return ModeActionResult::None;
   }

@@ -18,9 +18,11 @@ struct ModeContext {
   PomodoroTimer *pomodoro = nullptr;
   ReminderService *reminders = nullptr;
   void (*saveState)() = nullptr;
+  void (*saveRuntime)() = nullptr;
 
   bool ready() const;
   void save() const;
+  void saveRuntimeSettings() const;
 };
 
 class CompanionModeHandler {

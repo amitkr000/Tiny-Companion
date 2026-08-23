@@ -178,7 +178,6 @@ const char *moonPhaseName(MoonPhase phase) {
 
 const char *companionModeName(CompanionMode mode) {
   switch (mode) {
-    case CompanionMode::Clock: return "Clock";
     case CompanionMode::Pomodoro: return "Pomodoro";
     case CompanionMode::Reminders: return "Reminders";
     case CompanionMode::Status: return "Status";

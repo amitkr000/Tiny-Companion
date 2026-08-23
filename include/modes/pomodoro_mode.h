@@ -8,7 +8,7 @@ class PomodoroModeHandler : public CompanionModeHandler {
   const char *name() const override;
   void onEnter(ModeContext &context, uint32_t now) override;
   bool isStarted(const ModeContext &context) const override;
-  ModeActionResult onSinglePress(ModeContext &context, uint32_t now) override;
+  ModeActionResult onLongPress(ModeContext &context, uint32_t now) override;
   ModeActionResult onDoublePress(ModeContext &context, uint32_t now) override;
   ModeActionResult onTriplePress(ModeContext &context, uint32_t now) override;
 };

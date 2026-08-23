@@ -10,6 +10,12 @@ void ModeContext::save() const {
   }
 }
 
+void ModeContext::saveRuntimeSettings() const {
+  if (saveRuntime) {
+    saveRuntime();
+  }
+}
+
 void CompanionModeHandler::onEnter(ModeContext &context, uint32_t now) {
   if (!context.ready()) return;
   context.state->companionMode = mode();
@@ -27,8 +33,8 @@ bool CompanionModeHandler::isStarted(const ModeContext &) const {
   return false;
 }
 
-ModeActionResult CompanionModeHandler::onSinglePress(ModeContext &context, uint32_t now) {
-  return recordAction(context, now, String(name()) + " action");
+ModeActionResult CompanionModeHandler::onSinglePress(ModeContext &, uint32_t) {
+  return ModeActionResult::NextMode;
 }
 
 ModeActionResult CompanionModeHandler::onDoublePress(ModeContext &context, uint32_t now) {
@@ -39,8 +45,8 @@ ModeActionResult CompanionModeHandler::onTriplePress(ModeContext &context, uint3
   return recordAction(context, now, String(name()) + " action");
 }
 
-ModeActionResult CompanionModeHandler::onLongPress(ModeContext &, uint32_t) {
-  return ModeActionResult::NextMode;
+ModeActionResult CompanionModeHandler::onLongPress(ModeContext &context, uint32_t now) {
+  return recordAction(context, now, String(name()) + " action");
 }
 
 ModeActionResult CompanionModeHandler::recordAction(ModeContext &context, uint32_t now, const String &label) const {

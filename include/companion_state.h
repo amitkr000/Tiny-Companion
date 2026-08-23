@@ -14,7 +14,6 @@ enum class DeviceMode : uint8_t {
 
 enum class CompanionMode : uint8_t {
   Idle,
-  Clock,
   Pomodoro,
   Reminders,
   Status,

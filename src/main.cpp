@@ -490,6 +490,7 @@ void setup() {
   modeContext.pomodoro = &pomodoro;
   modeContext.reminders = &reminders;
   modeContext.saveState = saveCompanionState;
+  modeContext.saveRuntime = saveRuntimeSettings;
   modeManager.begin(modeContext);
 
   Serial.println("[boot] drawing startup screen");
