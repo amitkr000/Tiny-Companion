@@ -67,14 +67,7 @@ static CompanionMode nextDashboardMode(CompanionMode mode) {
   }
 }
 
-static void prepareDashboardMode(CompanionMode mode, PomodoroTimer &pomodoro, uint32_t now) {
-  if (mode == CompanionMode::Pomodoro && !pomodoro.isRunning()) {
-    pomodoro.reset(now);
-  }
-}
-
-static void setDashboardMode(AppState &state, PomodoroTimer &pomodoro, CompanionMode mode, uint32_t now) {
-  prepareDashboardMode(mode, pomodoro, now);
+static void setDashboardMode(AppState &state, PomodoroTimer &, CompanionMode mode, uint32_t now) {
   state.companionMode = mode;
   state.hasReactionFace = false;
   state.lastAction = companionModeName(mode);

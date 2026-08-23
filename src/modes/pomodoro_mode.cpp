@@ -9,9 +9,6 @@ const char *PomodoroModeHandler::name() const {
 }
 
 void PomodoroModeHandler::onEnter(ModeContext &context, uint32_t now) {
-  if (context.pomodoro && !context.pomodoro->isRunning()) {
-    context.pomodoro->reset(now);
-  }
   CompanionModeHandler::onEnter(context, now);
 }
 
