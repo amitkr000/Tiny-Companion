@@ -107,33 +107,68 @@ static void drawHeartEyes(Adafruit_SSD1306 &display) {
 }
 
 static void drawCheerfulIdle(Adafruit_SSD1306 &display) {
-  uint8_t frame = (millis() / 180) % 16;
-  int8_t bob = frame < 4 ? -1 : (frame < 8 ? 0 : (frame < 12 ? 1 : 0));
-  bool blink = frame == 14;
-  int16_t eyeY = 23 + bob;
+  uint8_t frame = (millis() / 150) % 24;
+  int8_t bob = frame < 6 ? -1 : (frame < 12 ? 0 : (frame < 18 ? 1 : 0));
+  int8_t pupilShift = frame < 8 ? -1 : (frame < 16 ? 1 : 0);
+  bool blink = frame == 20 || frame == 21;
+  bool happyMouth = frame % 12 < 6;
 
-  if (blink) {
-    display.drawFastHLine(32, eyeY + 8, 22, SSD1306_WHITE);
-    display.drawFastHLine(74, eyeY + 8, 22, SSD1306_WHITE);
-  } else {
-    display.fillRoundRect(32, eyeY, 22, 16, 7, SSD1306_WHITE);
-    display.fillRoundRect(74, eyeY, 22, 16, 7, SSD1306_WHITE);
-    display.drawPixel(45, eyeY + 5, SSD1306_BLACK);
-    display.drawPixel(87, eyeY + 5, SSD1306_BLACK);
+  int16_t headX = 22;
+  int16_t headY = 14 + bob;
+  display.drawRect(headX, headY, 84, 42, SSD1306_WHITE);
+  display.drawFastHLine(headX + 4, headY - 1, 76, SSD1306_WHITE);
+  display.drawFastHLine(headX + 4, headY + 42, 76, SSD1306_WHITE);
+  display.drawPixel(headX + 1, headY + 1, SSD1306_BLACK);
+  display.drawPixel(headX + 82, headY + 1, SSD1306_BLACK);
+  display.drawPixel(headX + 1, headY + 40, SSD1306_BLACK);
+  display.drawPixel(headX + 82, headY + 40, SSD1306_BLACK);
+
+  display.drawFastVLine(20, headY + 25, 8, SSD1306_WHITE);
+  display.drawFastVLine(107, headY + 25, 8, SSD1306_WHITE);
+  display.drawRect(16, headY + 28, 4, 8, SSD1306_WHITE);
+  display.drawRect(108, headY + 28, 4, 8, SSD1306_WHITE);
+
+  display.drawLine(64, headY, 64, headY - 8, SSD1306_WHITE);
+  display.drawPixel(64, headY - 10, SSD1306_WHITE);
+  if (frame % 8 < 4) {
+    display.drawPixel(62, headY - 9, SSD1306_WHITE);
+    display.drawPixel(66, headY - 9, SSD1306_WHITE);
+    display.drawPixel(64, headY - 12, SSD1306_WHITE);
   }
 
-  display.drawLine(48, 50 + bob, 56, 55 + bob, SSD1306_WHITE);
-  display.drawLine(56, 55 + bob, 72, 55 + bob, SSD1306_WHITE);
-  display.drawLine(72, 55 + bob, 80, 50 + bob, SSD1306_WHITE);
+  if (blink) {
+    display.drawFastHLine(35, headY + 19, 22, SSD1306_WHITE);
+    display.drawFastHLine(71, headY + 19, 22, SSD1306_WHITE);
+  } else {
+    display.drawRect(34, headY + 12, 24, 18, SSD1306_WHITE);
+    display.drawRect(70, headY + 12, 24, 18, SSD1306_WHITE);
+    display.fillRect(41 + pupilShift, headY + 18, 8, 7, SSD1306_WHITE);
+    display.fillRect(77 + pupilShift, headY + 18, 8, 7, SSD1306_WHITE);
+    display.drawPixel(45 + pupilShift, headY + 19, SSD1306_BLACK);
+    display.drawPixel(81 + pupilShift, headY + 19, SSD1306_BLACK);
+  }
 
-  display.drawPixel(17, 18 + (frame % 3), SSD1306_WHITE);
-  display.drawPixel(21, 18 + (frame % 3), SSD1306_WHITE);
-  display.drawPixel(19, 16 + (frame % 3), SSD1306_WHITE);
-  display.drawPixel(19, 20 + (frame % 3), SSD1306_WHITE);
-  display.drawPixel(108, 38 - (frame % 4), SSD1306_WHITE);
-  display.drawPixel(112, 38 - (frame % 4), SSD1306_WHITE);
-  display.drawPixel(110, 36 - (frame % 4), SSD1306_WHITE);
-  display.drawPixel(110, 40 - (frame % 4), SSD1306_WHITE);
+  display.drawPixel(31, headY + 32, SSD1306_WHITE);
+  display.drawPixel(96, headY + 32, SSD1306_WHITE);
+  display.drawPixel(33, headY + 33, SSD1306_WHITE);
+  display.drawPixel(94, headY + 33, SSD1306_WHITE);
+
+  display.drawLine(54, headY + 34, 60, headY + 38, SSD1306_WHITE);
+  display.drawLine(60, headY + 38, 68, headY + 38, SSD1306_WHITE);
+  display.drawLine(68, headY + 38, 74, headY + 34, SSD1306_WHITE);
+  if (happyMouth) {
+    display.drawPixel(58, headY + 36, SSD1306_WHITE);
+    display.drawPixel(70, headY + 36, SSD1306_WHITE);
+  }
+
+  display.drawPixel(10, 18 + (frame % 4), SSD1306_WHITE);
+  display.drawPixel(14, 18 + (frame % 4), SSD1306_WHITE);
+  display.drawPixel(12, 16 + (frame % 4), SSD1306_WHITE);
+  display.drawPixel(12, 20 + (frame % 4), SSD1306_WHITE);
+  display.drawPixel(114, 42 - (frame % 5), SSD1306_WHITE);
+  display.drawPixel(118, 42 - (frame % 5), SSD1306_WHITE);
+  display.drawPixel(116, 40 - (frame % 5), SSD1306_WHITE);
+  display.drawPixel(116, 44 - (frame % 5), SSD1306_WHITE);
 }
 
 static void drawGreeting(Adafruit_SSD1306 &display, const String &userName) {
