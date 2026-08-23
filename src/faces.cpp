@@ -315,7 +315,6 @@ static void drawPomodoro(Adafruit_SSD1306 &display, const PomodoroTimer &pomodor
   uint32_t remaining = pomodoro.remainingSeconds(millis());
   uint8_t minutes = remaining / 60;
   uint8_t seconds = remaining % 60;
-  drawCentered(display, "Pomodoro", 13);
   char buffer[8];
   snprintf(buffer, sizeof(buffer), "%02u:%02u", minutes, seconds);
   drawCentered(display, buffer, 28, 2);
@@ -379,7 +378,6 @@ static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
 }
 
 static void drawSettingInfo(Adafruit_SSD1306 &display, const AppState &state, bool wifiConnected, const String &ssid, const IPAddress &ip) {
-  drawCentered(display, "Setting", 5);
   if (wifiConnected) {
     drawCentered(display, "WiFi connected", 18);
     drawCentered(display, shortText(ssid, 20), 29);
