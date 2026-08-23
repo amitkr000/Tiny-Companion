@@ -152,7 +152,7 @@ struct PomodoroSettings {
 };
 
 struct ReminderSettings {
-  bool hydrationEnabled = true;
+  bool hydrationEnabled = false;
   bool stretchEnabled = true;
   uint16_t hydrationMinutes = DEFAULT_HYDRATION_MINUTES;
   uint16_t stretchMinutes = DEFAULT_STRETCH_MINUTES;

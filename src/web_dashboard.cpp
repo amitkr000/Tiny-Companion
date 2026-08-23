@@ -473,24 +473,31 @@ bool WebDashboard::applyAction(const String &action) {
     state_->stats.happiness = clampStat(state_->stats.happiness + 15);
     triggerReaction(*state_, FaceId::Love, "Loved", now);
   } else if (action == "pomoStart") {
+    state_->pomodoroCompleteUntil = 0;
     pomodoro_->start(now);
     state_->companionMode = CompanionMode::Pomodoro;
     triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro started", now);
   } else if (action == "pomoPause") {
     pomodoro_->pause(now);
+    state_->pomodoroCompleteUntil = 0;
     state_->companionMode = CompanionMode::Pomodoro;
     triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro paused", now);
   } else if (action == "pomoToggle") {
     pomodoro_->startPause(now);
+    if (!pomodoro_->isRunning()) {
+      state_->pomodoroCompleteUntil = 0;
+    }
     state_->companionMode = CompanionMode::Pomodoro;
     triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro toggle", now);
   } else if (action == "pomoReset") {
     pomodoro_->reset(now);
+    state_->pomodoroCompleteUntil = 0;
     state_->companionMode = CompanionMode::Pomodoro;
     triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro reset", now);
   } else if (action == "doneHydration") {
     reminders_->markDone(ReminderKind::Hydration, now);
     state_->activeReminder = ReminderKind::None;
+    state_->hydrationCompleteUntil = 0;
     triggerReaction(*state_, FaceId::Proud, "Hydrated", now);
   } else if (action == "doneStretch") {
     reminders_->markDone(ReminderKind::Stretch, now);
@@ -567,6 +574,12 @@ bool WebDashboard::applySettingsFromRequest() {
   if (server_->hasArg("annoyedPokes")) state_->touchSettings.annoyedPokeCount = constrain(server_->arg("annoyedPokes").toInt(), 2, 12);
   if (server_->hasArg("angryPokes")) state_->touchSettings.angryPokeCount = constrain(server_->arg("angryPokes").toInt(), 3, 20);
 
+  if (!state_->reminderSettings.hydrationEnabled) {
+    state_->hydrationCompleteUntil = 0;
+    if (state_->activeReminder == ReminderKind::Hydration) {
+      state_->activeReminder = ReminderKind::None;
+    }
+  }
   pomodoro_->applySettings(state_->pomodoroSettings, millis());
   reminders_->applySettings(state_->reminderSettings, millis());
   weather_->saveSettings();
@@ -635,6 +648,12 @@ bool WebDashboard::applySettingsFromJson() {
     if (!touch["angryPokeCount"].isNull()) state_->touchSettings.angryPokeCount = constrain(touch["angryPokeCount"].as<int>(), 3, 20);
   }
 
+  if (!state_->reminderSettings.hydrationEnabled) {
+    state_->hydrationCompleteUntil = 0;
+    if (state_->activeReminder == ReminderKind::Hydration) {
+      state_->activeReminder = ReminderKind::None;
+    }
+  }
   pomodoro_->applySettings(state_->pomodoroSettings, millis());
   reminders_->applySettings(state_->reminderSettings, millis());
   weather_->saveSettings();

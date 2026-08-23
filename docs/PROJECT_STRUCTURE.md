@@ -49,7 +49,7 @@ web_dashboard/
 
 `main.cpp` owns the global `AppState` and calls each service from `loop()`.
 
-Touch input produces gestures. Face-touch gestures update stats, greetings, petting, and reaction faces. Action-touch gestures are delegated to `ModeManager`, which sends single, double, triple, and long-press input to the active `CompanionModeHandler`. `main.cpp` owns the Face-mode home loop that mixes idle faces with active Pomodoro and hydration panels.
+Touch input produces gestures. Face-touch gestures update stats, greetings, petting, and reaction faces. Action-touch gestures are delegated to `ModeManager`, which sends single, double, triple, and long-press input to the active `CompanionModeHandler`. `main.cpp` owns the Face-mode home loop that mixes idle faces with running Pomodoro and hydration-ON panels.
 
 Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face in the 60-second face-mode loop.
 

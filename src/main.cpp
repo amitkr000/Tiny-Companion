@@ -131,7 +131,13 @@ static void loadRuntimeSettings() {
   runtimeSoundEnabled = preferences.getBool("sound", ENABLE_SOUND);
 
   app.pomodoroSettings.focusMinutes = constrain(preferences.getUShort("focus", DEFAULT_FOCUS_MINUTES), 1, 120);
-  app.reminderSettings.hydrationEnabled = preferences.getBool("hydOn", true);
+  if (!preferences.getBool("hydOffV1", false)) {
+    app.reminderSettings.hydrationEnabled = false;
+    preferences.putBool("hydOn", false);
+    preferences.putBool("hydOffV1", true);
+  } else {
+    app.reminderSettings.hydrationEnabled = preferences.getBool("hydOn", false);
+  }
   app.reminderSettings.stretchEnabled = preferences.getBool("stretchOn", true);
   app.reminderSettings.hydrationMinutes = constrain(preferences.getUShort("hydMin", DEFAULT_HYDRATION_MINUTES), 5, 240);
   app.reminderSettings.stretchMinutes = constrain(preferences.getUShort("stretchMin", DEFAULT_STRETCH_MINUTES), 5, 240);
@@ -223,7 +229,7 @@ static void updateHomePanel(uint32_t now) {
     return;
   }
 
-  bool pomodoroActive = pomodoro.isActive(now);
+  bool pomodoroActive = pomodoro.isRunning();
   bool hydrationActive = app.reminderSettings.hydrationEnabled;
   if (!pomodoroActive && !hydrationActive) {
     return;
@@ -251,7 +257,7 @@ static void renderNow() {
   }
   lastFrameAt = now;
   updateCompletionNotices(now);
-  FaceId idleFace = app.companionMode == CompanionMode::Idle && (pomodoro.isActive(now) || app.reminderSettings.hydrationEnabled)
+  FaceId idleFace = app.companionMode == CompanionMode::Idle && (pomodoro.isRunning() || app.reminderSettings.hydrationEnabled)
     ? FaceId::CheerfulIdle
     : weather.idleFaceFor(now);
   app.currentFace = selectFace(app, pomodoro, reminders, idleFace, now);

@@ -24,6 +24,9 @@ ModeActionResult PomodoroModeHandler::onLongPress(ModeContext &context, uint32_t
     return ModeActionResult::None;
   }
   context.pomodoro->startPause(now);
+  if (!context.pomodoro->isRunning()) {
+    context.state->pomodoroCompleteUntil = 0;
+  }
   context.state->lastAction = context.pomodoro->isRunning() ? "Pomodoro started" : "Pomodoro paused";
   context.state->lastInteractionAt = now;
   context.save();
@@ -35,6 +38,7 @@ ModeActionResult PomodoroModeHandler::onDoublePress(ModeContext &context, uint32
     return ModeActionResult::None;
   }
   context.pomodoro->reset(now);
+  context.state->pomodoroCompleteUntil = 0;
   context.state->lastAction = "Pomodoro reset";
   context.state->lastInteractionAt = now;
   context.save();

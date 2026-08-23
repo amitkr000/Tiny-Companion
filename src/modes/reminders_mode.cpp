@@ -17,8 +17,11 @@ ModeActionResult RemindersModeHandler::onLongPress(ModeContext &context, uint32_
   if (context.reminders) {
     context.reminders->applySettings(context.state->reminderSettings, now);
   }
-  if (!context.state->reminderSettings.hydrationEnabled && context.state->activeReminder == ReminderKind::Hydration) {
-    context.state->activeReminder = ReminderKind::None;
+  if (!context.state->reminderSettings.hydrationEnabled) {
+    context.state->hydrationCompleteUntil = 0;
+    if (context.state->activeReminder == ReminderKind::Hydration) {
+      context.state->activeReminder = ReminderKind::None;
+    }
   }
   context.state->lastAction = context.state->reminderSettings.hydrationEnabled ? "Hydration reminders on" : "Hydration reminders off";
   context.state->lastInteractionAt = now;

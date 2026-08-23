@@ -77,11 +77,11 @@ In Pomodoro mode:
 | Triple tap | Reserved |
 | Long press | Start or pause Pomodoro |
 
-In Reminders mode, long press starts or stops hydration reminders. While Face mode is running, active hydration reminders appear inside the home loop for the final 20 seconds of each minute, or 10 seconds if Pomodoro is also active. When a hydration reminder is due, Tiny Companion shows a Hydration complete screen for 1 minute, returns to Face mode, and schedules the next reminder based on the saved interval. If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
+In Reminders/Hydration mode, long press starts or stops hydration reminders. Hydration reminders are OFF by default. While Face mode is running, hydration appears inside the home loop only when hydration reminders are ON: 20 seconds each minute, or 10 seconds if Pomodoro is also running. When a hydration reminder is due, Tiny Companion shows a Hydration complete screen for 1 minute, returns to Face mode, and schedules the next reminder based on the saved interval. If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
 
 ## Pomodoro
 
-Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, long press starts/pauses and double tap resets. While Face mode is running, an active Pomodoro appears inside the home loop for the final 20 seconds of each minute, or 10 seconds if hydration reminders are also active. When Pomodoro finishes, Tiny Companion shows a Pomodoro complete screen for 1 minute, returns to Face mode, and resets the Pomodoro timer.
+Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, long press starts/pauses and double tap resets. While Face mode is running, Pomodoro appears inside the home loop only while the Pomodoro timer is running: 20 seconds each minute, or 10 seconds if hydration reminders are also ON. Paused or reset Pomodoro does not appear in the Face-mode loop. When Pomodoro finishes, Tiny Companion shows a Pomodoro complete screen for 1 minute, returns to Face mode, and resets the Pomodoro timer.
 
 Default timing:
 
@@ -93,7 +93,7 @@ You can change these from the dashboard settings.
 
 Tiny Companion supports:
 
-- Hydration reminders
+- Hydration reminders, OFF by default
 - Stretch reminders
 
 When a reminder appears, use the dashboard action to mark it done. The face will briefly show a proud reaction.

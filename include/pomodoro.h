@@ -15,7 +15,6 @@ class PomodoroTimer {
   void applySettings(const PomodoroSettings &settings, uint32_t now);
 
   bool isRunning() const;
-  bool isActive(uint32_t now) const;
   uint8_t completedSessions() const;
   uint32_t remainingSeconds(uint32_t now) const;
   uint32_t durationSeconds() const;
