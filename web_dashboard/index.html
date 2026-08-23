@@ -53,6 +53,7 @@
             <button data-action="poke">Poke</button>
             <button data-action="feed">Feed</button>
             <button data-action="play">Play</button>
+            <button data-action="pet">Pet</button>
             <button data-action="love">Love</button>
             <button data-action="sleep" class="secondary">Sleep</button>
             <button data-action="wake" class="secondary">Wake</button>
@@ -118,6 +119,7 @@
 
       <section class="tab-panel" id="device">
         <form id="deviceForm" class="settings-grid">
+          <label>Your name<input name="userName" maxlength="16" autocomplete="given-name"></label>
           <label>OLED brightness<input name="brightness" type="range" min="1" max="100"></label>
           <label class="check"><input name="inverted" type="checkbox"> Invert display</label>
           <label class="check"><input name="idleAnimationEnabled" type="checkbox"> Show animated faces</label>

@@ -1,7 +1,7 @@
 const STORAGE_KEY = "tinyCompanionDevice";
 const COMMON_BASES = ["192.168.0.", "192.168.1.", "192.168.29.", "192.168.31.", "10.0.0."];
 const FACES = [
-  "neutral", "cheerful", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
+  "neutral", "cheerful", "greeting", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
   "poke", "feed", "full", "wake", "proud", "pomodoro", "break", "hydration",
   "sunny", "rainy", "cloudy", "stormy", "foggy", "windy", "hot", "cold",
   "morning", "afternoon", "evening", "night", "new-moon", "crescent-moon",
@@ -173,6 +173,7 @@ function fillSettings(settings) {
   weather.overrideSeason.value = settings.weather.overrideSeason;
 
   const device = $("#deviceForm");
+  device.userName.value = settings.companion?.userName || "Friend";
   device.brightness.value = settings.display.brightness;
   device.inverted.checked = settings.display.inverted;
   device.idleAnimationEnabled.checked = settings.display.idleAnimationEnabled;
@@ -288,6 +289,9 @@ function installEvents() {
     event.preventDefault();
     const form = event.currentTarget;
     saveSettings({
+      companion: {
+        userName: form.userName.value.trim() || "Friend",
+      },
       display: {
         brightness: Number(form.brightness.value),
         inverted: form.inverted.checked,

@@ -18,7 +18,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 
 ## Supported Features
 
-- OLED face system with a cheerful animated default idle face plus weather, time, moon, season, action, reaction, reminder, and system faces.
+- OLED face system with animated faces, a cheerful default idle face, personalized greetings, plus weather, time, moon, season, action, reaction, reminder, and system faces.
 - Wi-Fi setup portal at `TinyBotSetup`.
 - GitHub Pages hosted dashboard after Wi-Fi connection.
 - ESP32 fallback page plus local JSON API.
@@ -28,7 +28,8 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Automatic season selection from date and hemisphere inferred from latitude.
 - Manual weather and season overrides from the dashboard.
 - Companion stats: fullness, happiness, and energy.
-- Face touch gestures: poke, feed, love, sleep/wake.
+- User name setting for first-boot greetings and first-touch-of-day greetings.
+- Face touch gestures: poke, feed, love/play, and long-press pet/rub affection.
 - Action touch gestures: long-press mode cycling with automatic return to face mode.
 - Face mode shows only the face and visual effects, without labels, status icons, or extra text.
 - Pomodoro timer with configurable duration.
@@ -42,7 +43,7 @@ System faces have highest priority: boot, setup, connecting, low battery, and er
 
 Mode faces appear while a mode is active: Pomodoro timer, reminders, stretch break, sleep.
 
-Reaction faces appear briefly after touch or dashboard actions: poke, feed, full, love, angry, annoyed, proud, and wake. These reactions immediately replace the idle face.
+Reaction faces appear briefly after touch or dashboard actions: greeting, poke, feed, full, love/petting, angry, annoyed, proud, sleep, and wake. These reactions immediately replace the idle face.
 
 Face mode uses the cheerful animated idle face as the home expression whenever nothing urgent is happening. Short time and season faces appear between cheerful stretches, then the display returns to the cheerful face automatically:
 
@@ -59,8 +60,9 @@ Face mode uses the cheerful animated idle face as the home expression whenever n
 | Face touch | Single tap | Poke/pet reaction |
 | Face touch | Double tap | Feed |
 | Face touch | Triple tap | Love/play reaction |
-| Face touch | Long press | Sleep or wake |
+| Face touch | Long press | Pet/rub affection with animated love face |
 | Face touch | Repeated taps | Annoyed, then angry |
+| Face touch | First touch of a new local day | Greets the saved user name |
 | Face mode | No recent touch | Shows the cheerful animated face, with short time/season glances |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single/double/triple tap | Reserved for current/future mode actions |
@@ -71,7 +73,7 @@ Face mode uses the cheerful animated idle face as the home expression whenever n
 
 ## Dashboard/API Summary
 
-The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, website-only Pomodoro controls, reminder settings, weather settings, display settings, and touch timing.
+The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, website-only Pomodoro controls, reminder settings, weather settings, user name, display settings, and touch timing.
 
 The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard.
 
@@ -81,6 +83,7 @@ The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`,
 - No movement is possible without motors or servos.
 - Battery percentage is not accurate unless a safe ADC voltage divider is added and configured.
 - Weather requires Wi-Fi. Offline behavior uses saved weather and approximate time.
+- Daily first-touch greetings need synced or saved time context to know the local day.
 - Browser local-network protections may require manual IP entry or local-network permission for the hosted dashboard.
 - The Flutter `mobile_app` folder is not part of this firmware pass and remains optional future work.
 

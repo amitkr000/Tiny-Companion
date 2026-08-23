@@ -40,6 +40,17 @@ static String jsonEscape(const String &value) {
   return escaped;
 }
 
+static String cleanUserName(String value) {
+  value.trim();
+  if (value.length() == 0) {
+    return DEFAULT_USER_NAME;
+  }
+  if (value.length() > 16) {
+    value = value.substring(0, 16);
+  }
+  return value;
+}
+
 static CompanionMode nextDashboardMode(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Idle: return CompanionMode::Pomodoro;
@@ -298,6 +309,9 @@ void WebDashboard::sendDashboardPage() {
   body += F("\">Open hosted dashboard</a><a class=\"button ghost\" href=\"/api/state\">State JSON</a></div></div>");
 
   body += F("<div class=\"card\"><h2>Companion</h2>");
+  body += F("<p class=\"muted\">Hello, ");
+  body += htmlEscape(state_->userName);
+  body += F("</p>");
   body += metricBlock(F("Fullness"), state_->stats.fullness);
   body += metricBlock(F("Happiness"), state_->stats.happiness);
   body += metricBlock(F("Energy"), state_->stats.energy);
@@ -320,7 +334,7 @@ void WebDashboard::sendDashboardPage() {
   body += F("</section>");
 
   body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Fallback Actions</h2><div class=\"row actions\">");
-  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}};
+  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"pet", "Pet"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}};
   for (const auto &action : actions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -381,6 +395,10 @@ bool WebDashboard::applyAction(const String &action) {
     state_->stats.happiness = clampStat(state_->stats.happiness + 20);
     state_->stats.energy = clampStat(state_->stats.energy - 12);
     triggerReaction(*state_, FaceId::Playful, "Played", now);
+  } else if (action == "pet") {
+    state_->stats.happiness = clampStat(state_->stats.happiness + 18);
+    state_->stats.energy = clampStat(state_->stats.energy + 4);
+    triggerReaction(*state_, FaceId::Love, "Petted", now, PETTING_FACE_MS);
   } else if (action == "sleep") {
     state_->sleepRequested = true;
     state_->stats.energy = clampStat(state_->stats.energy + 28);
@@ -455,6 +473,7 @@ void WebDashboard::handleSettings() {
 }
 
 bool WebDashboard::applySettingsFromRequest() {
+  if (server_->hasArg("userName")) state_->userName = cleanUserName(server_->arg("userName"));
   if (server_->hasArg("brightness")) state_->displaySettings.brightness = constrain(server_->arg("brightness").toInt(), 1, 100);
   state_->displaySettings.inverted = server_->hasArg("invert");
   state_->displaySettings.idleAnimationEnabled = server_->hasArg("idleAnim");
@@ -493,12 +512,17 @@ bool WebDashboard::applySettingsFromJson() {
     return false;
   }
 
-  DynamicJsonDocument doc(2048);
+  DynamicJsonDocument doc(2304);
   if (deserializeJson(doc, body)) {
     return false;
   }
 
   JsonObject root = doc.as<JsonObject>();
+  JsonObject companion = root["companion"];
+  if (!companion.isNull()) {
+    if (!companion["userName"].isNull()) state_->userName = cleanUserName(companion["userName"].as<String>());
+  }
+
   JsonObject display = root["display"];
   if (!display.isNull()) {
     if (!display["brightness"].isNull()) state_->displaySettings.brightness = constrain(display["brightness"].as<int>(), 1, 100);
@@ -637,8 +661,10 @@ void WebDashboard::sendDiscoverJson() {
 
 void WebDashboard::sendSettingsJson() {
   String json;
-  json.reserve(1800);
-  json += F("{\"ok\":true,\"display\":{\"brightness\":");
+  json.reserve(2000);
+  json += F("{\"ok\":true,\"companion\":{\"userName\":\"");
+  json += jsonEscape(state_->userName);
+  json += F("\"},\"display\":{\"brightness\":");
   json += state_->displaySettings.brightness;
   json += F(",\"inverted\":");
   json += state_->displaySettings.inverted ? F("true") : F("false");
@@ -690,6 +716,8 @@ void WebDashboard::sendStateJson() {
   json.reserve(1800);
   json += F("{\"device\":\"");
   json += jsonEscape(DEVICE_NAME);
+  json += F("\",\"userName\":\"");
+  json += jsonEscape(state_->userName);
   json += F("\",\"mode\":\"");
   json += deviceModeName(state_->deviceMode);
   json += F("\",\"companionMode\":\"");

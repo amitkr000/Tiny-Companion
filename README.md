@@ -1,6 +1,6 @@
 # Tiny Companion ESP32 Firmware
 
-Tiny Companion is an ESP32-C3 desk companion with expressive OLED faces, two touch sensors, Pomodoro mode, reminders, Wi-Fi setup, a GitHub Pages dashboard, and a cheerful animated idle face with short time/season face glances.
+Tiny Companion is an ESP32-C3 desk companion with expressive animated OLED faces, two touch sensors, personalized greetings, Pomodoro mode, reminders, Wi-Fi setup, a GitHub Pages dashboard, and a cheerful idle face with short time/season face glances.
 
 The polished dashboard is hosted with GitHub Pages. The root Pages URL redirects to the dashboard:
 

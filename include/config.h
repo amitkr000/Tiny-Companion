@@ -6,6 +6,7 @@
 static constexpr const char *DEVICE_NAME = "Tiny Companion";
 static constexpr const char *HOSTED_DASHBOARD_URL = "https://amitkr000.github.io/Tiny-Companion/";
 static constexpr const char *MDNS_HOSTNAME = "tinycompanion";
+static constexpr const char *DEFAULT_USER_NAME = "Friend";
 
 // ESP32-hosted Wi-Fi setup portal. Connect a phone/computer to this access
 // point, then open http://192.168.4.1 to send home Wi-Fi details.
@@ -27,7 +28,7 @@ static constexpr uint8_t OLED_ADDRESS = 0x3C;
 static constexpr bool OLED_FLIP_180 = false;
 
 // Optional inputs/outputs. Set to -1 to disable.
-// FACE_TOUCH_PIN is the "pet" sensor: poke, feed, love, sleep/wake.
+// FACE_TOUCH_PIN is the "pet" sensor: poke, feed, love/play, and pet/rub.
 // ACTION_TOUCH_PIN is the mode/action sensor: long-press mode cycle and future mode input.
 static constexpr int FACE_TOUCH_PIN = 1;
 static constexpr int ACTION_TOUCH_PIN = 2;
@@ -44,6 +45,8 @@ static constexpr uint32_t NAVIGATION_REFRESH_MS = 350;
 static constexpr uint32_t MODE_PREVIEW_TIMEOUT_MS = 20000;
 static constexpr uint32_t IDLE_GLANCE_FACE_MS = 4500;
 static constexpr uint32_t IDLE_GLANCE_INTERVAL_MS = 45000;
+static constexpr uint32_t GREETING_FACE_MS = 5200;
+static constexpr uint32_t PETTING_FACE_MS = 5200;
 static constexpr uint32_t WEATHER_CHANGE_FACE_MS = 18000;
 static constexpr uint32_t WEATHER_GLANCE_INTERVAL_MS = 90000;
 static constexpr uint32_t WEATHER_SYNC_INTERVAL_MS = 30UL * 60UL * 1000UL;

@@ -23,6 +23,7 @@ enum class CompanionMode : uint8_t {
 enum class FaceId : uint8_t {
   Neutral,
   CheerfulIdle,
+  Greeting,
   Happy,
   Playful,
   Hungry,
@@ -171,6 +172,7 @@ struct AppState {
   uint32_t reactionUntil = 0;
   String currentMessage = "Starting";
   String lastAction = "Ready";
+  String userName = DEFAULT_USER_NAME;
   CompanionStats stats;
   WeatherContext weather;
   PomodoroSettings pomodoroSettings;
@@ -183,6 +185,7 @@ struct AppState {
   uint32_t showIpUntil = 0;
   uint32_t lastInteractionAt = 0;
   uint32_t lastStatsDecayAt = 0;
+  uint32_t lastGreetingDay = 0;
 };
 
 static inline uint8_t clampStat(int value) {

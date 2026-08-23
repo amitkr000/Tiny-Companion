@@ -191,6 +191,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  animation: face-bob 1.8s ease-in-out infinite;
 }
 
 .face-art span {
@@ -199,6 +200,22 @@ button:disabled {
   border-radius: 8px;
   background: #dfffe9;
   display: block;
+  animation: face-blink 5s ease-in-out infinite;
+}
+
+.face-art.face-love span,
+.face-art.face-greeting span {
+  border-radius: 50% 50% 45% 45%;
+}
+
+@keyframes face-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@keyframes face-blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.15); }
 }
 
 .metric {

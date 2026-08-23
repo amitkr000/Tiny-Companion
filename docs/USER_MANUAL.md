@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Tiny Companion is a small desk pet with expressive OLED faces. It reacts to touch, usually shows a cheerful animated idle face, briefly shows time/season faces between cheerful stretches, runs a Pomodoro timer, and reminds you to drink water or stretch.
+Tiny Companion is a small desk pet with expressive animated OLED faces. It reacts to touch, greets you by name, usually shows a cheerful animated idle face, briefly shows time/season faces between cheerful stretches, runs a Pomodoro timer, and reminds you to drink water or stretch.
 
 In Face mode, the OLED shows only the face and its visual effects. Labels, status icons, and extra text are hidden so touch reactions like poke/feed/love can take over cleanly.
 
@@ -56,8 +56,10 @@ Face touch sensor:
 | Single tap | Poke/pet |
 | Double tap | Feed |
 | Triple tap | Love/play |
-| Long press | Sleep or wake |
+| Long press | Pet/rub affection |
 | Too many fast taps | Annoyed, then angry |
+
+The first face touch of each local day shows a greeting using the saved user name. Set the name from the dashboard Device tab. The daily check uses synced or saved time, so connect Wi-Fi/NTP at least once for reliable daily greetings.
 
 Action touch sensor:
 
@@ -120,13 +122,14 @@ The dashboard lets you:
 
 - Connect to the ESP32 by saved IP, manual IP, `tinycompanion.local`, or best-effort local scan.
 - Preview faces.
-- Trigger poke/feed/play/love/sleep/wake.
+- Trigger poke/feed/play/pet/love/sleep/wake.
 - Test mode cycling with Face, Pomodoro, and Cycle Mode buttons.
 - Start, pause, and reset Pomodoro.
 - Configure reminders.
 - Configure weather location and timezone.
 - Override weather or season.
 - Adjust OLED brightness and inverted colors.
+- Set the user name used in greetings.
 - Tune touch timing and poke anger threshold.
 - View JSON status at `/api/state`.
 - Forget Wi-Fi and return to setup.
@@ -138,6 +141,7 @@ If your browser blocks local-network access from the hosted page, open `http://E
 | Face | Meaning |
 | --- | --- |
 | Cheerful | Default animated face mode expression |
+| Greeting | First boot or first touch of the local day |
 | Morning/afternoon/evening/night | Short time-of-day glance |
 | Spring/summer/monsoon/autumn/winter | Short season glance |
 | Sunny/rainy/cloudy | Weather preview or override face |

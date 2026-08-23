@@ -61,9 +61,11 @@ static void saveCompanionState() {
   preferences.putUChar("energy", app.stats.energy);
   preferences.putString("lastAction", app.lastAction);
   preferences.putBool("sleep", app.sleepRequested);
+  preferences.putULong("greetDay", app.lastGreetingDay);
 }
 
 static void saveRuntimeSettings() {
+  preferences.putString("userName", app.userName);
   preferences.putUChar("bright", app.displaySettings.brightness);
   preferences.putBool("invert", app.displaySettings.inverted);
   preferences.putBool("idleAnim", app.displaySettings.idleAnimationEnabled);
@@ -81,12 +83,16 @@ static void saveRuntimeSettings() {
 }
 
 static void loadRuntimeSettings() {
-  app.currentFace = static_cast<FaceId>(preferences.getUChar("face", static_cast<uint8_t>(FaceId::Neutral)));
+  app.currentFace = static_cast<FaceId>(preferences.getUChar("face", static_cast<uint8_t>(FaceId::CheerfulIdle)));
   app.stats.fullness = constrain(preferences.getUChar("fullness", 72), 0, 100);
   app.stats.happiness = constrain(preferences.getUChar("happy", 78), 0, 100);
   app.stats.energy = constrain(preferences.getUChar("energy", 66), 0, 100);
   app.lastAction = preferences.isKey("lastAction") ? preferences.getString("lastAction", "Ready") : "Ready";
+  app.userName = preferences.isKey("userName") ? preferences.getString("userName", DEFAULT_USER_NAME) : DEFAULT_USER_NAME;
+  app.userName.trim();
+  if (app.userName.length() == 0) app.userName = DEFAULT_USER_NAME;
   app.sleepRequested = preferences.getBool("sleep", false);
+  app.lastGreetingDay = preferences.getULong("greetDay", 0);
 
   app.displaySettings.brightness = constrain(preferences.getUChar("bright", 100), 1, 100);
   app.displaySettings.inverted = preferences.getBool("invert", false);
@@ -103,6 +109,50 @@ static void loadRuntimeSettings() {
   app.touchSettings.longPressMs = constrain(preferences.getULong("longPress", TOUCH_LONG_PRESS_MS), 500UL, 2500UL);
   app.touchSettings.annoyedPokeCount = constrain(preferences.getUChar("annoyPoke", ANNOYED_POKE_COUNT), 2, 12);
   app.touchSettings.angryPokeCount = constrain(preferences.getUChar("angryPoke", ANGRY_POKE_COUNT), 3, 20);
+}
+
+static uint32_t currentLocalDay(uint32_t now) {
+  uint32_t epoch = weather.currentEpoch(now);
+  if (epoch == 0) {
+    return 0;
+  }
+  int64_t localEpoch = static_cast<int64_t>(epoch) + static_cast<int64_t>(app.weather.timezoneOffsetMinutes) * 60LL;
+  if (localEpoch < 0) {
+    return 0;
+  }
+  return static_cast<uint32_t>(localEpoch / 86400LL);
+}
+
+static String greetingActionText(const __FlashStringHelper *prefix) {
+  String text(prefix);
+  text += app.userName;
+  return text;
+}
+
+static bool triggerDailyTouchGreeting(uint32_t now) {
+  uint32_t localDay = currentLocalDay(now);
+  if (localDay == 0 || localDay == app.lastGreetingDay) {
+    return false;
+  }
+  app.lastGreetingDay = localDay;
+  app.stats.happiness = clampStat(app.stats.happiness + 4);
+  triggerReaction(app, FaceId::Greeting, greetingActionText(F("Hi ")), now, GREETING_FACE_MS);
+  toneOnce(1568, 45);
+  saveCompanionState();
+  return true;
+}
+
+static void showFirstBootGreeting() {
+  if (preferences.getBool("bootHello", false)) {
+    return;
+  }
+  uint32_t now = millis();
+  app.currentMessage = greetingActionText(F("Hi "));
+  triggerReaction(app, FaceId::Greeting, greetingActionText(F("Welcome ")), now, GREETING_FACE_MS);
+  preferences.putBool("bootHello", true);
+  saveCompanionState();
+  renderDisplay(display, app, pomodoro, reminders, false, 0, "", IPAddress());
+  delay(2200);
 }
 
 static void applyDisplayCallback() {
@@ -306,6 +356,10 @@ static void autoReturnToFaceMode(uint32_t now) {
 static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
   if (gesture == TouchGesture::None) return;
 
+  if (triggerDailyTouchGreeting(now)) {
+    return;
+  }
+
   if (gesture == TouchGesture::SingleTap) {
     if (now - pokeWindowStartedAt > POKE_WINDOW_MS) {
       pokeWindowStartedAt = now;
@@ -338,14 +392,10 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
     toneOnce(1319, 45);
   } else if (gesture == TouchGesture::LongPress) {
     pokeCount = 0;
-    app.sleepRequested = !app.sleepRequested;
-    if (app.sleepRequested) {
-      app.stats.energy = clampStat(app.stats.energy + 20);
-      triggerReaction(app, FaceId::Sleepy, "Sleeping", now);
-    } else {
-      triggerReaction(app, FaceId::Wake, "Awake", now);
-    }
-    toneOnce(740, 50);
+    app.stats.happiness = clampStat(app.stats.happiness + 18);
+    app.stats.energy = clampStat(app.stats.energy + 4);
+    triggerReaction(app, FaceId::Love, "Petted", now, PETTING_FACE_MS);
+    toneOnce(1568, 50);
   }
 
   saveCompanionState();
@@ -417,6 +467,7 @@ void setup() {
   Serial.println("[boot] opening preferences");
   preferences.begin("wifi", false);
   loadRuntimeSettings();
+  showFirstBootGreeting();
   Serial.println("[boot] loading weather/settings");
   weather.begin(preferences, app.weather);
   applyDisplayCallback();
