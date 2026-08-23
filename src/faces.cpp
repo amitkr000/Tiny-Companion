@@ -322,7 +322,26 @@ static void drawPomodoro(Adafruit_SSD1306 &display, const PomodoroTimer &pomodor
   drawCentered(display, pomodoro.isRunning() ? "running" : "paused", 54);
 }
 
+static void drawAttentionFlash(Adafruit_SSD1306 &display) {
+  uint8_t phase = (millis() / 180) % 4;
+  if (phase < 2) {
+    display.drawRect(0, 0, OLED_WIDTH, OLED_HEIGHT, SSD1306_WHITE);
+    display.drawRect(2, 2, OLED_WIDTH - 4, OLED_HEIGHT - 4, SSD1306_WHITE);
+    display.fillRect(0, 0, 12, 5, SSD1306_WHITE);
+    display.fillRect(OLED_WIDTH - 12, 0, 12, 5, SSD1306_WHITE);
+    display.fillRect(0, OLED_HEIGHT - 5, 12, 5, SSD1306_WHITE);
+    display.fillRect(OLED_WIDTH - 12, OLED_HEIGHT - 5, 12, 5, SSD1306_WHITE);
+  } else {
+    display.drawRect(1, 1, OLED_WIDTH - 2, OLED_HEIGHT - 2, SSD1306_WHITE);
+    display.fillRect(0, 10, 4, 12, SSD1306_WHITE);
+    display.fillRect(0, 42, 4, 12, SSD1306_WHITE);
+    display.fillRect(OLED_WIDTH - 4, 10, 4, 12, SSD1306_WHITE);
+    display.fillRect(OLED_WIDTH - 4, 42, 4, 12, SSD1306_WHITE);
+  }
+}
+
 static void drawPomodoroComplete(Adafruit_SSD1306 &display) {
+  drawAttentionFlash(display);
   drawSmilingEyes(display, 12, 18, 18, 45);
   drawCentered(display, "Pomodoro", 2);
   drawCentered(display, "complete", 54);
@@ -335,6 +354,7 @@ static void drawHydrationStatus(Adafruit_SSD1306 &display, const ReminderService
 }
 
 static void drawHydrationComplete(Adafruit_SSD1306 &display) {
+  drawAttentionFlash(display);
   drawSmilingEyes(display, 12, 18, 18, 45);
   display.drawTriangle(116, 7, 111, 19, 121, 19, SSD1306_WHITE);
   display.drawCircle(116, 21, 4, SSD1306_WHITE);
