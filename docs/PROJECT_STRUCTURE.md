@@ -49,11 +49,11 @@ web_dashboard/
 
 `main.cpp` owns the global `AppState` and calls each service from `loop()`.
 
-Touch input produces gestures. Face-touch gestures update stats, greetings, petting, and reaction faces. Action-touch gestures are delegated to `ModeManager`, which sends single, double, triple, and long-press input to the active `CompanionModeHandler`. `main.cpp` owns the Face-mode home loop that mixes idle faces with running Pomodoro and hydration-ON panels.
+Touch input produces gestures. Face-touch gestures update stats, greetings, petting, and reaction faces. Action-touch gestures are delegated to `ModeManager`, which sends single, double, triple, and long-press input to the active `CompanionModeHandler`. `main.cpp` owns the Face-mode home loop that mixes idle faces, active Pomodoro/Hydration face cameos, and the final active progress panels.
 
 Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face in the 60-second face-mode loop.
 
-Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive. Pomodoro mode supports Action-touch long press for start/pause, double press for reset, and single press for mode cycling. Completion notices are one-minute non-blocking display states, so touch and web requests continue to work.
+Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive. Pomodoro mode supports Action-touch long press for start/pause, double press for reset, and single press for mode cycling. Paused Pomodoro time is preserved when leaving and re-entering Pomodoro mode. Completion notices are 30-second flashing non-blocking display states, so touch and web requests continue to work.
 
 The face renderer selects the final face using priority:
 
@@ -62,11 +62,11 @@ The face renderer selects the final face using priority:
 3. Active Pomodoro or reminder.
 4. Recent reaction.
 5. Stat-driven needs.
-6. Face-mode 60-second idle loop: cheerful robot face, one alternating weather-or-time face, then time/weather info.
+6. Face-mode 60-second idle loop: cheerful robot face, optional active Pomodoro/Hydration face cameos, one alternating weather-or-time face when no active feature is running, then time/weather info or active progress text.
 
-In Face mode, `renderDisplay()` hides the status bar and draws only the selected face plus visual effects. Reaction faces still win first, so touch actions replace the idle face immediately.
+In Face mode, `renderDisplay()` hides the status bar while a face is showing. Reaction faces still win first, so touch actions replace the idle face immediately. The final active window uses `HomePanel` to draw Pomodoro timer text or hydration progress text instead of a face-only cameo.
 
-The hosted GitHub Pages dashboard talks to the ESP32 through JSON API routes. State-changing routes require the saved dashboard token, and settings are saved to ESP32 Preferences/NVS.
+The hosted GitHub Pages dashboard talks to the ESP32 through JSON API routes. State-changing routes require the saved dashboard token, sent by the hosted dashboard as a query token for browser compatibility, and settings are saved to ESP32 Preferences/NVS.
 
 ## Where To Add Things
 

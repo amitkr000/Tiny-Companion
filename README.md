@@ -36,7 +36,7 @@ Setup page: Wi-Fi captive portal
 You can ignore Wi-Fi completely. If you later connect it to Wi-Fi, open the ESP32 local dashboard at the IP shown in Setting mode and copy the access token. Then open the hosted dashboard and enter both the IP address and token.
 The IP address is shown for about 30 seconds after connection, then the companion returns to face mode.
 
-After Wi-Fi is saved, normal power cycling reconnects automatically. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on for about 2.5 seconds.
+After Wi-Fi is saved, normal power cycling reconnects automatically. If setup fails, Tiny Companion shows a Wi-Fi failed screen for about 30 seconds, keeps setup available for retry, then returns to face mode. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on for about 2.5 seconds.
 
 ## Build And Flash
 

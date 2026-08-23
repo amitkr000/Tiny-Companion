@@ -46,7 +46,7 @@ Mode faces appear while a mode is active: Pomodoro timer, reminders, stretch bre
 
 Reaction faces appear briefly after touch or dashboard actions: greeting, poke, feed, full, love/petting, angry, annoyed, proud, sleep, and wake. These reactions immediately replace the idle face.
 
-Face mode uses a repeating 60-second home loop whenever nothing urgent is happening. With no running Pomodoro and hydration reminders OFF, each minute starts with 40 seconds of the cheerful robot face, shows 5 seconds of either a weather or time face, shows 5 seconds of time/weather information, then returns to the cheerful face for the rest of the minute. The contextual face alternates by minute so weather and time do not appear back to back in one minute. Offline units skip weather faces and show weather unavailable in the info screen:
+Face mode uses a repeating 60-second home loop whenever nothing urgent is happening. With no running Pomodoro and hydration reminders OFF, each minute starts with 40 seconds of the cheerful robot face, shows 5 seconds of either a weather or time face, shows 5 seconds of time/weather information, then returns to the cheerful face for the rest of the minute. The contextual face alternates by minute so weather and time do not appear back to back in one minute. Offline units skip weather faces and show weather unavailable in the info screen. When Pomodoro is running or hydration reminders are ON, the normal idle portion can occasionally show the matching Pomodoro or Hydration face as a short cameo. The final active window shows the actual progress text: 10 seconds for the single active feature, or 5 seconds Pomodoro plus 5 seconds Hydration when both are active:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
 - Time: morning waking/nap energy, afternoon low energy, evening tea, night sleep/zzz.
@@ -69,10 +69,12 @@ Face mode uses a repeating 60-second home loop whenever nothing urgent is happen
 | Action touch | Single tap | Cycle Face, Pomodoro, Reminders, Status, and Setting modes |
 | Action touch | Double tap in Pomodoro mode | Reset Pomodoro |
 | Action touch | Triple tap | Reserved for current/future mode actions |
-| Face mode | Pomodoro running or hydration ON | 40s face, then 20s active status; if both are active, Pomodoro and hydration split 10s each |
-| Completion screen | Pomodoro finished | Shows Pomodoro complete for 1 minute, resets Pomodoro, then returns to Face mode |
-| Completion screen | Hydration due | Shows Hydration complete for 1 minute, then returns to Face mode and schedules the next interval |
-| Action touch | Long press in Pomodoro mode | Start or pause Pomodoro |
+| Face mode | Only Pomodoro running | Idle face loop with occasional Pomodoro face cameos, then 10s Pomodoro timer/progress text |
+| Face mode | Only hydration ON | Idle face loop with occasional Hydration face cameos, then 10s hydration progress text |
+| Face mode | Pomodoro running and hydration ON | Idle face loop with occasional Pomodoro/Hydration face cameos, then 5s Pomodoro progress text and 5s hydration progress text |
+| Completion screen | Pomodoro finished | Shows a flashing Pomodoro complete screen for 30 seconds, resets Pomodoro, then returns to Face mode |
+| Completion screen | Hydration due | Shows a flashing Hydration complete screen for 30 seconds, then returns to Face mode and schedules the next interval |
+| Action touch | Long press in Pomodoro mode | Start or pause Pomodoro; leaving and re-entering Pomodoro mode preserves a paused remaining time |
 | Action touch | Long press in Reminders/Hydration mode | Start or stop hydration reminders |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |
 | Website | Pomodoro controls | Start, pause, and reset |
@@ -82,7 +84,7 @@ Face mode uses a repeating 60-second home loop whenever nothing urgent is happen
 
 The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, Pomodoro controls, reminder settings, weather settings, user name, display settings, and touch timing. Actions, face previews, settings writes, and Wi-Fi reset require the per-device access token shown on the ESP32 local dashboard.
 
-The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard. Settings reads/writes and all state-changing routes require `X-Tiny-Token` or a matching `token` form/query parameter.
+The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard. Settings reads/writes and all state-changing routes require `X-Tiny-Token` or a matching `token` form/query parameter. The hosted dashboard sends the token as a query parameter for broad browser compatibility with local-network requests.
 
 ## Current Limitations
 

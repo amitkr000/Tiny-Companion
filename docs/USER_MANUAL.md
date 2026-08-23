@@ -45,7 +45,7 @@ https://amitkr000.github.io/Tiny-Companion/
 
 The IP address stays on screen for about 30 seconds, then Tiny Companion returns to face mode.
 
-After Wi-Fi is saved, Tiny Companion reconnects automatically after a power cycle. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on the ESP32 for about 2.5 seconds.
+After Wi-Fi is saved, Tiny Companion reconnects automatically after a power cycle. If a Wi-Fi setup attempt fails, it shows a flashing-style Wi-Fi failed message for about 30 seconds, keeps the setup network available for retry, and then returns to Face mode. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on the ESP32 for about 2.5 seconds.
 
 ## Daily Touch Controls
 
@@ -77,11 +77,11 @@ In Pomodoro mode:
 | Triple tap | Reserved |
 | Long press | Start or pause Pomodoro |
 
-In Reminders/Hydration mode, long press starts or stops hydration reminders. Hydration reminders are OFF by default. While Face mode is running, hydration appears inside the home loop only when hydration reminders are ON: 20 seconds each minute, or 10 seconds if Pomodoro is also running. When a hydration reminder is due, Tiny Companion shows a Hydration complete screen for 1 minute, returns to Face mode, and schedules the next reminder based on the saved interval. If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
+In Reminders/Hydration mode, long press starts or stops hydration reminders. Hydration reminders are OFF by default. While Face mode is running, hydration appears only when hydration reminders are ON. During the idle portion it can appear as a short Hydration face cameo; in the final active window it shows hydration progress text for 10 seconds, or 5 seconds if Pomodoro is also running. When a hydration reminder is due, Tiny Companion shows a flashing Hydration complete screen for 30 seconds, returns to Face mode, and schedules the next reminder based on the saved interval. If a selected mode is only being previewed and no timer/reminder is active, Tiny Companion returns to face mode automatically after about 20 seconds.
 
 ## Pomodoro
 
-Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, long press starts/pauses and double tap resets. While Face mode is running, Pomodoro appears inside the home loop only while the Pomodoro timer is running: 20 seconds each minute, or 10 seconds if hydration reminders are also ON. Paused or reset Pomodoro does not appear in the Face-mode loop. When Pomodoro finishes, Tiny Companion shows a Pomodoro complete screen for 1 minute, returns to Face mode, and resets the Pomodoro timer.
+Use the hosted dashboard or the Action touch sensor to control Pomodoro mode. In Pomodoro mode, long press starts/pauses and double tap resets. If you pause Pomodoro, leave the mode, and come back later, the paused remaining time is preserved. While Face mode is running, Pomodoro appears only while the Pomodoro timer is running. During the idle portion it can appear as a short Pomodoro face cameo; in the final active window it shows Pomodoro timer/progress text for 10 seconds, or 5 seconds if hydration reminders are also ON. Paused or reset Pomodoro does not appear in the Face-mode loop. When Pomodoro finishes, Tiny Companion shows a flashing Pomodoro complete screen for 30 seconds, returns to Face mode, and resets the Pomodoro timer.
 
 Default timing:
 
@@ -102,13 +102,16 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 Weather faces use Open-Meteo only after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard. If Wi-Fi is not connected or weather has not synced, Tiny Companion skips weather faces and the info screen shows weather unavailable.
 
-Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. When Pomodoro and hydration reminders are both stopped, each minute starts with 40 seconds of the cheerful robot face, then 5 seconds of either a weather or time face, then 5 seconds of time/weather information. The final part of the minute returns to the cheerful face. The 5-second contextual face alternates by minute so weather and time do not appear back to back in the same minute:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. When Pomodoro and hydration reminders are both stopped, each minute starts with 40 seconds of the cheerful robot face, then 5 seconds of either a weather or time face, then 5 seconds of time/weather information. The final part of the minute returns to the cheerful face. The 5-second contextual face alternates by minute so weather and time do not appear back to back in the same minute. When Pomodoro or hydration is active, the idle portion can occasionally show the matching face as a cameo, and the final active window shows the actual timer/reminder progress text:
 
 - Morning: waking up / nap energy.
 - Afternoon: sleepy and lower energy.
 - Evening: tea-time mood.
 - Night: sleeping with zzz.
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, or cold.
+- Only Pomodoro running: 10 seconds Pomodoro timer/progress text at the end of the minute.
+- Only hydration ON: 10 seconds hydration progress text at the end of the minute.
+- Both active: 5 seconds Pomodoro progress text and 5 seconds hydration progress text at the end of the minute.
 
 Weather faces are available as preview/override faces in the dashboard:
 
