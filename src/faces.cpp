@@ -78,11 +78,11 @@ static void drawEyes(Adafruit_SSD1306 &display, int16_t y, int16_t leftHeight, i
   mouthY += bob;
 
   if (blink) {
-    display.drawFastHLine(32, y + 9, 22, SSD1306_WHITE);
-    display.drawFastHLine(74, y + 9, 22, SSD1306_WHITE);
+    display.drawFastHLine(28, y + 9, 30, SSD1306_WHITE);
+    display.drawFastHLine(70, y + 9, 30, SSD1306_WHITE);
   } else {
-    display.fillRoundRect(32, y + (18 - leftHeight) / 2, 22, leftHeight, 6, SSD1306_WHITE);
-    display.fillRoundRect(74, y + (18 - rightHeight) / 2, 22, rightHeight, 6, SSD1306_WHITE);
+    display.fillRoundRect(28, y + (22 - leftHeight) / 2, 30, leftHeight + 4, 8, SSD1306_WHITE);
+    display.fillRoundRect(70, y + (22 - rightHeight) / 2, 30, rightHeight + 4, 8, SSD1306_WHITE);
   }
   display.drawFastHLine(46, mouthY + (frame % 10 == 0 ? 1 : 0), 36, SSD1306_WHITE);
 }
@@ -163,9 +163,6 @@ static void drawCheerfulIdle(Adafruit_SSD1306 &display) {
   display.fillRoundRect(56, 43 + bob, 16, 5, 2, SSD1306_WHITE);
   display.drawPixel(55, 42 + bob, SSD1306_WHITE);
   display.drawPixel(72, 42 + bob, SSD1306_WHITE);
-  display.drawLine(7, 57 + bob, 18, 61 + bob, SSD1306_WHITE);
-  display.drawFastHLine(18, 61 + bob, 92, SSD1306_WHITE);
-  display.drawLine(110, 61 + bob, 121, 57 + bob, SSD1306_WHITE);
 }
 
 static void drawGreeting(Adafruit_SSD1306 &display, const String &userName) {
@@ -175,11 +172,11 @@ static void drawGreeting(Adafruit_SSD1306 &display, const String &userName) {
   int16_t eyeY = 16 + bob;
 
   if (blink) {
-    display.drawFastHLine(32, eyeY + 8, 22, SSD1306_WHITE);
-    display.drawFastHLine(74, eyeY + 8, 22, SSD1306_WHITE);
+    display.drawFastHLine(28, eyeY + 9, 30, SSD1306_WHITE);
+    display.drawFastHLine(70, eyeY + 9, 30, SSD1306_WHITE);
   } else {
-    display.fillRoundRect(32, eyeY, 22, 15, 7, SSD1306_WHITE);
-    display.fillRoundRect(74, eyeY, 22, 15, 7, SSD1306_WHITE);
+    display.fillRoundRect(28, eyeY - 2, 30, 20, 8, SSD1306_WHITE);
+    display.fillRoundRect(70, eyeY - 2, 30, 20, 8, SSD1306_WHITE);
   }
   display.drawLine(48, 42 + bob, 56, 47 + bob, SSD1306_WHITE);
   display.drawLine(56, 47 + bob, 72, 47 + bob, SSD1306_WHITE);
@@ -359,8 +356,9 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawPixel(83, 49, SSD1306_BLACK);
       break;
     case FaceId::Playful:
-      display.fillRoundRect(30, 25, 25, 12, 6, SSD1306_WHITE);
-      display.drawFastHLine(73, 30, 26, SSD1306_WHITE);
+      display.fillRoundRect(28, 23, 30, 17, 8, SSD1306_WHITE);
+      display.drawFastHLine(70, 31, 30, SSD1306_WHITE);
+      display.drawFastHLine(70, 32, 30, SSD1306_WHITE);
       display.drawFastHLine(47, 51, 34, SSD1306_WHITE);
       break;
     case FaceId::Hungry:
@@ -374,8 +372,8 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawCircle(64, 51, 5, SSD1306_WHITE);
       break;
     case FaceId::Sleepy:
-      display.drawFastHLine(32, 30 + bob, 23, SSD1306_WHITE);
-      display.drawFastHLine(74, 30 + bob, 23, SSD1306_WHITE);
+      display.drawFastHLine(28, 30 + bob, 30, SSD1306_WHITE);
+      display.drawFastHLine(70, 30 + bob, 30, SSD1306_WHITE);
       display.drawFastHLine(48, 50 + bob, 31, SSD1306_WHITE);
       break;
     case FaceId::Wake:
@@ -399,8 +397,8 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawLine(75, 16, 98, 19, SSD1306_WHITE);
       break;
     case FaceId::Pomodoro:
-      display.fillRect(34, 28 + bob, 22, 8, SSD1306_WHITE);
-      display.fillRect(72, 28 + bob, 22, 8, SSD1306_WHITE);
+      display.fillRoundRect(29, 26 + bob, 30, 12, 4, SSD1306_WHITE);
+      display.fillRoundRect(69, 26 + bob, 30, 12, 4, SSD1306_WHITE);
       display.drawFastHLine(50, 51 + bob, 28, SSD1306_WHITE);
       display.drawRect(20, 15, 88, 42, SSD1306_WHITE);
       break;
@@ -464,15 +462,16 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       break;
     case FaceId::MorningIdle:
       drawSun(display, 108, 16);
-      display.fillRoundRect(31, 29, 23, 9, 5, SSD1306_WHITE);
-      display.drawFastHLine(74, 32, 23, SSD1306_WHITE);
+      display.fillRoundRect(28, 27, 30, 13, 6, SSD1306_WHITE);
+      display.drawFastHLine(70, 33, 30, SSD1306_WHITE);
+      display.drawFastHLine(70, 34, 30, SSD1306_WHITE);
       drawFriendlySmile(display, 51);
       display.drawPixel(24, 22, SSD1306_WHITE);
       display.drawPixel(20, 27, SSD1306_WHITE);
       break;
     case FaceId::AfternoonIdle:
-      display.fillRoundRect(32, 31, 22, 7, 4, SSD1306_WHITE);
-      display.fillRoundRect(74, 31, 22, 7, 4, SSD1306_WHITE);
+      display.fillRoundRect(28, 29, 30, 11, 5, SSD1306_WHITE);
+      display.fillRoundRect(70, 29, 30, 11, 5, SSD1306_WHITE);
       drawFriendlySmile(display, 53);
       display.drawLine(101, 24, 96, 34, SSD1306_WHITE);
       display.drawCircle(96, 37, 3, SSD1306_WHITE);
@@ -487,8 +486,8 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawPixel(112, 28, SSD1306_WHITE);
       break;
     case FaceId::NightIdle:
-      display.drawFastHLine(32, 31 + bob, 23, SSD1306_WHITE);
-      display.drawFastHLine(74, 31 + bob, 23, SSD1306_WHITE);
+      display.drawFastHLine(28, 31 + bob, 30, SSD1306_WHITE);
+      display.drawFastHLine(70, 31 + bob, 30, SSD1306_WHITE);
       drawFriendlySmile(display, 51);
       display.drawCircle(17, 18, 6, SSD1306_WHITE);
       display.fillCircle(20, 16, 6, SSD1306_BLACK);
@@ -523,33 +522,33 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawLine(96, 36, 99, 19, SSD1306_WHITE);
       break;
     case FaceId::Annoyed:
-      display.fillRoundRect(34 + shake, 30, 20, 8, 3, SSD1306_WHITE);
-      display.fillRoundRect(74 + shake, 30, 20, 8, 3, SSD1306_WHITE);
-      display.drawLine(32 + shake, 22, 56 + shake, 28, SSD1306_WHITE);
-      display.drawLine(96 + shake, 22, 72 + shake, 28, SSD1306_WHITE);
+      display.fillRoundRect(29 + shake, 29, 28, 11, 4, SSD1306_WHITE);
+      display.fillRoundRect(71 + shake, 29, 28, 11, 4, SSD1306_WHITE);
+      display.drawLine(28 + shake, 21, 58 + shake, 28, SSD1306_WHITE);
+      display.drawLine(100 + shake, 21, 70 + shake, 28, SSD1306_WHITE);
       display.drawFastHLine(50, 52, 28, SSD1306_WHITE);
       break;
     case FaceId::Angry:
-      display.fillRoundRect(34 + shake, 30, 20, 8, 3, SSD1306_WHITE);
-      display.fillRoundRect(74 + shake, 30, 20, 8, 3, SSD1306_WHITE);
-      display.drawLine(31 + shake, 19, 56 + shake, 29, SSD1306_WHITE);
-      display.drawLine(97 + shake, 19, 72 + shake, 29, SSD1306_WHITE);
+      display.fillRoundRect(29 + shake, 29, 28, 11, 4, SSD1306_WHITE);
+      display.fillRoundRect(71 + shake, 29, 28, 11, 4, SSD1306_WHITE);
+      display.drawLine(27 + shake, 18, 58 + shake, 29, SSD1306_WHITE);
+      display.drawLine(101 + shake, 18, 70 + shake, 29, SSD1306_WHITE);
       display.drawLine(48, 54, 64, 49 + bob, SSD1306_WHITE);
       display.drawLine(64, 49 + bob, 80, 54, SSD1306_WHITE);
       break;
     case FaceId::Dizzy:
-      display.drawCircle(43, 31, 9, SSD1306_WHITE);
-      display.drawCircle(85, 31, 9, SSD1306_WHITE);
-      display.drawLine(36, 24, 50, 38, SSD1306_WHITE);
-      display.drawLine(50, 24, 36, 38, SSD1306_WHITE);
-      display.drawLine(78, 24, 92, 38, SSD1306_WHITE);
-      display.drawLine(92, 24, 78, 38, SSD1306_WHITE);
+      display.drawCircle(43, 31, 12, SSD1306_WHITE);
+      display.drawCircle(85, 31, 12, SSD1306_WHITE);
+      display.drawLine(34, 22, 52, 40, SSD1306_WHITE);
+      display.drawLine(52, 22, 34, 40, SSD1306_WHITE);
+      display.drawLine(76, 22, 94, 40, SSD1306_WHITE);
+      display.drawLine(94, 22, 76, 40, SSD1306_WHITE);
       display.drawFastHLine(50, 52, 28, SSD1306_WHITE);
       break;
     case FaceId::Ignored:
     case FaceId::Bored:
-      display.drawFastHLine(32, 32, 23, SSD1306_WHITE);
-      display.drawFastHLine(74, 32, 23, SSD1306_WHITE);
+      display.drawFastHLine(28, 32, 30, SSD1306_WHITE);
+      display.drawFastHLine(70, 32, 30, SSD1306_WHITE);
       display.drawFastHLine(48, 52, 31, SSD1306_WHITE);
       break;
     case FaceId::LowBattery:

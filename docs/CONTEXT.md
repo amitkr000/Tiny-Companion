@@ -46,7 +46,7 @@ Mode faces appear while a mode is active: Pomodoro timer, reminders, stretch bre
 
 Reaction faces appear briefly after touch or dashboard actions: greeting, poke, feed, full, love/petting, angry, annoyed, proud, sleep, and wake. These reactions immediately replace the idle face.
 
-Face mode uses a repeating 60-second idle loop whenever nothing urgent is happening: 40 seconds of the cheerful robot idle face, 5 seconds of the current weather face when Wi-Fi/weather data is available, 5 seconds of the current time-of-day face, then 10 seconds of time/weather information. Offline units skip weather faces and show weather unavailable in the info screen:
+Face mode uses a repeating 60-second idle loop whenever nothing urgent is happening: 50 seconds of the cheerful robot idle face, 5 seconds of either a weather or time face, then 5 seconds of time/weather information. The contextual face alternates by minute so weather and time do not appear back to back in one minute. Offline units skip weather faces and show weather unavailable in the info screen:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
 - Time: morning waking/nap energy, afternoon low energy, evening tea, night sleep/zzz.
@@ -64,7 +64,7 @@ Face mode uses a repeating 60-second idle loop whenever nothing urgent is happen
 | Face touch | Long press | Pet/rub affection with animated love face |
 | Face touch | Repeated taps | Annoyed, then angry |
 | Face touch | First touch of a new local day | Greets the saved user name |
-| Face mode | No recent touch | Loops 40s cheerful face, 5s weather face, 5s time face, 10s time/weather info |
+| Face mode | No recent touch | Loops 50s cheerful face, 5s alternating weather-or-time face, 5s time/weather info |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single/double/triple tap | Reserved for current/future mode actions |
 | Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, Status, and Setting modes |

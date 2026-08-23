@@ -211,8 +211,8 @@ FaceId WeatherService::idleFaceFor(uint32_t now) const {
   }
 
   if (loopPosition < IDLE_CHEERFUL_MS + IDLE_TIME_FACE_MS) {
-    uint32_t featurePosition = loopPosition - IDLE_CHEERFUL_MS;
-    if (featurePosition < IDLE_TIME_FACE_MS / 2) {
+    bool weatherMinute = ((now / IDLE_LOOP_MS) % 2UL) == 1UL;
+    if (weatherMinute) {
       if (!context_->wifiConnected || !context_->hasData) {
         return FaceId::CheerfulIdle;
       }

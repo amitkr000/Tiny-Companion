@@ -216,7 +216,6 @@ button:disabled {
   padding: 24px 38px 0;
   border-radius: 20px;
   background: #10191c;
-  box-shadow: 0 28px 0 -17px #e5372f;
 }
 
 .face-art.face-cheerful span {
@@ -238,16 +237,6 @@ button:disabled {
   transform: translateX(-50%);
 }
 
-.face-art.face-cheerful::after {
-  content: "";
-  position: absolute;
-  left: 14%;
-  right: 14%;
-  bottom: -4px;
-  height: 10px;
-  border-radius: 0 0 999px 999px;
-  border-bottom: 4px solid #e5372f;
-}
 
 @keyframes face-bob {
   0%, 100% { transform: translateY(0); }

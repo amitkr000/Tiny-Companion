@@ -56,7 +56,7 @@ The face renderer selects the final face using priority:
 3. Active Pomodoro or reminder.
 4. Recent reaction.
 5. Stat-driven needs.
-6. Face-mode 60-second idle loop: cheerful robot face, weather face when Wi-Fi/weather data is available, time face, then time/weather info.
+6. Face-mode 60-second idle loop: cheerful robot face, one alternating weather-or-time face, then time/weather info.
 
 In Face mode, `renderDisplay()` hides the status bar and draws only the selected face plus visual effects. Reaction faces still win first, so touch actions replace the idle face immediately.
 

@@ -100,7 +100,7 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 Weather faces use Open-Meteo only after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard. If Wi-Fi is not connected or weather has not synced, Tiny Companion skips weather faces and the info screen shows weather unavailable.
 
-Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. It loops every minute: 40 seconds cheerful robot idle face, 5 seconds weather face when available, 5 seconds current time-of-day face, then 10 seconds time/weather information:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. It loops every minute: 50 seconds cheerful robot idle face, 5 seconds of either weather or time face, then 5 seconds time/weather information. The 5-second face alternates by minute so weather and time do not appear back to back in the same minute:
 
 - Morning: waking up / nap energy.
 - Afternoon: sleepy and lower energy.
