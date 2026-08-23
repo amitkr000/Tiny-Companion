@@ -84,8 +84,9 @@ static void setDashboardMode(AppState &state, PomodoroTimer &pomodoro, Companion
 void WebDashboard::addCorsHeaders() {
   server_->sendHeader(F("Access-Control-Allow-Origin"), F("https://amitkr000.github.io"));
   server_->sendHeader(F("Access-Control-Allow-Methods"), F("GET, POST, OPTIONS"));
-  server_->sendHeader(F("Access-Control-Allow-Headers"), F("Content-Type"));
+  server_->sendHeader(F("Access-Control-Allow-Headers"), F("Content-Type, X-Tiny-Token, Authorization"));
   server_->sendHeader(F("Access-Control-Allow-Private-Network"), F("true"));
+  server_->sendHeader(F("Access-Control-Max-Age"), F("600"));
   server_->sendHeader(F("Cache-Control"), F("no-store"));
 }
 

@@ -45,18 +45,22 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 1400) {
 
 async function api(path, options = {}) {
   if (!deviceBase) throw new Error("No device connected");
+  const { authRequired = true, timeoutMs, ...fetchOptions } = options;
   const token = $("#accessToken")?.value.trim() || localStorage.getItem(TOKEN_STORAGE_KEY) || "";
-  const headers = {
-    ...(token ? { "X-Tiny-Token": token } : {}),
-    ...(options.headers || {}),
-  };
-  const response = await fetchWithTimeout(`${deviceBase}${path}`, {
-    ...options,
+  const apiPath = authRequired && token ? appendToken(path, token) : path;
+  const headers = { ...(fetchOptions.headers || {}) };
+  const response = await fetchWithTimeout(`${deviceBase}${apiPath}`, {
+    ...fetchOptions,
     headers,
-  }, options.timeoutMs || 2500);
+  }, timeoutMs || 2500);
   if (response.status === 401) throw new Error("Access token required or incorrect");
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
+}
+
+function appendToken(path, token) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}token=${encodeURIComponent(token)}`;
 }
 
 function setStatus(online, message) {
@@ -98,7 +102,7 @@ function updateState(state) {
 }
 
 async function loadState() {
-  const state = await api("/api/state");
+  const state = await api("/api/state", { authRequired: false });
   updateState(state);
   return state;
 }
@@ -114,7 +118,7 @@ async function connect(address) {
   if (!base) throw new Error("Enter a device IP address");
   $("#connectHint").textContent = "Connecting...";
   deviceBase = base;
-  const discovery = await api("/api/discover", { timeoutMs: 2200 });
+  const discovery = await api("/api/discover", { authRequired: false, timeoutMs: 2200 });
   localStorage.setItem(STORAGE_KEY, deviceBase.replace("http://", ""));
   const token = $("#accessToken").value.trim();
   if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
