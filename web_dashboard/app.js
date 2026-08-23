@@ -4,7 +4,7 @@ const COMMON_BASES = ["192.168.0.", "192.168.1.", "192.168.29.", "192.168.31.", 
 const FACES = [
   "neutral", "cheerful", "greeting", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
   "poke", "feed", "full", "wake", "proud", "pomodoro", "break", "hydration",
-  "sunny", "rainy", "cloudy", "stormy", "foggy", "windy", "hot", "cold",
+  "sunny", "rainy", "cloudy", "stormy", "foggy", "windy", "hot", "cold", "time-weather-info",
   "morning", "afternoon", "evening", "night", "new-moon", "crescent-moon",
   "half-moon", "full-moon", "spring", "summer", "monsoon", "autumn", "winter",
   "annoyed", "angry", "dizzy", "ignored", "bored", "lonely", "low-battery", "error"

@@ -1,5 +1,7 @@
 #include "faces.h"
 
+#include <time.h>
+
 static String shortText(const String &text, size_t maxLen) {
   if (text.length() <= maxLen) return text;
   return text.substring(0, maxLen - 3) + "...";
@@ -85,6 +87,21 @@ static void drawEyes(Adafruit_SSD1306 &display, int16_t y, int16_t leftHeight, i
   display.drawFastHLine(46, mouthY + (frame % 10 == 0 ? 1 : 0), 36, SSD1306_WHITE);
 }
 
+static void drawFriendlySmile(Adafruit_SSD1306 &display, int16_t mouthY) {
+  uint8_t frame = (millis() / 180) % 24;
+  int8_t bob = frame < 6 ? -1 : (frame < 12 ? 0 : (frame < 18 ? 1 : 0));
+  int16_t y = mouthY + bob;
+  display.fillRect(44, y - 2, 40, 9, SSD1306_BLACK);
+  display.drawLine(48, y, 56, y + 4, SSD1306_WHITE);
+  display.drawFastHLine(56, y + 4, 17, SSD1306_WHITE);
+  display.drawLine(73, y + 4, 81, y, SSD1306_WHITE);
+}
+
+static void drawSmilingEyes(Adafruit_SSD1306 &display, int16_t y, int16_t leftHeight, int16_t rightHeight, int16_t mouthY) {
+  drawEyes(display, y, leftHeight, rightHeight, mouthY);
+  drawFriendlySmile(display, mouthY);
+}
+
 static void drawTinyHeart(Adafruit_SSD1306 &display, int16_t x, int16_t y) {
   display.drawPixel(x, y, SSD1306_WHITE);
   display.drawPixel(x + 2, y, SSD1306_WHITE);
@@ -109,47 +126,46 @@ static void drawHeartEyes(Adafruit_SSD1306 &display) {
 static void drawCheerfulIdle(Adafruit_SSD1306 &display) {
   uint32_t now = millis();
   uint8_t frame = (now / 140) % 32;
-  uint8_t gaze = (now / 1700) % 7;
+  uint8_t gaze = (now / 1550) % 7;
   int8_t bob = frame < 8 ? -1 : (frame < 16 ? 0 : (frame < 24 ? 1 : 0));
   bool blink = frame == 24 || frame == 25 || gaze == 6;
   int8_t lookX = 0;
   int8_t lookY = 0;
 
   switch (gaze) {
-    case 0: lookX = -4; break;
-    case 1: lookX = 4; break;
-    case 2: lookY = -2; break;
-    case 3: lookY = 2; break;
-    case 4: lookX = -3; lookY = -1; break;
-    case 5: lookX = 3; lookY = 1; break;
+    case 0: lookX = -6; break;
+    case 1: lookX = 6; break;
+    case 2: lookY = -3; break;
+    case 3: lookY = 3; break;
+    case 4: lookX = -4; lookY = -2; break;
+    case 5: lookX = 4; lookY = 2; break;
     default: break;
   }
 
-  int16_t panelY = 8 + bob;
-  int16_t eyeY = 19 + bob + lookY;
-  int16_t leftEyeX = 31 + lookX;
-  int16_t rightEyeX = 80 + lookX;
-
-  display.drawRoundRect(18, panelY, 92, 50, 10, SSD1306_WHITE);
+  int16_t eyeY = 12 + bob + lookY;
+  int16_t leftEyeX = 16 + lookX;
+  int16_t rightEyeX = 91 + lookX;
 
   if (blink) {
-    display.drawFastHLine(30, 30 + bob, 18, SSD1306_WHITE);
-    display.drawFastHLine(31, 31 + bob, 16, SSD1306_WHITE);
-    display.drawFastHLine(79, 30 + bob, 18, SSD1306_WHITE);
-    display.drawFastHLine(80, 31 + bob, 16, SSD1306_WHITE);
+    display.drawFastHLine(15, 29 + bob, 28, SSD1306_WHITE);
+    display.drawFastHLine(17, 30 + bob, 24, SSD1306_WHITE);
+    display.drawFastHLine(90, 29 + bob, 28, SSD1306_WHITE);
+    display.drawFastHLine(92, 30 + bob, 24, SSD1306_WHITE);
   } else {
-    display.fillRoundRect(leftEyeX, eyeY, 16, 22, 6, SSD1306_WHITE);
-    display.fillRoundRect(rightEyeX, eyeY, 16, 22, 6, SSD1306_WHITE);
-    display.drawPixel(leftEyeX + 10, eyeY + 5, SSD1306_BLACK);
-    display.drawPixel(rightEyeX + 10, eyeY + 5, SSD1306_BLACK);
+    display.fillRoundRect(leftEyeX, eyeY, 22, 31, 8, SSD1306_WHITE);
+    display.fillRoundRect(rightEyeX, eyeY, 22, 31, 8, SSD1306_WHITE);
+    display.drawPixel(leftEyeX + 14, eyeY + 7, SSD1306_BLACK);
+    display.drawPixel(leftEyeX + 15, eyeY + 8, SSD1306_BLACK);
+    display.drawPixel(rightEyeX + 14, eyeY + 7, SSD1306_BLACK);
+    display.drawPixel(rightEyeX + 15, eyeY + 8, SSD1306_BLACK);
   }
 
-  display.fillRoundRect(59, 43 + bob, 10, 4, 2, SSD1306_WHITE);
-  display.drawPixel(58, 42 + bob, SSD1306_WHITE);
-  display.drawPixel(69, 42 + bob, SSD1306_WHITE);
-  display.drawLine(24, 55 + bob, 31, 58 + bob, SSD1306_WHITE);
-  display.drawFastHLine(31, 58 + bob, 66, SSD1306_WHITE);
-  display.drawLine(97, 58 + bob, 104, 55 + bob, SSD1306_WHITE);
+  display.fillRoundRect(56, 43 + bob, 16, 5, 2, SSD1306_WHITE);
+  display.drawPixel(55, 42 + bob, SSD1306_WHITE);
+  display.drawPixel(72, 42 + bob, SSD1306_WHITE);
+  display.drawLine(7, 57 + bob, 18, 61 + bob, SSD1306_WHITE);
+  display.drawFastHLine(18, 61 + bob, 92, SSD1306_WHITE);
+  display.drawLine(110, 61 + bob, 121, 57 + bob, SSD1306_WHITE);
 }
 
 static void drawGreeting(Adafruit_SSD1306 &display, const String &userName) {
@@ -267,6 +283,41 @@ static void drawSettingInfo(Adafruit_SSD1306 &display, const AppState &state, co
   drawCentered(display, state.dashboardToken.length() ? state.dashboardToken : String("missing"), 54);
 }
 
+static uint32_t displayEpochFromState(const AppState &state) {
+  if (state.weather.epochAtSync == 0 || state.weather.lastSyncAt == 0) {
+    return 0;
+  }
+  return state.weather.epochAtSync + ((millis() - state.weather.lastSyncAt) / 1000UL);
+}
+
+static String localTimeText(const AppState &state) {
+  uint32_t epoch = displayEpochFromState(state);
+  if (epoch == 0) {
+    return "--:--";
+  }
+  int64_t adjustedEpoch = static_cast<int64_t>(epoch) + static_cast<int64_t>(state.weather.timezoneOffsetMinutes) * 60LL;
+  time_t localEpoch = static_cast<time_t>(adjustedEpoch);
+  struct tm *timeInfo = gmtime(&localEpoch);
+  if (!timeInfo) {
+    return "--:--";
+  }
+  char buffer[6];
+  snprintf(buffer, sizeof(buffer), "%02d:%02d", timeInfo->tm_hour, timeInfo->tm_min);
+  return String(buffer);
+}
+
+static void drawTimeWeatherInfo(Adafruit_SSD1306 &display, const AppState &state) {
+  WeatherTheme theme = state.weather.manualWeather ? state.weather.overrideTheme : state.weather.theme;
+  String weatherText = theme == WeatherTheme::Unknown ? String("Weather --") : String("Weather ") + weatherThemeName(theme);
+  String tempText = state.weather.hasData ? String("Temp ") + String(state.weather.temperatureC, 1) + " C" : String("Temp -- C");
+  String seasonText = String("Season ") + seasonThemeName(state.weather.season);
+
+  drawCentered(display, String("Time ") + localTimeText(state), 6, 1);
+  drawCentered(display, weatherText, 21, 1);
+  drawCentered(display, tempText, 36, 1);
+  drawCentered(display, seasonText, 51, 1);
+}
+
 static void drawAmbientMotion(Adafruit_SSD1306 &display, FaceId face) {
   if (face == FaceId::RainyIdle || face == FaceId::MonsoonIdle || face == FaceId::StormyIdle) {
     return;
@@ -361,68 +412,69 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       break;
     case FaceId::SunnyIdle:
       drawSun(display, 108, 18);
-      drawEyes(display, 25, 13, 13, 51);
+      drawSmilingEyes(display, 25, 13, 13, 51);
       break;
     case FaceId::RainyIdle:
       drawRain(display, false);
-      drawEyes(display, 24, 10, 10, 51);
+      drawSmilingEyes(display, 24, 10, 10, 51);
       break;
     case FaceId::MonsoonIdle:
       drawRain(display, true);
-      drawEyes(display, 24, 9, 9, 52);
+      drawSmilingEyes(display, 24, 9, 9, 52);
       break;
     case FaceId::CloudyIdle:
       drawCloud(display, 92, 15);
-      drawEyes(display, 26, 11, 11, 52);
+      drawSmilingEyes(display, 26, 11, 11, 52);
       break;
     case FaceId::StormyIdle:
       drawRain(display, true);
       if (frame % 4 < 2) drawLightning(display, 112, 9);
-      drawEyes(display, 26, 8, 8, 53);
+      drawSmilingEyes(display, 26, 8, 8, 53);
       break;
     case FaceId::FoggyIdle:
-      drawEyes(display, 24, 10, 10, 50);
+      drawSmilingEyes(display, 24, 10, 10, 50);
       for (int y = 17; y <= 49; y += 11) {
         display.drawFastHLine(4, y, 25, SSD1306_WHITE);
         display.drawFastHLine(99, y + 4, 25, SSD1306_WHITE);
       }
       break;
     case FaceId::WindyIdle:
-      drawEyes(display, 24, 14, 7, 50);
+      drawSmilingEyes(display, 24, 14, 7, 50);
       display.drawFastHLine(4, 16, 28, SSD1306_WHITE);
       display.drawFastHLine(92, 24, 30, SSD1306_WHITE);
       display.drawFastHLine(6, 38, 22, SSD1306_WHITE);
       break;
     case FaceId::HotIdle:
       drawSun(display, 101, 19);
-      drawEyes(display, 28, 8, 8, 53);
-      display.drawLine(49, 51, 80, 51, SSD1306_WHITE);
+      drawSmilingEyes(display, 28, 8, 8, 53);
       break;
     case FaceId::ColdIdle:
     case FaceId::WinterIdle:
-      drawEyes(display, 27, 10, 10, 51);
+      drawSmilingEyes(display, 27, 10, 10, 51);
       display.drawPixel(96, 19, SSD1306_WHITE);
       display.drawPixel(103, 26, SSD1306_WHITE);
       display.drawPixel(91, 33, SSD1306_WHITE);
-      display.drawFastHLine(48, 52, 28, SSD1306_WHITE);
+      break;
+    case FaceId::TimeWeatherInfo:
+      drawTimeWeatherInfo(display, state);
       break;
     case FaceId::MorningIdle:
       drawSun(display, 108, 16);
       display.fillRoundRect(31, 29, 23, 9, 5, SSD1306_WHITE);
       display.drawFastHLine(74, 32, 23, SSD1306_WHITE);
-      display.drawFastHLine(49, 51, 30, SSD1306_WHITE);
+      drawFriendlySmile(display, 51);
       display.drawPixel(24, 22, SSD1306_WHITE);
       display.drawPixel(20, 27, SSD1306_WHITE);
       break;
     case FaceId::AfternoonIdle:
       display.fillRoundRect(32, 31, 22, 7, 4, SSD1306_WHITE);
       display.fillRoundRect(74, 31, 22, 7, 4, SSD1306_WHITE);
-      display.drawFastHLine(49, 53, 30, SSD1306_WHITE);
+      drawFriendlySmile(display, 53);
       display.drawLine(101, 24, 96, 34, SSD1306_WHITE);
       display.drawCircle(96, 37, 3, SSD1306_WHITE);
       break;
     case FaceId::EveningIdle:
-      drawEyes(display, 25, 12, 12, 51);
+      drawSmilingEyes(display, 25, 12, 12, 51);
       display.drawRoundRect(98, 35, 18, 13, 3, SSD1306_WHITE);
       display.drawCircle(118, 40, 4, SSD1306_WHITE);
       display.drawFastHLine(96, 49, 23, SSD1306_WHITE);
@@ -433,7 +485,7 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
     case FaceId::NightIdle:
       display.drawFastHLine(32, 31 + bob, 23, SSD1306_WHITE);
       display.drawFastHLine(74, 31 + bob, 23, SSD1306_WHITE);
-      display.drawFastHLine(49, 51 + bob, 30, SSD1306_WHITE);
+      drawFriendlySmile(display, 51);
       display.drawCircle(17, 18, 6, SSD1306_WHITE);
       display.fillCircle(20, 16, 6, SSD1306_BLACK);
       break;
@@ -450,7 +502,7 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       drawMoon(display, MoonPhase::Full);
       break;
     case FaceId::SpringIdle:
-      drawEyes(display, 25, 14, 14, 50);
+      drawSmilingEyes(display, 25, 14, 14, 50);
       display.drawCircle(101, 24, 3, SSD1306_WHITE);
       display.drawCircle(96, 29, 3, SSD1306_WHITE);
       display.drawCircle(106, 29, 3, SSD1306_WHITE);
@@ -458,10 +510,10 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       break;
     case FaceId::SummerIdle:
       drawSun(display, 101, 20);
-      drawEyes(display, 23, 16, 16, 50);
+      drawSmilingEyes(display, 23, 16, 16, 50);
       break;
     case FaceId::AutumnIdle:
-      drawEyes(display, 26, 12, 12, 51);
+      drawSmilingEyes(display, 26, 12, 12, 51);
       display.drawLine(99, 19, 108, 30, SSD1306_WHITE);
       display.drawLine(108, 30, 96, 36, SSD1306_WHITE);
       display.drawLine(96, 36, 99, 19, SSD1306_WHITE);

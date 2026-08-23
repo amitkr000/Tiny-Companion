@@ -210,21 +210,19 @@ button:disabled {
 
 .face-art.face-cheerful {
   position: relative;
-  width: min(74%, 260px);
-  min-height: 112px;
+  width: min(92%, 330px);
+  min-height: 140px;
   align-items: flex-start;
-  padding: 26px 30px 0;
-  border-radius: 18px;
+  padding: 24px 38px 0;
+  border-radius: 20px;
   background: #10191c;
-  box-shadow:
-    inset 0 0 0 2px #26363a,
-    0 22px 0 -14px #e5372f;
+  box-shadow: 0 28px 0 -17px #e5372f;
 }
 
 .face-art.face-cheerful span {
-  width: 25%;
-  aspect-ratio: 0.78 / 1;
-  border-radius: 11px;
+  width: 24%;
+  aspect-ratio: 0.72 / 1;
+  border-radius: 13px;
   box-shadow: none;
 }
 
@@ -232,9 +230,9 @@ button:disabled {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: 34px;
-  width: 22px;
-  height: 7px;
+  bottom: 42px;
+  width: 28px;
+  height: 8px;
   border-radius: 999px;
   background: #dfffe9;
   transform: translateX(-50%);

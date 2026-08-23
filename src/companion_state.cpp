@@ -27,6 +27,7 @@ static const FaceSpec FACE_SPECS[] = {
   {FaceId::WindyIdle, "windy", "Windy"},
   {FaceId::HotIdle, "hot", "Hot day"},
   {FaceId::ColdIdle, "cold", "Cold day"},
+  {FaceId::TimeWeatherInfo, "time-weather-info", "Time and weather info"},
   {FaceId::MorningIdle, "morning", "Morning"},
   {FaceId::AfternoonIdle, "afternoon", "Afternoon"},
   {FaceId::EveningIdle, "evening", "Evening"},

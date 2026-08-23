@@ -210,13 +210,17 @@ FaceId WeatherService::idleFaceFor(uint32_t now) const {
   }
 
   if (loopPosition < IDLE_CHEERFUL_MS + IDLE_TIME_FACE_MS) {
+    uint32_t featurePosition = loopPosition - IDLE_CHEERFUL_MS;
+    if (featurePosition < IDLE_TIME_FACE_MS / 2) {
+      WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
+      FaceId weatherFace = faceForWeather(theme);
+      return weatherFace != FaceId::Neutral ? weatherFace : FaceId::CloudyIdle;
+    }
     FaceId timeFace = faceForTime(localHour(now));
     return timeFace != FaceId::Neutral ? timeFace : FaceId::CheerfulIdle;
   }
 
-  WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
-  FaceId weatherFace = faceForWeather(theme);
-  return weatherFace != FaceId::Neutral ? weatherFace : FaceId::CloudyIdle;
+  return FaceId::TimeWeatherInfo;
 }
 
 WeatherTheme WeatherService::themeFromWeatherCode(int code, float temperatureC, float windKmh) const {

@@ -69,6 +69,7 @@ enum class FaceId : uint8_t {
   Lonely,
   LowBattery,
   Error,
+  TimeWeatherInfo,
 };
 
 enum class WeatherTheme : uint8_t {
