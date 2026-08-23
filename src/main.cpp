@@ -236,12 +236,13 @@ static void updateHomePanel(uint32_t now) {
   }
 
   uint32_t loopPosition = now % IDLE_LOOP_MS;
-  if (loopPosition < IDLE_CHEERFUL_MS) {
+  uint32_t activeStart = IDLE_LOOP_MS - ACTIVE_STATUS_FACE_MS;
+  if (loopPosition < activeStart) {
     return;
   }
 
   if (pomodoroActive && hydrationActive) {
-    uint32_t activePosition = loopPosition - IDLE_CHEERFUL_MS;
+    uint32_t activePosition = loopPosition - activeStart;
     app.homePanel = activePosition < (ACTIVE_STATUS_FACE_MS / 2) ? HomePanel::Pomodoro : HomePanel::Hydration;
   } else if (pomodoroActive) {
     app.homePanel = HomePanel::Pomodoro;
