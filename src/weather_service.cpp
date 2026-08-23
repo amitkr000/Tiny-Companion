@@ -35,10 +35,13 @@ void WeatherService::loadSettings() {
   context_->weatherCode = preferences_->getInt("wCode", -1);
   context_->isDay = preferences_->getBool("isDay", true);
   context_->hasData = preferences_->getBool("hasWeather", false);
-  context_->lastSyncAt = preferences_->getULong("timeSyncMs", preferences_->getULong("wSyncMs", 0));
+  context_->lastSyncAt = 0;
   context_->lastWeatherSyncAt = preferences_->getULong("weatherMs", context_->hasData ? preferences_->getULong("wSyncMs", 0) : 0);
   context_->lastWeatherChangeAt = 0;
   context_->epochAtSync = preferences_->getULong("epochSync", 0);
+  if (context_->epochAtSync != 0) {
+    context_->lastSyncAt = millis();
+  }
 }
 
 void WeatherService::saveSettings() {

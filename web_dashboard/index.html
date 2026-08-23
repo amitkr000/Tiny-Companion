@@ -20,10 +20,12 @@
         <div class="input-row">
           <label for="deviceAddress">Device address</label>
           <input id="deviceAddress" placeholder="192.168.1.45 or tinycompanion.local">
+          <label for="accessToken">Access token</label>
+          <input id="accessToken" placeholder="Shown on ESP32 dashboard">
           <button id="connectBtn">Connect</button>
           <button id="scanBtn" class="secondary">Scan</button>
         </div>
-        <p class="hint" id="connectHint">Try the IP shown on the OLED. Browser local-network permission may be required.</p>
+        <p class="hint" id="connectHint">Try the IP shown on the OLED. Open the ESP32 local dashboard once to copy its access token.</p>
       </section>
 
       <nav class="tabs" aria-label="Dashboard sections">

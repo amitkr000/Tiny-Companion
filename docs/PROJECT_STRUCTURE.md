@@ -60,7 +60,7 @@ The face renderer selects the final face using priority:
 
 In Face mode, `renderDisplay()` hides the status bar and draws only the selected face plus visual effects. Reaction faces still win first, so touch actions replace the idle face immediately.
 
-The hosted GitHub Pages dashboard talks to the ESP32 through JSON API routes. Settings are saved to ESP32 Preferences/NVS.
+The hosted GitHub Pages dashboard talks to the ESP32 through JSON API routes. State-changing routes require the saved dashboard token, and settings are saved to ESP32 Preferences/NVS.
 
 ## Where To Add Things
 

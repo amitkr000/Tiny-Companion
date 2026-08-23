@@ -1,4 +1,5 @@
 const STORAGE_KEY = "tinyCompanionDevice";
+const TOKEN_STORAGE_KEY = "tinyCompanionToken";
 const COMMON_BASES = ["192.168.0.", "192.168.1.", "192.168.29.", "192.168.31.", "10.0.0."];
 const FACES = [
   "neutral", "cheerful", "greeting", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
@@ -44,7 +45,16 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 1400) {
 
 async function api(path, options = {}) {
   if (!deviceBase) throw new Error("No device connected");
-  const response = await fetchWithTimeout(`${deviceBase}${path}`, options, options.timeoutMs || 2500);
+  const token = $("#accessToken")?.value.trim() || localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+  const headers = {
+    ...(token ? { "X-Tiny-Token": token } : {}),
+    ...(options.headers || {}),
+  };
+  const response = await fetchWithTimeout(`${deviceBase}${path}`, {
+    ...options,
+    headers,
+  }, options.timeoutMs || 2500);
+  if (response.status === 401) throw new Error("Access token required or incorrect");
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
@@ -106,9 +116,16 @@ async function connect(address) {
   deviceBase = base;
   const discovery = await api("/api/discover", { timeoutMs: 2200 });
   localStorage.setItem(STORAGE_KEY, deviceBase.replace("http://", ""));
+  const token = $("#accessToken").value.trim();
+  if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
   $("#deviceAddress").value = deviceBase.replace("http://", "");
   $("#connectHint").textContent = `Connected to ${discovery.device || "Tiny Companion"}.`;
-  await Promise.all([loadState(), loadSettings()]);
+  await loadState();
+  try {
+    await loadSettings();
+  } catch (err) {
+    $("#connectHint").textContent = `${err.message}. Copy the token from http://${deviceBase.replace("http://", "")}/ and reconnect.`;
+  }
   startPolling();
 }
 
@@ -313,9 +330,11 @@ function boot() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     $("#deviceAddress").value = saved;
+    $("#accessToken").value = localStorage.getItem(TOKEN_STORAGE_KEY) || "";
     connect(saved).catch(() => setStatus(false, "Saved device not reachable"));
   } else {
     $("#deviceAddress").value = "tinycompanion.local";
+    $("#accessToken").value = localStorage.getItem(TOKEN_STORAGE_KEY) || "";
   }
 }
 

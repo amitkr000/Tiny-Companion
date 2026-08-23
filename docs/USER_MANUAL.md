@@ -37,7 +37,7 @@ Setup page: http://192.168.4.1
 
 Connect your phone or computer to that network, open `http://192.168.4.1`, choose your home Wi-Fi, enter the password, and save.
 
-After connection, the OLED shows online status. Open the hosted dashboard and enter the ESP32 IP address:
+After connection, the OLED shows online status. Open the ESP32 local dashboard at the IP shown on the OLED and copy the access token. Then open the hosted dashboard and enter the ESP32 IP address plus that token:
 
 ```text
 https://amitkr000.github.io/Tiny-Companion/
@@ -121,6 +121,7 @@ Manual weather and season overrides are available in the dashboard.
 The dashboard lets you:
 
 - Connect to the ESP32 by saved IP, manual IP, `tinycompanion.local`, or best-effort local scan.
+- Use the access token from the ESP32 local dashboard for actions and settings changes.
 - Preview faces.
 - Trigger poke/feed/play/pet/love/sleep/wake.
 - Test mode cycling with Face, Pomodoro, and Cycle Mode buttons.
@@ -134,7 +135,7 @@ The dashboard lets you:
 - View JSON status at `/api/state`.
 - Forget Wi-Fi and return to setup.
 
-If your browser blocks local-network access from the hosted page, open `http://ESP32_IP/api/state` once directly or use another browser/device on the same Wi-Fi.
+If actions or settings show an access-token error, open `http://ESP32_IP/`, copy the token from the Companion card, and paste it into the hosted dashboard. If your browser blocks local-network access from the hosted page, open `http://ESP32_IP/api/state` once directly or use another browser/device on the same Wi-Fi.
 
 ## Common Faces
 

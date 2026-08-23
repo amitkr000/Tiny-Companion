@@ -22,6 +22,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Wi-Fi setup portal at `TinyBotSetup`.
 - GitHub Pages hosted dashboard after Wi-Fi connection.
 - ESP32 fallback page plus local JSON API.
+- Per-device dashboard access token for state-changing API routes.
 - Open-Meteo weather sync using latitude, longitude, and timezone.
 - NTP time sync with last-known-time fallback.
 - Local moon phase calculation.
@@ -73,9 +74,9 @@ Face mode uses the cheerful animated idle face as the home expression whenever n
 
 ## Dashboard/API Summary
 
-The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, website-only Pomodoro controls, reminder settings, weather settings, user name, display settings, and touch timing.
+The hosted dashboard supports device discovery, face previews, touch-like actions, mode testing, website-only Pomodoro controls, reminder settings, weather settings, user name, display settings, and touch timing. Actions, face previews, settings writes, and Wi-Fi reset require the per-device access token shown on the ESP32 local dashboard.
 
-The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard.
+The ESP32 API exposes `/api/state`, `/api/discover`, `/api/action`, `/api/face`, and `/api/settings` with CORS headers for the hosted dashboard. Settings reads/writes and all state-changing routes require `X-Tiny-Token` or a matching `token` form/query parameter.
 
 ## Current Limitations
 

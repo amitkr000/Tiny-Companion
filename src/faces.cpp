@@ -17,6 +17,18 @@ static void drawCentered(Adafruit_SSD1306 &display, const String &text, int16_t 
   display.print(text);
 }
 
+static void drawCenteredText(Adafruit_SSD1306 &display, const char *text, int16_t y, uint8_t size = 1) {
+  display.setTextSize(size);
+  display.setTextColor(SSD1306_WHITE);
+  int16_t x1;
+  int16_t y1;
+  uint16_t w;
+  uint16_t h;
+  display.getTextBounds(text, 0, y, &x1, &y1, &w, &h);
+  display.setCursor((OLED_WIDTH - w) / 2, y);
+  display.print(text);
+}
+
 static void drawWrappedText(Adafruit_SSD1306 &display, String text, int16_t x, int16_t y, uint8_t maxCharsPerLine, uint8_t maxLines) {
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
@@ -142,7 +154,9 @@ static void drawGreeting(Adafruit_SSD1306 &display, const String &userName) {
   display.drawLine(72, 47 + bob, 80, 42 + bob, SSD1306_WHITE);
   drawTinyHeart(display, 15, 17 + (frame % 5));
   drawTinyHeart(display, 109, 21 + ((frame + 2) % 5));
-  drawCentered(display, "Hi " + shortText(userName, 12), 55);
+  char greeting[20];
+  snprintf(greeting, sizeof(greeting), "Hi %.12s", userName.c_str());
+  drawCenteredText(display, greeting, 55);
 }
 
 static void drawSun(Adafruit_SSD1306 &display, int x, int y) {

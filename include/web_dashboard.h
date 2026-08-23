@@ -45,6 +45,10 @@ class WebDashboard {
   void addCorsHeaders();
   void sendJson(int code, const String &json);
   void sendJsonError(int code, const String &message);
+  bool hasValidToken() const;
+  bool requireToken();
+  String tokenField() const;
+  String tokenQuery() const;
   bool applyAction(const String &action);
   bool applyFacePreview(const String &id);
   bool applySettingsFromRequest();

@@ -7,6 +7,7 @@
 #include <ESPmDNS.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <esp_system.h>
 
 #include "companion_state.h"
 #include "faces.h"
@@ -43,6 +44,29 @@ uint32_t connectingStartedAt = 0;
 uint32_t pokeWindowStartedAt = 0;
 uint8_t pokeCount = 0;
 
+static String generateDashboardToken() {
+  char token[9];
+  uint32_t value = esp_random();
+  snprintf(token, sizeof(token), "%08lX", static_cast<unsigned long>(value));
+  return String(token);
+}
+
+static String cleanStoredUserName(String value) {
+  value.trim();
+  String cleaned;
+  cleaned.reserve(16);
+  for (size_t i = 0; i < value.length() && cleaned.length() < 16; i++) {
+    char c = value[i];
+    bool alpha = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    bool digit = c >= '0' && c <= '9';
+    if (alpha || digit || c == ' ' || c == '-' || c == '_') {
+      cleaned += c;
+    }
+  }
+  cleaned.trim();
+  return cleaned.length() > 0 ? cleaned : String(DEFAULT_USER_NAME);
+}
+
 static void toneOnce(int frequency, int durationMs) {
   if (!runtimeSoundEnabled || BUZZER_PIN < 0) {
     return;
@@ -66,6 +90,7 @@ static void saveCompanionState() {
 
 static void saveRuntimeSettings() {
   preferences.putString("userName", app.userName);
+  preferences.putString("apiToken", app.dashboardToken);
   preferences.putUChar("bright", app.displaySettings.brightness);
   preferences.putBool("invert", app.displaySettings.inverted);
   preferences.putBool("idleAnim", app.displaySettings.idleAnimationEnabled);
@@ -88,9 +113,12 @@ static void loadRuntimeSettings() {
   app.stats.happiness = constrain(preferences.getUChar("happy", 78), 0, 100);
   app.stats.energy = constrain(preferences.getUChar("energy", 66), 0, 100);
   app.lastAction = preferences.isKey("lastAction") ? preferences.getString("lastAction", "Ready") : "Ready";
-  app.userName = preferences.isKey("userName") ? preferences.getString("userName", DEFAULT_USER_NAME) : DEFAULT_USER_NAME;
-  app.userName.trim();
-  if (app.userName.length() == 0) app.userName = DEFAULT_USER_NAME;
+  app.userName = cleanStoredUserName(preferences.isKey("userName") ? preferences.getString("userName", DEFAULT_USER_NAME) : DEFAULT_USER_NAME);
+  app.dashboardToken = preferences.isKey("apiToken") ? preferences.getString("apiToken", "") : "";
+  if (app.dashboardToken.length() < 8) {
+    app.dashboardToken = generateDashboardToken();
+    preferences.putString("apiToken", app.dashboardToken);
+  }
   app.sleepRequested = preferences.getBool("sleep", false);
   app.lastGreetingDay = preferences.getULong("greetDay", 0);
 
@@ -356,9 +384,7 @@ static void autoReturnToFaceMode(uint32_t now) {
 static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
   if (gesture == TouchGesture::None) return;
 
-  if (triggerDailyTouchGreeting(now)) {
-    return;
-  }
+  bool greetedToday = triggerDailyTouchGreeting(now);
 
   if (gesture == TouchGesture::SingleTap) {
     if (now - pokeWindowStartedAt > POKE_WINDOW_MS) {
@@ -368,13 +394,13 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
     pokeCount++;
     if (pokeCount >= app.touchSettings.angryPokeCount) {
       app.stats.happiness = clampStat(app.stats.happiness - 10);
-      triggerReaction(app, FaceId::Angry, "Too many pokes", now, 5000);
+      if (!greetedToday) triggerReaction(app, FaceId::Angry, "Too many pokes", now, 5000);
     } else if (pokeCount >= app.touchSettings.annoyedPokeCount) {
       app.stats.happiness = clampStat(app.stats.happiness - 4);
-      triggerReaction(app, FaceId::Annoyed, "Annoyed", now, 4200);
+      if (!greetedToday) triggerReaction(app, FaceId::Annoyed, "Annoyed", now, 4200);
     } else {
       app.stats.happiness = clampStat(app.stats.happiness + 2);
-      triggerReaction(app, FaceId::Poke, "Poked", now);
+      if (!greetedToday) triggerReaction(app, FaceId::Poke, "Poked", now);
     }
     toneOnce(988, 35);
   } else if (gesture == TouchGesture::DoubleTap) {
@@ -382,19 +408,19 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
     app.stats.fullness = clampStat(app.stats.fullness + 24);
     app.stats.happiness = clampStat(app.stats.happiness + 6);
     app.stats.energy = clampStat(app.stats.energy + 3);
-    triggerReaction(app, app.stats.fullness > 92 ? FaceId::Full : FaceId::Feed, "Fed", now);
+    if (!greetedToday) triggerReaction(app, app.stats.fullness > 92 ? FaceId::Full : FaceId::Feed, "Fed", now);
     toneOnce(1175, 40);
   } else if (gesture == TouchGesture::TripleTap) {
     pokeCount = 0;
     app.stats.happiness = clampStat(app.stats.happiness + 15);
     app.stats.energy = clampStat(app.stats.energy + 4);
-    triggerReaction(app, FaceId::Love, "Loved", now);
+    if (!greetedToday) triggerReaction(app, FaceId::Love, "Loved", now);
     toneOnce(1319, 45);
   } else if (gesture == TouchGesture::LongPress) {
     pokeCount = 0;
     app.stats.happiness = clampStat(app.stats.happiness + 18);
     app.stats.energy = clampStat(app.stats.energy + 4);
-    triggerReaction(app, FaceId::Love, "Petted", now, PETTING_FACE_MS);
+    if (!greetedToday) triggerReaction(app, FaceId::Love, "Petted", now, PETTING_FACE_MS);
     toneOnce(1568, 50);
   }
 

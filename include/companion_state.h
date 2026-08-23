@@ -173,6 +173,7 @@ struct AppState {
   String currentMessage = "Starting";
   String lastAction = "Ready";
   String userName = DEFAULT_USER_NAME;
+  String dashboardToken;
   CompanionStats stats;
   WeatherContext weather;
   PomodoroSettings pomodoroSettings;

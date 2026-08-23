@@ -42,13 +42,18 @@ static String jsonEscape(const String &value) {
 
 static String cleanUserName(String value) {
   value.trim();
-  if (value.length() == 0) {
-    return DEFAULT_USER_NAME;
+  String cleaned;
+  cleaned.reserve(16);
+  for (size_t i = 0; i < value.length() && cleaned.length() < 16; i++) {
+    char c = value[i];
+    bool alpha = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    bool digit = c >= '0' && c <= '9';
+    if (alpha || digit || c == ' ' || c == '-' || c == '_') {
+      cleaned += c;
+    }
   }
-  if (value.length() > 16) {
-    value = value.substring(0, 16);
-  }
-  return value;
+  cleaned.trim();
+  return cleaned.length() > 0 ? cleaned : String(DEFAULT_USER_NAME);
 }
 
 static CompanionMode nextDashboardMode(CompanionMode mode) {
@@ -77,7 +82,7 @@ static void setDashboardMode(AppState &state, PomodoroTimer &pomodoro, Companion
 }
 
 void WebDashboard::addCorsHeaders() {
-  server_->sendHeader(F("Access-Control-Allow-Origin"), F("*"));
+  server_->sendHeader(F("Access-Control-Allow-Origin"), F("https://amitkr000.github.io"));
   server_->sendHeader(F("Access-Control-Allow-Methods"), F("GET, POST, OPTIONS"));
   server_->sendHeader(F("Access-Control-Allow-Headers"), F("Content-Type"));
   server_->sendHeader(F("Access-Control-Allow-Private-Network"), F("true"));
@@ -122,6 +127,8 @@ void WebDashboard::setCallbacks(DashboardCallback saveState, DashboardCallback s
 
 void WebDashboard::registerRoutes() {
   Serial.println("[web] registering routes");
+  static const char *headerKeys[] = {"X-Tiny-Token"};
+  server_->collectHeaders(headerKeys, 1);
   server_->on("/", HTTP_GET, [this]() { sendHomePage(); });
   server_->on("/test", HTTP_GET, [this]() { sendPlainOk(); });
   server_->on("/setup", HTTP_GET, [this]() { sendSetupPage(); });
@@ -142,7 +149,10 @@ void WebDashboard::registerRoutes() {
   server_->on("/api/state", HTTP_OPTIONS, [this]() { handleOptions(); });
   server_->on("/api/discover", HTTP_GET, [this]() { sendDiscoverJson(); });
   server_->on("/api/discover", HTTP_OPTIONS, [this]() { handleOptions(); });
-  server_->on("/api/settings", HTTP_GET, [this]() { sendSettingsJson(); });
+  server_->on("/api/settings", HTTP_GET, [this]() {
+    if (!requireToken()) return;
+    sendSettingsJson();
+  });
   server_->on("/api/settings", HTTP_POST, [this]() { handleApiSettings(); });
   server_->on("/api/settings", HTTP_OPTIONS, [this]() { handleOptions(); });
   server_->on("/api/action", HTTP_POST, [this]() { handleApiAction(); });
@@ -225,6 +235,43 @@ String WebDashboard::checkboxInput(const String &name, bool checked) {
   if (checked) input += F(" checked");
   input += F(">");
   return input;
+}
+
+bool WebDashboard::hasValidToken() const {
+  if (!state_ || state_->dashboardToken.length() == 0) {
+    return false;
+  }
+  if (server_->hasHeader("X-Tiny-Token") && server_->header("X-Tiny-Token") == state_->dashboardToken) {
+    return true;
+  }
+  if (server_->hasArg("token") && server_->arg("token") == state_->dashboardToken) {
+    return true;
+  }
+  return false;
+}
+
+bool WebDashboard::requireToken() {
+  if (hasValidToken()) {
+    return true;
+  }
+  addCorsHeaders();
+  server_->send(401, F("text/plain"), F("Unauthorized"));
+  return false;
+}
+
+String WebDashboard::tokenField() const {
+  String field;
+  field.reserve(72);
+  field += F("<input type=\"hidden\" name=\"token\" value=\"");
+  field += state_ ? htmlEscape(state_->dashboardToken) : String("");
+  field += F("\">");
+  return field;
+}
+
+String WebDashboard::tokenQuery() const {
+  String query = F("?token=");
+  query += state_ ? htmlEscape(state_->dashboardToken) : String("");
+  return query;
 }
 
 void WebDashboard::redirectHome() {
@@ -311,6 +358,9 @@ void WebDashboard::sendDashboardPage() {
   body += F("<div class=\"card\"><h2>Companion</h2>");
   body += F("<p class=\"muted\">Hello, ");
   body += htmlEscape(state_->userName);
+  body += F("<br>Access token: <strong>");
+  body += htmlEscape(state_->dashboardToken);
+  body += F("</strong>");
   body += F("</p>");
   body += metricBlock(F("Fullness"), state_->stats.fullness);
   body += metricBlock(F("Happiness"), state_->stats.happiness);
@@ -338,7 +388,9 @@ void WebDashboard::sendDashboardPage() {
   for (const auto &action : actions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
-    body += F("\"><button type=\"submit\">");
+    body += F("\">");
+    body += tokenField();
+    body += F("<button type=\"submit\">");
     body += action[1];
     body += F("</button></form>");
   }
@@ -346,7 +398,9 @@ void WebDashboard::sendDashboardPage() {
   for (const auto &action : pomoActions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
-    body += F("\"><button type=\"submit\">");
+    body += F("\">");
+    body += tokenField();
+    body += F("<button type=\"submit\">");
     body += action[1];
     body += F("</button></form>");
   }
@@ -364,12 +418,15 @@ void WebDashboard::sendDashboardPage() {
   body += FACE_TOUCH_PIN;
   body += F(", action touch GPIO ");
   body += ACTION_TOUCH_PIN;
-  body += F(".</p><div class=\"row\"><a class=\"button danger\" href=\"/reset\">Forget Wi-Fi</a><a class=\"button ghost\" href=\"/status\">Simple status</a></div></section>");
+  body += F(".</p><div class=\"row\"><a class=\"button danger\" href=\"/reset");
+  body += tokenQuery();
+  body += F("\">Forget Wi-Fi</a><a class=\"button ghost\" href=\"/status\">Simple status</a></div></section>");
 
   server_->send(200, F("text/html"), pageShell(F("Tiny Companion Dashboard"), body));
 }
 
 void WebDashboard::handleAction() {
+  if (!requireToken()) return;
   String action = server_->hasArg("action") ? server_->arg("action") : server_->arg("name");
   action.trim();
   if (!applyAction(action)) {
@@ -452,6 +509,7 @@ bool WebDashboard::applyAction(const String &action) {
 }
 
 void WebDashboard::handleFacePreview() {
+  if (!requireToken()) return;
   String id = server_->arg("face");
   if (!applyFacePreview(id)) {
     server_->send(400, F("text/plain"), F("Unknown face"));
@@ -461,13 +519,17 @@ void WebDashboard::handleFacePreview() {
 }
 
 bool WebDashboard::applyFacePreview(const String &id) {
-  FaceId face = faceFromId(id, state_->currentFace);
+  FaceId face = faceFromId(id, FaceId::Neutral);
+  if (id.length() == 0 || id != faceId(face)) {
+    return false;
+  }
   triggerReaction(*state_, face, String("Preview: ") + faceName(face), millis(), 7000);
   if (saveState_) saveState_();
   return true;
 }
 
 void WebDashboard::handleSettings() {
+  if (!requireToken()) return;
   applySettingsFromRequest();
   redirectHome();
 }
@@ -575,6 +637,7 @@ bool WebDashboard::applySettingsFromJson() {
 }
 
 void WebDashboard::handleApiAction() {
+  if (!requireToken()) return;
   DynamicJsonDocument doc(256);
   String body = server_->arg("plain");
   String action;
@@ -593,6 +656,7 @@ void WebDashboard::handleApiAction() {
 }
 
 void WebDashboard::handleApiFace() {
+  if (!requireToken()) return;
   DynamicJsonDocument doc(256);
   String body = server_->arg("plain");
   String face;
@@ -611,6 +675,7 @@ void WebDashboard::handleApiFace() {
 }
 
 void WebDashboard::handleApiSettings() {
+  if (!requireToken()) return;
   if (!applySettingsFromJson()) {
     sendJsonError(400, "Invalid settings JSON");
     return;
@@ -636,6 +701,7 @@ void WebDashboard::handleWifiSave() {
 }
 
 void WebDashboard::handleForgetWifi() {
+  if (!requireToken()) return;
   server_->send(200, F("text/html"), pageShell(F("Wi-Fi Removed"), F("<h1>Saved Wi-Fi Removed</h1><p>The setup network will be available again after restart.</p>")));
   if (forgetWifi_) forgetWifi_();
 }
@@ -655,7 +721,7 @@ void WebDashboard::sendDiscoverJson() {
   json += deviceModeName(state_->deviceMode);
   json += F("\",\"setupSsid\":\"");
   json += SETUP_AP_SSID;
-  json += F("\",\"endpoints\":[\"/api/state\",\"/api/action\",\"/api/face\",\"/api/settings\",\"/api/discover\"]}");
+  json += F("\",\"authRequired\":true,\"endpoints\":[\"/api/state\",\"/api/action\",\"/api/face\",\"/api/settings\",\"/api/discover\"]}");
   sendJson(200, json);
 }
 
@@ -716,8 +782,6 @@ void WebDashboard::sendStateJson() {
   json.reserve(1800);
   json += F("{\"device\":\"");
   json += jsonEscape(DEVICE_NAME);
-  json += F("\",\"userName\":\"");
-  json += jsonEscape(state_->userName);
   json += F("\",\"mode\":\"");
   json += deviceModeName(state_->deviceMode);
   json += F("\",\"companionMode\":\"");
