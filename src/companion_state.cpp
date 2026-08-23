@@ -181,6 +181,7 @@ const char *companionModeName(CompanionMode mode) {
     case CompanionMode::Pomodoro: return "Pomodoro";
     case CompanionMode::Reminders: return "Reminders";
     case CompanionMode::Status: return "Status";
+    case CompanionMode::Settings: return "Setting";
     case CompanionMode::Idle:
     default: return "Face";
   }

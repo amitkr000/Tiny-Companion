@@ -337,7 +337,8 @@ static CompanionMode nextCompanionMode(CompanionMode mode) {
     case CompanionMode::Pomodoro: return CompanionMode::Clock;
     case CompanionMode::Clock: return CompanionMode::Reminders;
     case CompanionMode::Reminders: return CompanionMode::Status;
-    case CompanionMode::Status:
+    case CompanionMode::Status: return CompanionMode::Settings;
+    case CompanionMode::Settings:
     default: return CompanionMode::Idle;
   }
 }

@@ -204,19 +204,19 @@ SeasonTheme WeatherService::resolvedSeason(uint32_t now) const {
 FaceId WeatherService::idleFaceFor(uint32_t now) const {
   if (!context_) return FaceId::CheerfulIdle;
 
-  int hour = localHour(now);
-  uint32_t glanceWindow = now % IDLE_GLANCE_INTERVAL_MS;
-  if (glanceWindow < IDLE_GLANCE_FACE_MS) {
-    uint32_t glanceIndex = now / IDLE_GLANCE_INTERVAL_MS;
-    if (glanceIndex % 2 == 0) {
-      FaceId timeFace = faceForTime(hour);
-      return timeFace != FaceId::Neutral ? timeFace : FaceId::CheerfulIdle;
-    }
-    FaceId seasonFace = faceForSeason(resolvedSeason(now));
-    return seasonFace != FaceId::Neutral ? seasonFace : FaceId::CheerfulIdle;
+  uint32_t loopPosition = now % IDLE_LOOP_MS;
+  if (loopPosition < IDLE_CHEERFUL_MS) {
+    return FaceId::CheerfulIdle;
   }
 
-  return FaceId::CheerfulIdle;
+  if (loopPosition < IDLE_CHEERFUL_MS + IDLE_TIME_FACE_MS) {
+    FaceId timeFace = faceForTime(localHour(now));
+    return timeFace != FaceId::Neutral ? timeFace : FaceId::CheerfulIdle;
+  }
+
+  WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
+  FaceId weatherFace = faceForWeather(theme);
+  return weatherFace != FaceId::Neutral ? weatherFace : FaceId::CloudyIdle;
 }
 
 WeatherTheme WeatherService::themeFromWeatherCode(int code, float temperatureC, float windKmh) const {

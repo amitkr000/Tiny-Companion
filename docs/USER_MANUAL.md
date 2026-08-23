@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Tiny Companion is a small desk pet with expressive animated OLED faces. It reacts to touch, greets you by name, usually shows a cheerful animated idle face, briefly shows time/season faces between cheerful stretches, runs a Pomodoro timer, and reminds you to drink water or stretch.
+Tiny Companion is a small desk pet with expressive animated OLED faces. It reacts to touch, greets you by name, runs a one-minute cheerful/time/weather idle loop, runs a Pomodoro timer, and reminds you to drink water or stretch.
 
 In Face mode, the OLED shows only the face and its visual effects. Labels, status icons, and extra text are hidden so touch reactions like poke/feed/love can take over cleanly.
 
@@ -66,7 +66,7 @@ Action touch sensor:
 | Gesture | Normal Mode |
 | --- | --- |
 | Single/double/triple tap | Reserved for the current mode or future modes |
-| Long press | Cycle modes: Face, Pomodoro, Clock, Reminders, Status |
+| Long press | Cycle modes: Face, Pomodoro, Clock, Reminders, Status, Setting |
 
 In Pomodoro mode:
 
@@ -100,12 +100,13 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 Weather faces use Open-Meteo after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard.
 
-Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. Most of the time it shows a cheerful animated idle face. For a short moment between cheerful stretches, it shows the current time-of-day or season face:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. It loops every minute: 40 seconds cheerful robot idle face, 10 seconds current time-of-day face, then 10 seconds current weather face:
 
 - Morning: waking up / nap energy.
 - Afternoon: sleepy and lower energy.
 - Evening: tea-time mood.
 - Night: sleeping with zzz.
+- Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, or cold.
 
 Weather faces are available as preview/override faces in the dashboard:
 
@@ -124,7 +125,7 @@ The dashboard lets you:
 - Use the access token from the ESP32 local dashboard for actions and settings changes.
 - Preview faces.
 - Trigger poke/feed/play/pet/love/sleep/wake.
-- Test mode cycling with Face, Pomodoro, and Cycle Mode buttons.
+- Test mode cycling with Face, Pomodoro, Setting, and Cycle Mode buttons.
 - Start, pause, and reset Pomodoro.
 - Configure reminders.
 - Configure weather location and timezone.
@@ -154,6 +155,10 @@ If actions or settings show an access-token error, open `http://ESP32_IP/`, copy
 | Pomodoro | Pomodoro timer |
 | Break | Stretch reminder |
 | Hydration | Drink water reminder |
+
+## Setting Mode
+
+Long-press the Action touch sensor until Setting mode appears. It shows the ESP32 IP address and access token for connecting the hosted web dashboard. If left alone, it returns to Face mode after the normal preview timeout.
 
 ## Charging And Power
 

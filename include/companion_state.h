@@ -18,6 +18,7 @@ enum class CompanionMode : uint8_t {
   Pomodoro,
   Reminders,
   Status,
+  Settings,
 };
 
 enum class FaceId : uint8_t {

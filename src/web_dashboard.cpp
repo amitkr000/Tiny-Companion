@@ -62,7 +62,8 @@ static CompanionMode nextDashboardMode(CompanionMode mode) {
     case CompanionMode::Pomodoro: return CompanionMode::Clock;
     case CompanionMode::Clock: return CompanionMode::Reminders;
     case CompanionMode::Reminders: return CompanionMode::Status;
-    case CompanionMode::Status:
+    case CompanionMode::Status: return CompanionMode::Settings;
+    case CompanionMode::Settings:
     default: return CompanionMode::Idle;
   }
 }
@@ -384,7 +385,7 @@ void WebDashboard::sendDashboardPage() {
   body += F("</section>");
 
   body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Fallback Actions</h2><div class=\"row actions\">");
-  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"pet", "Pet"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}};
+  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"pet", "Pet"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}, {"modeSettings", "Setting mode"}};
   for (const auto &action : actions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -500,6 +501,8 @@ bool WebDashboard::applyAction(const String &action) {
     setDashboardMode(*state_, *pomodoro_, CompanionMode::Idle, now);
   } else if (action == "modePomodoro") {
     setDashboardMode(*state_, *pomodoro_, CompanionMode::Pomodoro, now);
+  } else if (action == "modeSettings") {
+    setDashboardMode(*state_, *pomodoro_, CompanionMode::Settings, now);
   } else {
     return false;
   }

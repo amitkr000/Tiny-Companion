@@ -46,7 +46,7 @@ Mode faces appear while a mode is active: Pomodoro timer, reminders, stretch bre
 
 Reaction faces appear briefly after touch or dashboard actions: greeting, poke, feed, full, love/petting, angry, annoyed, proud, sleep, and wake. These reactions immediately replace the idle face.
 
-Face mode uses the cheerful animated idle face as the home expression whenever nothing urgent is happening. Short time and season faces appear between cheerful stretches, then the display returns to the cheerful face automatically:
+Face mode uses a repeating 60-second idle loop whenever nothing urgent is happening: 40 seconds of the cheerful robot idle face, 10 seconds of the current time-of-day face, then 10 seconds of the current weather face:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
 - Time: morning waking/nap energy, afternoon low energy, evening tea, night sleep/zzz.
@@ -64,13 +64,13 @@ Face mode uses the cheerful animated idle face as the home expression whenever n
 | Face touch | Long press | Pet/rub affection with animated love face |
 | Face touch | Repeated taps | Annoyed, then angry |
 | Face touch | First touch of a new local day | Greets the saved user name |
-| Face mode | No recent touch | Shows the cheerful animated face, with short time/season glances |
+| Face mode | No recent touch | Loops 40s cheerful face, 10s time face, 10s weather face |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single/double/triple tap | Reserved for current/future mode actions |
-| Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, and Status modes |
+| Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, Status, and Setting modes |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |
 | Website | Pomodoro controls | Start, pause, and reset |
-| Website | Mode test controls | Cycle mode, Face mode, and Pomodoro mode |
+| Website | Mode test controls | Cycle mode, Face mode, Pomodoro mode, and Setting mode |
 
 ## Dashboard/API Summary
 

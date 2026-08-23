@@ -275,6 +275,17 @@ static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
   display.fillRect(89, 42, 16, 4, SSD1306_WHITE);
 }
 
+static void drawSettingInfo(Adafruit_SSD1306 &display, const AppState &state, const IPAddress &ip) {
+  drawCentered(display, "Web Setting", 13);
+  if (ip == IPAddress()) {
+    drawCentered(display, "IP not ready", 28);
+  } else {
+    drawCentered(display, String("IP ") + ip.toString(), 28);
+  }
+  drawCentered(display, "Token", 43);
+  drawCentered(display, state.dashboardToken.length() ? state.dashboardToken : String("missing"), 54);
+}
+
 static void drawAmbientMotion(Adafruit_SSD1306 &display, FaceId face) {
   if (face == FaceId::RainyIdle || face == FaceId::MonsoonIdle || face == FaceId::StormyIdle) {
     return;
@@ -570,7 +581,8 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
     && (state.hasReactionFace || state.companionMode == CompanionMode::Idle)
     && state.companionMode != CompanionMode::Pomodoro
     && state.companionMode != CompanionMode::Status
-    && state.companionMode != CompanionMode::Reminders;
+    && state.companionMode != CompanionMode::Reminders
+    && state.companionMode != CompanionMode::Settings;
   if (!faceOnlyScreen) {
     drawStatusBar(display, state, wifiConnected, rssi);
   }
@@ -602,6 +614,8 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
         drawPomodoro(display, pomodoro);
       } else if (state.companionMode == CompanionMode::Status) {
         drawStats(display, state);
+      } else if (state.companionMode == CompanionMode::Settings) {
+        drawSettingInfo(display, state, ip);
       } else if (state.companionMode == CompanionMode::Reminders) {
         drawCentered(display, "Hydrate in", 14);
         drawCentered(display, String(reminders.minutesUntilHydration(millis())) + " min", 28, 2);
