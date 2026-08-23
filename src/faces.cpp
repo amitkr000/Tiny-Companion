@@ -142,11 +142,53 @@ static void drawTinyHeart(Adafruit_SSD1306 &display, int16_t x, int16_t y) {
 }
 
 static void drawHeartEyes(Adafruit_SSD1306 &display) {
-  uint8_t frame = (millis() / 150) % 18;
-  drawSmilingEyes(display, 15, 18, 18, 49);
-  drawTinyHeart(display, 8, 16 + (frame % 5));
-  drawTinyHeart(display, 116, 20 + ((frame + 2) % 5));
-  drawTinyHeart(display, 10, 45 - (frame % 5));
+  uint8_t frame = (millis() / 120) % 32;
+  uint8_t gaze = (millis() / 520) % 6;
+  int8_t bob = frame < 8 ? -1 : (frame < 16 ? 0 : (frame < 24 ? 1 : 0));
+  bool blink = frame == 26 || frame == 27;
+  int8_t lookX = 0;
+  int8_t lookY = 0;
+
+  switch (gaze) {
+    case 0: lookX = -3; break;
+    case 1: lookX = 3; break;
+    case 2: lookY = -2; break;
+    case 3: lookY = 2; break;
+    case 4: lookX = -2; lookY = 1; break;
+    case 5: lookX = 2; lookY = -1; break;
+  }
+
+  int16_t eyeY = 14 + bob + lookY;
+  int16_t leftX = 20 + lookX;
+  int16_t rightX = 84 + lookX;
+  if (blink) {
+    display.drawFastHLine(20, 30 + bob, 24, SSD1306_WHITE);
+    display.drawFastHLine(22, 31 + bob, 20, SSD1306_WHITE);
+    display.drawFastHLine(84, 30 + bob, 24, SSD1306_WHITE);
+    display.drawFastHLine(86, 31 + bob, 20, SSD1306_WHITE);
+  } else {
+    display.fillRoundRect(leftX, eyeY, 24, 30, 8, SSD1306_WHITE);
+    display.fillRoundRect(rightX, eyeY, 24, 30, 8, SSD1306_WHITE);
+    display.drawPixel(leftX + 8 + (frame % 3), eyeY + 8, SSD1306_BLACK);
+    display.drawPixel(leftX + 16, eyeY + 17 + (frame % 2), SSD1306_BLACK);
+    display.drawPixel(rightX + 8 + ((frame + 1) % 3), eyeY + 8, SSD1306_BLACK);
+    display.drawPixel(rightX + 16, eyeY + 17 + ((frame + 1) % 2), SSD1306_BLACK);
+  }
+
+  drawFriendlySmile(display, 49);
+
+  uint8_t floatA = frame % 7;
+  uint8_t floatB = (frame + 3) % 7;
+  drawTinyHeart(display, 5, 9 + floatA);
+  drawTinyHeart(display, 15, 31 - floatB);
+  drawTinyHeart(display, 8, 52 - floatA);
+  drawTinyHeart(display, 116, 10 + floatB);
+  drawTinyHeart(display, 121, 33 - floatA);
+  drawTinyHeart(display, 112, 53 - floatB);
+  if (frame % 8 < 4) {
+    drawTinyHeart(display, 58, 6);
+    drawTinyHeart(display, 67, 7);
+  }
 }
 
 static void drawCheerfulIdle(Adafruit_SSD1306 &display) {
