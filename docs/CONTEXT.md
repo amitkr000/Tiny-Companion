@@ -31,7 +31,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Companion stats: fullness, happiness, and energy.
 - User name setting for first-boot greetings and first-touch-of-day greetings.
 - Face touch gestures: poke, feed, love/play, and long-press pet/rub affection.
-- Action touch gestures: long-press mode cycling with automatic return to face mode.
+- Action touch gestures: delegated through per-mode handler classes, with long-press mode cycling and automatic return to face mode.
 - Face mode shows only the face and visual effects, without labels, status icons, or extra text.
 - Pomodoro timer with configurable duration.
 - Hydration and stretch reminders.

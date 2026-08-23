@@ -11,6 +11,7 @@
 
 #include "companion_state.h"
 #include "faces.h"
+#include "mode_manager.h"
 #include "pomodoro.h"
 #include "reminders.h"
 #include "touch_input.h"
@@ -27,6 +28,7 @@ WeatherService weather;
 PomodoroTimer pomodoro;
 ReminderService reminders;
 WebDashboard dashboard;
+ModeManager modeManager;
 TouchInput faceTouch(FACE_TOUCH_PIN);
 TouchInput actionTouch(ACTION_TOUCH_PIN);
 
@@ -344,56 +346,6 @@ static void startSetupPortal(bool showSetupScreen) {
   toneOnce(988, 45);
 }
 
-static CompanionMode nextCompanionMode(CompanionMode mode) {
-  switch (mode) {
-    case CompanionMode::Idle: return CompanionMode::Pomodoro;
-    case CompanionMode::Pomodoro: return CompanionMode::Clock;
-    case CompanionMode::Clock: return CompanionMode::Reminders;
-    case CompanionMode::Reminders: return CompanionMode::Status;
-    case CompanionMode::Status: return CompanionMode::Settings;
-    case CompanionMode::Settings:
-    default: return CompanionMode::Idle;
-  }
-}
-
-static void prepareModePreview(CompanionMode mode, uint32_t now) {
-  if (mode == CompanionMode::Pomodoro && !pomodoro.isRunning()) {
-    pomodoro.reset(now);
-  }
-}
-
-static void selectCompanionMode(CompanionMode mode, uint32_t now) {
-  prepareModePreview(mode, now);
-  app.companionMode = mode;
-  app.hasReactionFace = false;
-  app.lastAction = companionModeName(mode);
-  app.lastInteractionAt = now;
-  saveCompanionState();
-}
-
-static bool currentModeIsStarted() {
-  if (app.companionMode == CompanionMode::Pomodoro) {
-    return pomodoro.isRunning();
-  }
-  return false;
-}
-
-static void autoReturnToFaceMode(uint32_t now) {
-  if (app.companionMode == CompanionMode::Idle) {
-    return;
-  }
-  if (currentModeIsStarted()) {
-    app.lastInteractionAt = now;
-    return;
-  }
-  if (app.lastInteractionAt == 0) {
-    app.lastInteractionAt = now;
-    return;
-  }
-  if (now - app.lastInteractionAt >= MODE_PREVIEW_TIMEOUT_MS) {
-    selectCompanionMode(CompanionMode::Idle, now);
-  }
-}
 
 static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
   if (gesture == TouchGesture::None) return;
@@ -442,20 +394,7 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
 }
 
 static void handleActionGesture(TouchGesture gesture, uint32_t now) {
-  if (gesture == TouchGesture::None) return;
-
-  if (gesture == TouchGesture::LongPress) {
-    selectCompanionMode(nextCompanionMode(app.companionMode), now);
-    return;
-  }
-
-  if (app.companionMode == CompanionMode::Pomodoro) {
-    return;
-  }
-
-  app.lastAction = String(companionModeName(app.companionMode)) + " action";
-  app.lastInteractionAt = now;
-  saveCompanionState();
+  modeManager.handleActionGesture(gesture, now);
 }
 
 static bool setupResetGestureHeld() {
@@ -531,6 +470,12 @@ void setup() {
   applyDisplayCallback();
   pomodoro.begin(app.pomodoroSettings);
   reminders.begin(app.reminderSettings, millis());
+  ModeContext modeContext;
+  modeContext.state = &app;
+  modeContext.pomodoro = &pomodoro;
+  modeContext.reminders = &reminders;
+  modeContext.saveState = saveCompanionState;
+  modeManager.begin(modeContext);
 
   Serial.println("[boot] drawing startup screen");
   display.clearDisplay();
@@ -604,7 +549,7 @@ void loop() {
     handleActionGesture(actionTouch.update(now), now);
   }
 
-  autoReturnToFaceMode(now);
+  modeManager.update(now);
   decayStats(now);
   renderNow();
 }

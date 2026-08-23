@@ -9,6 +9,9 @@ include/
   config.h              Hardware pins, defaults, timing constants
   companion_state.h     Shared enums, settings, stats, and app state
   faces.h               OLED face rendering interface
+  companion_mode_handler.h  Base interface for companion modes
+  mode_manager.h        Mode selection, action input dispatch, preview timeout
+  modes/                One class header per companion mode
   touch_input.h         TTP223 gesture detection
   weather_service.h     Weather, NTP, season, and moon context
   pomodoro.h            Pomodoro state machine
@@ -19,6 +22,9 @@ src/
   main.cpp              Setup, loop, Wi-Fi orchestration, service ticks
   companion_state.cpp   String/id lookup tables for faces and themes
   faces.cpp             OLED drawing and face priority
+  companion_mode_handler.cpp  Shared mode interface defaults
+  mode_manager.cpp      Mode registry, cycling, action dispatch, auto-return
+  modes/                One class implementation per companion mode
   touch_input.cpp       Debounced single/double/triple/long press logic
   weather_service.cpp   Open-Meteo, NTP, idle face context
   pomodoro.cpp          Single Pomodoro countdown behavior
@@ -43,11 +49,11 @@ web_dashboard/
 
 `main.cpp` owns the global `AppState` and calls each service from `loop()`.
 
-Touch input produces gestures. Face-touch gestures update stats, greetings, petting, and reaction faces. Action-touch long-press cycles modes; short taps are reserved for the active mode or future mode actions.
+Touch input produces gestures. Face-touch gestures update stats, greetings, petting, and reaction faces. Action-touch gestures are delegated to `ModeManager`, which sends single, double, triple, and long-press input to the active `CompanionModeHandler`.
 
 Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face in the 60-second face-mode loop.
 
-Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive.
+Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive. Pomodoro mode remains website-controlled: its mode handler ignores short action-touch presses and only uses long press for mode cycling.
 
 The face renderer selects the final face using priority:
 
@@ -70,19 +76,19 @@ Add a new OLED face in:
 - `src/companion_state.cpp`: add the face ID, label, and description.
 - `src/faces.cpp`: add drawing behavior in `drawFace()`.
 
-Add a new touch gesture behavior in `src/main.cpp`:
+Add a new touch gesture behavior:
 
-- `handleFaceGesture()` for companion/pet actions.
-- `triggerDailyTouchGreeting()` for the first-touch-of-day greeting.
-- `handleActionGesture()` for mode cycling and mode-specific actions.
-- `autoReturnToFaceMode()` for returning paused/preview modes to idle faces.
+- `src/main.cpp`: `handleFaceGesture()` for companion/pet actions.
+- `src/main.cpp`: `triggerDailyTouchGreeting()` for the first-touch-of-day greeting.
+- A mode handler class in `include/modes/` and `src/modes/`: override `onSinglePress()`, `onDoublePress()`, `onTriplePress()`, or `onLongPress()` for action-touch behavior.
 
 Add a new mode by updating:
 
 - `CompanionMode` in `include/companion_state.h`.
-- `nextCompanionMode()` in `src/main.cpp`.
-- `renderDisplay()` in `src/faces.cpp`.
-- Dashboard controls in `src/web_dashboard.cpp`.
+- Create `include/modes/new_mode.h` and `src/modes/new_mode.cpp` inheriting from `CompanionModeHandler`.
+- Register the handler and cycle order in `include/mode_manager.h` and `src/mode_manager.cpp`.
+- Add display behavior in `renderDisplay()` in `src/faces.cpp`.
+- Add dashboard controls in `src/web_dashboard.cpp` and `web_dashboard/app.js` if the hosted UI should control it.
 
 Add a new setting by updating:
 
