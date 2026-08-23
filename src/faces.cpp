@@ -272,15 +272,18 @@ static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
   display.fillRect(89, 42, 16, 4, SSD1306_WHITE);
 }
 
-static void drawSettingInfo(Adafruit_SSD1306 &display, const AppState &state, const IPAddress &ip) {
-  drawCentered(display, "Web Setting", 13);
-  if (ip == IPAddress()) {
-    drawCentered(display, "IP not ready", 28);
+static void drawSettingInfo(Adafruit_SSD1306 &display, const AppState &state, bool wifiConnected, const String &ssid, const IPAddress &ip) {
+  drawCentered(display, "Setting", 5);
+  if (wifiConnected) {
+    drawCentered(display, "WiFi connected", 18);
+    drawCentered(display, shortText(ssid, 20), 29);
+    drawCentered(display, String("IP ") + ip.toString(), 40);
   } else {
-    drawCentered(display, String("IP ") + ip.toString(), 28);
+    drawCentered(display, "WiFi not connected", 18);
+    drawCentered(display, "Setup AP TinyBotSetup", 31);
+    drawCentered(display, "AP IP 192.168.4.1", 42);
   }
-  drawCentered(display, "Token", 43);
-  drawCentered(display, state.dashboardToken.length() ? state.dashboardToken : String("missing"), 54);
+  drawCentered(display, state.dashboardToken.length() ? state.dashboardToken : String("Token missing"), 54);
 }
 
 static uint32_t displayEpochFromState(const AppState &state) {
@@ -307,10 +310,11 @@ static String localTimeText(const AppState &state) {
 }
 
 static void drawTimeWeatherInfo(Adafruit_SSD1306 &display, const AppState &state) {
+  bool weatherAvailable = state.weather.wifiConnected && state.weather.hasData;
   WeatherTheme theme = state.weather.manualWeather ? state.weather.overrideTheme : state.weather.theme;
-  String weatherText = theme == WeatherTheme::Unknown ? String("Weather --") : String("Weather ") + weatherThemeName(theme);
-  String tempText = state.weather.hasData ? String("Temp ") + String(state.weather.temperatureC, 1) + " C" : String("Temp -- C");
-  String seasonText = String("Season ") + seasonThemeName(state.weather.season);
+  String weatherText = weatherAvailable && theme != WeatherTheme::Unknown ? String("Weather ") + weatherThemeName(theme) : String("Weather unavailable");
+  String tempText = weatherAvailable ? String("Temp ") + String(state.weather.temperatureC, 1) + " C" : String("WiFi not connected");
+  String seasonText = weatherAvailable ? String("Season ") + seasonThemeName(state.weather.season) : String("Connect WiFi for weather");
 
   drawCentered(display, String("Time ") + localTimeText(state), 6, 1);
   drawCentered(display, weatherText, 21, 1);
@@ -648,7 +652,7 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
       } else if (state.companionMode == CompanionMode::Status) {
         drawStats(display, state);
       } else if (state.companionMode == CompanionMode::Settings) {
-        drawSettingInfo(display, state, ip);
+        drawSettingInfo(display, state, wifiConnected, ssid, ip);
       } else if (state.companionMode == CompanionMode::Reminders) {
         drawCentered(display, "Hydrate in", 14);
         drawCentered(display, String(reminders.minutesUntilHydration(millis())) + " min", 28, 2);

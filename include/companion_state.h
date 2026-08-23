@@ -121,6 +121,7 @@ struct CompanionStats {
 struct WeatherContext {
   bool enabled = ENABLE_WEATHER_SYNC;
   bool hasData = false;
+  bool wifiConnected = false;
   bool manualWeather = false;
   bool manualSeason = false;
   float latitude = DEFAULT_LATITUDE;

@@ -303,8 +303,13 @@ void WebDashboard::handleCaptivePortal() {
   server_->send(302, F("text/plain"), F("Tiny Companion setup"));
 }
 
+static bool setupApActive() {
+  wifi_mode_t mode = WiFi.getMode();
+  return mode == WIFI_AP || mode == WIFI_AP_STA;
+}
+
 void WebDashboard::sendHomePage() {
-  if (state_->deviceMode == DeviceMode::SetupPortal && !WiFi.isConnected()) {
+  if (!WiFi.isConnected() && (state_->deviceMode == DeviceMode::SetupPortal || setupApActive())) {
     sendSetupPage();
     return;
   }
@@ -321,10 +326,10 @@ void WebDashboard::sendStatusPage() {
     body += F("<br>IP address: ");
     body += WiFi.localIP().toString();
     body += F("</p>");
-  } else if (state_->deviceMode == DeviceMode::SetupPortal) {
-    body += F("<p class=\"status\">Setup portal is running. Connect to ");
+  } else if (state_->deviceMode == DeviceMode::SetupPortal || setupApActive()) {
+    body += F("<p class=\"status\">Optional setup network is running. Connect to ");
     body += SETUP_AP_SSID;
-    body += F(" and use the Wi-Fi setup page.</p>");
+    body += F(" and use the Wi-Fi setup page when you want Wi-Fi features.</p>");
   } else {
     body += F("<p class=\"status\">Not connected yet.</p>");
   }
@@ -350,7 +355,7 @@ void WebDashboard::sendDashboardPage() {
     body += WiFi.RSSI();
     body += F(" dBm</p>");
   } else {
-    body += F("<p class=\"status\">Not connected. Use setup mode to add Wi-Fi.</p>");
+    body += F("<p class=\"status\">Wi-Fi is optional. Connect to TinyBotSetup when you want dashboard, weather, and sync features.</p>");
   }
   body += F("<div class=\"row\" style=\"margin-top:12px\"><a class=\"button\" href=\"");
   body += HOSTED_DASHBOARD_URL;

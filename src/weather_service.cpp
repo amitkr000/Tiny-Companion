@@ -84,6 +84,7 @@ void WeatherService::syncTime() {
 
 void WeatherService::update(uint32_t now, bool wifiConnected) {
   if (!context_) return;
+  context_->wifiConnected = wifiConnected;
   context_->moon = moonFromEpoch(currentEpoch(now));
   context_->season = resolvedSeason(now);
 
@@ -212,6 +213,9 @@ FaceId WeatherService::idleFaceFor(uint32_t now) const {
   if (loopPosition < IDLE_CHEERFUL_MS + IDLE_TIME_FACE_MS) {
     uint32_t featurePosition = loopPosition - IDLE_CHEERFUL_MS;
     if (featurePosition < IDLE_TIME_FACE_MS / 2) {
+      if (!context_->wifiConnected || !context_->hasData) {
+        return FaceId::CheerfulIdle;
+      }
       WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
       FaceId weatherFace = faceForWeather(theme);
       return weatherFace != FaceId::Neutral ? weatherFace : FaceId::CloudyIdle;

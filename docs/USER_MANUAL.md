@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Tiny Companion is a small desk pet with expressive animated OLED faces. It reacts to touch, greets you by name, runs a one-minute cheerful/time/weather idle loop, runs a Pomodoro timer, and reminds you to drink water or stretch.
+Tiny Companion is a small desk pet with expressive animated OLED faces. It reacts to touch, greets you by name, runs a one-minute cheerful idle loop with optional time/weather moments, runs a Pomodoro timer, and reminds you to drink water or stretch.
 
 In Face mode, the OLED shows only the face and its visual effects. Labels, status icons, and extra text are hidden so touch reactions like poke/feed/love can take over cleanly.
 
@@ -27,7 +27,7 @@ Use the correct input pin for your exact ESP32-C3 board. Some boards have `5V`, 
 
 ## First Boot
 
-On first boot, Tiny Companion starts a setup Wi-Fi network:
+On first boot, Tiny Companion starts face mode even if no home Wi-Fi is available. It also starts this optional setup Wi-Fi network in the background:
 
 ```text
 SSID: TinyBotSetup
@@ -35,9 +35,9 @@ Password: none
 Setup page: Wi-Fi captive portal
 ```
 
-Connect your phone or computer to that network, open the Wi-Fi setup prompt/captive portal, choose your home Wi-Fi, enter the password, and save.
+You can ignore that network and use Tiny Companion offline. To enable dashboard sync and weather later, connect your phone or computer to that network, open the Wi-Fi setup prompt/captive portal, choose your home Wi-Fi, enter the password, and save.
 
-After connection, the OLED shows online status. Open the ESP32 local dashboard at the IP shown on the OLED and copy the access token. Then open the hosted dashboard and enter the ESP32 IP address plus that token:
+After connection, Setting mode shows whether Wi-Fi is connected, the Wi-Fi name, the ESP32 IP address, and the access token. Open the hosted dashboard and enter the ESP32 IP address plus that token:
 
 ```text
 https://amitkr000.github.io/Tiny-Companion/
@@ -98,9 +98,9 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 ## Weather And Idle Faces
 
-Weather faces use Open-Meteo after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard.
+Weather faces use Open-Meteo only after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard. If Wi-Fi is not connected or weather has not synced, Tiny Companion skips weather faces and the info screen shows weather unavailable.
 
-Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. It loops every minute: 40 seconds cheerful robot idle face, 10 seconds current time-of-day face, then 10 seconds current weather face:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. It loops every minute: 40 seconds cheerful robot idle face, 5 seconds weather face when available, 5 seconds current time-of-day face, then 10 seconds time/weather information:
 
 - Morning: waking up / nap energy.
 - Afternoon: sleepy and lower energy.
@@ -134,7 +134,7 @@ The dashboard lets you:
 - Set the user name used in greetings.
 - Tune touch timing and poke anger threshold.
 - View JSON status at `/api/state`.
-- Forget Wi-Fi and return to setup.
+- Forget Wi-Fi and return to optional setup.
 
 If actions or settings show an access-token error, open `http://ESP32_IP/`, copy the token from the Companion card, and paste it into the hosted dashboard. If your browser blocks local-network access from the hosted page, open `http://ESP32_IP/api/state` once directly or use another browser/device on the same Wi-Fi.
 

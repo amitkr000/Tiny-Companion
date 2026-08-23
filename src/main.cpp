@@ -200,7 +200,7 @@ static void renderNow() {
   renderDisplay(display, app, pomodoro, reminders, WiFi.isConnected(), WiFi.isConnected() ? WiFi.RSSI() : 0, savedSsid.length() ? savedSsid : WiFi.SSID(), WiFi.localIP());
 }
 
-static void startSetupPortal();
+static void startSetupPortal(bool showSetupScreen = true);
 
 static void startWebServer() {
   if (webServerStarted) {
@@ -295,11 +295,20 @@ static void forceWeatherSync() {
   weather.fetchNow();
 }
 
-static void startSetupPortal() {
-  Serial.println("[setup-ap] starting");
-  app.deviceMode = DeviceMode::SetupPortal;
-  app.currentFace = FaceId::Neutral;
-  app.currentMessage = "Setup needed";
+static void startSetupPortal(bool showSetupScreen) {
+  Serial.println(showSetupScreen ? "[setup-ap] starting visible setup" : "[setup-ap] starting optional background setup");
+  if (showSetupScreen) {
+    app.deviceMode = DeviceMode::SetupPortal;
+    app.currentFace = FaceId::Neutral;
+    app.currentMessage = "Setup needed";
+  } else {
+    app.deviceMode = DeviceMode::Online;
+    app.companionMode = CompanionMode::Idle;
+    app.currentFace = FaceId::CheerfulIdle;
+    app.currentMessage = "WiFi optional";
+    app.showIpUntil = 0;
+  }
+  app.weather.wifiConnected = false;
   portalRunning = true;
 
   WiFi.persistent(false);
@@ -321,13 +330,17 @@ static void startSetupPortal() {
 
   if (apStarted) {
     dnsServer.start(53, "*", SETUP_AP_IP);
-    app.currentMessage = "Setup AP ready";
+    app.currentMessage = showSetupScreen ? "Setup AP ready" : "Face mode";
     startWebServer();
-  } else {
+  } else if (showSetupScreen) {
     app.currentFace = FaceId::Error;
     app.currentMessage = "AP failed";
+  } else {
+    app.currentMessage = "Face mode";
   }
-  renderDisplay(display, app, pomodoro, reminders, false, 0, SETUP_AP_SSID, SETUP_AP_IP);
+  if (showSetupScreen) {
+    renderDisplay(display, app, pomodoro, reminders, false, 0, SETUP_AP_SSID, SETUP_AP_IP);
+  }
   toneOnce(988, 45);
 }
 
@@ -521,7 +534,7 @@ void setup() {
 
   Serial.println("[boot] drawing startup screen");
   display.clearDisplay();
-  app.currentMessage = "Starting WiFi";
+  app.currentMessage = "Starting";
   renderDisplay(display, app, pomodoro, reminders, false, 0, "", IPAddress());
 
   Serial.println("[boot] starting dashboard routes");
@@ -542,12 +555,12 @@ void setup() {
     Serial.print("[boot] saved WiFi found: ");
     Serial.println(savedSsid);
     if (!connectToSavedWifi(WIFI_CONNECT_TIMEOUT_MS)) {
-      Serial.println("[boot] saved WiFi failed, starting setup AP");
-      startSetupPortal();
+      Serial.println("[boot] saved WiFi failed, starting optional setup AP");
+      startSetupPortal(false);
     }
   } else {
-    Serial.println("[boot] no saved WiFi, starting setup AP");
-    startSetupPortal();
+    Serial.println("[boot] no saved WiFi, starting optional setup AP");
+    startSetupPortal(false);
   }
 }
 
@@ -564,10 +577,12 @@ void loop() {
 
   server.handleClient();
 
-  if (savedSsid.length() > 0 && !WiFi.isConnected() && app.deviceMode != DeviceMode::SetupPortal) {
+  if (savedSsid.length() > 0 && !WiFi.isConnected() && app.deviceMode != DeviceMode::SetupPortal && !portalRunning) {
     if (now - lastConnectAttemptAt > WIFI_RECONNECT_INTERVAL_MS) {
       lastConnectAttemptAt = now;
-      connectToSavedWifi(WIFI_CONNECT_TIMEOUT_MS);
+      if (!connectToSavedWifi(WIFI_CONNECT_TIMEOUT_MS)) {
+        startSetupPortal(false);
+      }
     }
   } else if (WiFi.isConnected() && app.deviceMode != DeviceMode::Online) {
     app.deviceMode = DeviceMode::Online;
@@ -575,6 +590,7 @@ void loop() {
     app.showIpUntil = now + ONLINE_IP_SCREEN_MS;
   }
 
+  app.weather.wifiConnected = WiFi.isConnected();
   weather.update(now, WiFi.isConnected());
   pomodoro.update(now);
   ReminderKind reminder = reminders.update(now);

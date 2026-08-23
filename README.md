@@ -1,6 +1,6 @@
 # Tiny Companion ESP32 Firmware
 
-Tiny Companion is an ESP32-C3 desk companion with expressive animated OLED faces, two touch sensors, personalized greetings, Pomodoro mode, reminders, Wi-Fi setup, a GitHub Pages dashboard, and a cheerful idle loop with timed time/weather faces.
+Tiny Companion is an ESP32-C3 desk companion with expressive animated OLED faces, two touch sensors, personalized greetings, Pomodoro mode, reminders, optional Wi-Fi setup, a GitHub Pages dashboard, and a cheerful idle loop with timed time/weather faces when Wi-Fi is available.
 
 The polished dashboard is hosted with GitHub Pages. The root Pages URL redirects to the dashboard:
 
@@ -8,7 +8,7 @@ The polished dashboard is hosted with GitHub Pages. The root Pages URL redirects
 https://amitkr000.github.io/Tiny-Companion/
 ```
 
-The ESP32 hosts the first-boot Wi-Fi setup page plus a small local API for the hosted dashboard.
+The ESP32 hosts an optional Wi-Fi setup page plus a small local API for the hosted dashboard. Without home Wi-Fi, it still boots into face mode and runs as a desk companion.
 
 ## Hardware
 
@@ -25,7 +25,7 @@ Power is designed around a 400 mAh LiPo, TP4056 charger, and slide switch. Use a
 
 ## First Boot
 
-On first boot, or when saved Wi-Fi fails, the ESP32 starts:
+On first boot, or when saved Wi-Fi fails, Tiny Companion still starts face mode and also runs this optional setup network in the background:
 
 ```text
 SSID: TinyBotSetup
@@ -33,7 +33,7 @@ Password: none
 Setup page: Wi-Fi captive portal
 ```
 
-After it joins Wi-Fi, open the ESP32 local dashboard at the IP shown on the OLED and copy the access token. Then open the hosted dashboard and enter both the IP address and token.
+You can ignore Wi-Fi completely. If you later connect it to Wi-Fi, open the ESP32 local dashboard at the IP shown in Setting mode and copy the access token. Then open the hosted dashboard and enter both the IP address and token.
 The IP address is shown for about 30 seconds after connection, then the companion returns to face mode.
 
 After Wi-Fi is saved, normal power cycling reconnects automatically. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on for about 2.5 seconds.
