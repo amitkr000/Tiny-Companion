@@ -46,7 +46,7 @@ Mode faces appear while a mode is active: Pomodoro timer, reminders, stretch bre
 
 Reaction faces appear briefly after touch or dashboard actions: greeting, poke, feed, full, love/petting, angry, annoyed, proud, sleep, and wake. These reactions immediately replace the idle face.
 
-Face mode uses a repeating 60-second idle loop whenever nothing urgent is happening: 50 seconds of the cheerful robot idle face, 5 seconds of either a weather or time face, then 5 seconds of time/weather information. The contextual face alternates by minute so weather and time do not appear back to back in one minute. Offline units skip weather faces and show weather unavailable in the info screen:
+Face mode uses a repeating 60-second home loop whenever nothing urgent is happening. With no active Pomodoro and no active hydration reminders, each minute starts with 40 seconds of the cheerful robot face, shows 5 seconds of either a weather or time face, shows 5 seconds of time/weather information, then returns to the cheerful face for the rest of the minute. The contextual face alternates by minute so weather and time do not appear back to back in one minute. Offline units skip weather faces and show weather unavailable in the info screen:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
 - Time: morning waking/nap energy, afternoon low energy, evening tea, night sleep/zzz.
@@ -64,11 +64,14 @@ Face mode uses a repeating 60-second idle loop whenever nothing urgent is happen
 | Face touch | Long press | Pet/rub affection with animated love face |
 | Face touch | Repeated taps | Annoyed, then angry |
 | Face touch | First touch of a new local day | Greets the saved user name |
-| Face mode | No recent touch | Loops 50s cheerful face, 5s alternating weather-or-time face, 5s time/weather info |
+| Face mode | No active Pomodoro/hydration | 40s cheerful face, 5s alternating weather-or-time face, 5s time/weather info, then cheerful face |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single tap | Cycle Face, Pomodoro, Reminders, Status, and Setting modes |
 | Action touch | Double tap in Pomodoro mode | Reset Pomodoro |
 | Action touch | Triple tap | Reserved for current/future mode actions |
+| Face mode | Pomodoro or hydration active | 40s face, then 20s active status; if both are active, Pomodoro and hydration split 10s each |
+| Completion screen | Pomodoro finished | Shows Pomodoro complete for 1 minute, resets Pomodoro, then returns to Face mode |
+| Completion screen | Hydration due | Shows Hydration complete for 1 minute, then returns to Face mode and schedules the next interval |
 | Action touch | Long press in Pomodoro mode | Start or pause Pomodoro |
 | Action touch | Long press in Reminders mode | Start or stop hydration reminders |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |

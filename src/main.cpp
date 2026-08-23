@@ -201,14 +201,61 @@ static void applyDisplayCallback() {
   actionTouch.setTimings(app.touchSettings.tapWindowMs, app.touchSettings.longPressMs);
 }
 
+static bool timerActive(uint32_t until, uint32_t now) {
+  return until != 0 && static_cast<int32_t>(until - now) > 0;
+}
+
+static void updateCompletionNotices(uint32_t now) {
+  if (app.pomodoroCompleteUntil != 0 && !timerActive(app.pomodoroCompleteUntil, now)) {
+    app.pomodoroCompleteUntil = 0;
+  }
+  if (app.hydrationCompleteUntil != 0 && !timerActive(app.hydrationCompleteUntil, now)) {
+    app.hydrationCompleteUntil = 0;
+    if (app.activeReminder == ReminderKind::Hydration) {
+      app.activeReminder = ReminderKind::None;
+    }
+  }
+}
+
+static void updateHomePanel(uint32_t now) {
+  app.homePanel = HomePanel::Face;
+  if (app.companionMode != CompanionMode::Idle || (app.hasReactionFace && timerActive(app.reactionUntil, now))) {
+    return;
+  }
+
+  bool pomodoroActive = pomodoro.isActive(now);
+  bool hydrationActive = app.reminderSettings.hydrationEnabled;
+  if (!pomodoroActive && !hydrationActive) {
+    return;
+  }
+
+  uint32_t loopPosition = now % IDLE_LOOP_MS;
+  if (loopPosition < IDLE_CHEERFUL_MS) {
+    return;
+  }
+
+  if (pomodoroActive && hydrationActive) {
+    uint32_t activePosition = loopPosition - IDLE_CHEERFUL_MS;
+    app.homePanel = activePosition < (ACTIVE_STATUS_FACE_MS / 2) ? HomePanel::Pomodoro : HomePanel::Hydration;
+  } else if (pomodoroActive) {
+    app.homePanel = HomePanel::Pomodoro;
+  } else {
+    app.homePanel = HomePanel::Hydration;
+  }
+}
+
 static void renderNow() {
   uint32_t now = millis();
   if (now - lastFrameAt < FACE_FRAME_MS) {
     return;
   }
   lastFrameAt = now;
-  FaceId idleFace = weather.idleFaceFor(now);
+  updateCompletionNotices(now);
+  FaceId idleFace = app.companionMode == CompanionMode::Idle && (pomodoro.isActive(now) || app.reminderSettings.hydrationEnabled)
+    ? FaceId::CheerfulIdle
+    : weather.idleFaceFor(now);
   app.currentFace = selectFace(app, pomodoro, reminders, idleFace, now);
+  updateHomePanel(now);
   renderDisplay(display, app, pomodoro, reminders, WiFi.isConnected(), WiFi.isConnected() ? WiFi.RSSI() : 0, savedSsid.length() ? savedSsid : WiFi.SSID(), WiFi.localIP());
 }
 
@@ -553,11 +600,31 @@ void loop() {
 
   app.weather.wifiConnected = WiFi.isConnected();
   weather.update(now, WiFi.isConnected());
+  uint8_t completedBefore = pomodoro.completedSessions();
   pomodoro.update(now);
+  if (pomodoro.completedSessions() != completedBefore) {
+    app.pomodoroCompleteUntil = now + COMPLETION_SCREEN_MS;
+    app.companionMode = CompanionMode::Idle;
+    app.homePanel = HomePanel::Face;
+    app.hasReactionFace = false;
+    app.currentMessage = "Pomodoro complete";
+    app.lastAction = "Pomodoro complete";
+    pomodoro.reset(now);
+  }
+
   ReminderKind reminder = reminders.update(now);
-  if (reminder != ReminderKind::None && app.activeReminder == ReminderKind::None) {
-    app.activeReminder = reminder;
-    triggerReaction(app, reminder == ReminderKind::Hydration ? FaceId::Hydration : FaceId::BreakTime, reminder == ReminderKind::Hydration ? "Drink water" : "Stretch break", now, 8000);
+  if (reminder == ReminderKind::Hydration && !timerActive(app.hydrationCompleteUntil, now)) {
+    app.activeReminder = ReminderKind::Hydration;
+    app.hydrationCompleteUntil = now + COMPLETION_SCREEN_MS;
+    app.companionMode = CompanionMode::Idle;
+    app.homePanel = HomePanel::Face;
+    app.hasReactionFace = false;
+    app.currentMessage = "Hydration reminder";
+    app.lastAction = "Hydration reminder";
+    reminders.markDone(ReminderKind::Hydration, now);
+  } else if (reminder == ReminderKind::Stretch && app.activeReminder == ReminderKind::None) {
+    app.activeReminder = ReminderKind::Stretch;
+    triggerReaction(app, FaceId::BreakTime, "Stretch break", now, 8000);
   }
 
   if (runtimeTouchEnabled) {

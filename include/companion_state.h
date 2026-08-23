@@ -105,6 +105,12 @@ enum class ReminderKind : uint8_t {
   Stretch,
 };
 
+enum class HomePanel : uint8_t {
+  Face,
+  Pomodoro,
+  Hydration,
+};
+
 struct FaceSpec {
   FaceId id;
   const char *name;
@@ -183,9 +189,12 @@ struct AppState {
   TouchSettings touchSettings;
   DisplaySettings displaySettings;
   ReminderKind activeReminder = ReminderKind::None;
+  HomePanel homePanel = HomePanel::Face;
   bool sleepRequested = false;
   bool lowBattery = false;
   uint32_t showIpUntil = 0;
+  uint32_t pomodoroCompleteUntil = 0;
+  uint32_t hydrationCompleteUntil = 0;
   uint32_t lastInteractionAt = 0;
   uint32_t lastStatsDecayAt = 0;
   uint32_t lastGreetingDay = 0;

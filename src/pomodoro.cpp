@@ -58,6 +58,10 @@ bool PomodoroTimer::isRunning() const {
   return running_;
 }
 
+bool PomodoroTimer::isActive(uint32_t now) const {
+  return running_ || remainingSeconds(now) < configuredDurationSeconds();
+}
+
 uint8_t PomodoroTimer::completedSessions() const {
   return completedSessions_;
 }

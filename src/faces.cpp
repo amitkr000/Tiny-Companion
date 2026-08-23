@@ -47,6 +47,10 @@ static void drawWrappedText(Adafruit_SSD1306 &display, String text, int16_t x, i
   }
 }
 
+static bool timerActive(uint32_t until, uint32_t now) {
+  return until != 0 && static_cast<int32_t>(until - now) > 0;
+}
+
 static void drawStatusBar(Adafruit_SSD1306 &display, const AppState &state, bool wifiConnected, int rssi) {
   display.drawFastHLine(0, 0, OLED_WIDTH, SSD1306_WHITE);
   display.setCursor(2, 2);
@@ -311,6 +315,26 @@ static void drawPomodoro(Adafruit_SSD1306 &display, const PomodoroTimer &pomodor
   snprintf(buffer, sizeof(buffer), "%02u:%02u", minutes, seconds);
   drawCentered(display, buffer, 28, 2);
   drawCentered(display, pomodoro.isRunning() ? "running" : "paused", 54);
+}
+
+static void drawPomodoroComplete(Adafruit_SSD1306 &display) {
+  drawSmilingEyes(display, 12, 18, 18, 45);
+  drawCentered(display, "Pomodoro", 2);
+  drawCentered(display, "complete", 54);
+}
+
+static void drawHydrationStatus(Adafruit_SSD1306 &display, const ReminderService &reminders) {
+  drawCentered(display, "Hydration", 8);
+  drawCentered(display, String(reminders.minutesUntilHydration(millis())) + " min", 25, 2);
+  drawCentered(display, "next reminder", 54);
+}
+
+static void drawHydrationComplete(Adafruit_SSD1306 &display) {
+  drawSmilingEyes(display, 12, 18, 18, 45);
+  display.drawTriangle(116, 7, 111, 19, 121, 19, SSD1306_WHITE);
+  display.drawCircle(116, 21, 4, SSD1306_WHITE);
+  drawCentered(display, "Hydration", 2);
+  drawCentered(display, "complete", 54);
 }
 
 static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
@@ -652,8 +676,8 @@ FaceId selectFace(AppState &state, const PomodoroTimer &pomodoro, const Reminder
   if (state.companionMode == CompanionMode::Pomodoro) {
     return FaceId::Pomodoro;
   }
-  if (state.activeReminder == ReminderKind::Hydration) return FaceId::Hydration;
-  if (state.activeReminder == ReminderKind::Stretch) return FaceId::BreakTime;
+  if (state.companionMode != CompanionMode::Idle && state.activeReminder == ReminderKind::Hydration) return FaceId::Hydration;
+  if (state.companionMode != CompanionMode::Idle && state.activeReminder == ReminderKind::Stretch) return FaceId::BreakTime;
   if (state.stats.energy < 18) return FaceId::Sleepy;
   if (state.stats.fullness < 18) return FaceId::Hungry;
   if (state.stats.happiness < 20) return FaceId::Lonely;
@@ -663,14 +687,17 @@ FaceId selectFace(AppState &state, const PomodoroTimer &pomodoro, const Reminder
 
 void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const PomodoroTimer &pomodoro, const ReminderService &reminders, bool wifiConnected, int rssi, const String &ssid, const IPAddress &ip) {
   display.clearDisplay();
-  bool faceOnlyScreen = state.deviceMode == DeviceMode::Online
+  uint32_t now = millis();
+  bool ipVisible = state.showIpUntil != 0 && static_cast<int32_t>(state.showIpUntil - now) > 0;
+  bool homeModeScreen = state.deviceMode == DeviceMode::Online
     && state.displaySettings.idleAnimationEnabled
-    && (state.showIpUntil == 0 || static_cast<int32_t>(state.showIpUntil - millis()) <= 0)
-    && (state.hasReactionFace || state.companionMode == CompanionMode::Idle)
-    && state.companionMode != CompanionMode::Pomodoro
-    && state.companionMode != CompanionMode::Status
-    && state.companionMode != CompanionMode::Reminders
-    && state.companionMode != CompanionMode::Settings;
+    && !ipVisible
+    && state.companionMode == CompanionMode::Idle;
+  bool faceOnlyScreen = homeModeScreen
+    || (state.deviceMode == DeviceMode::Online
+      && state.displaySettings.idleAnimationEnabled
+      && !ipVisible
+      && state.hasReactionFace);
   if (!faceOnlyScreen) {
     drawStatusBar(display, state, wifiConnected, rssi);
   }
@@ -686,7 +713,7 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
       drawWrappedText(display, shortText(ssid, 32), 0, 32, 21, 2);
       break;
     case DeviceMode::Online:
-      if (state.showIpUntil != 0 && static_cast<int32_t>(state.showIpUntil - millis()) > 0) {
+      if (ipVisible) {
         drawCentered(display, "Dashboard", 12);
         drawCentered(display, String(ip[0]) + "." + String(ip[1]) + ".", 28);
         drawCentered(display, String(ip[2]) + "." + String(ip[3]), 40);
@@ -696,8 +723,16 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
         drawCentered(display, String(ip[0]) + "." + String(ip[1]) + ".", 28);
         drawCentered(display, String(ip[2]) + "." + String(ip[3]), 40);
         drawCentered(display, shortText(ssid, 18), 55);
-      } else if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - millis()) > 0) {
+      } else if (timerActive(state.pomodoroCompleteUntil, now)) {
+        drawPomodoroComplete(display);
+      } else if (timerActive(state.hydrationCompleteUntil, now)) {
+        drawHydrationComplete(display);
+      } else if (state.hasReactionFace && static_cast<int32_t>(state.reactionUntil - now) > 0) {
         drawFace(display, state.currentFace, state);
+      } else if (state.companionMode == CompanionMode::Idle && state.homePanel == HomePanel::Pomodoro) {
+        drawPomodoro(display, pomodoro);
+      } else if (state.companionMode == CompanionMode::Idle && state.homePanel == HomePanel::Hydration) {
+        drawHydrationStatus(display, reminders);
       } else if (state.companionMode == CompanionMode::Pomodoro) {
         drawPomodoro(display, pomodoro);
       } else if (state.companionMode == CompanionMode::Status) {

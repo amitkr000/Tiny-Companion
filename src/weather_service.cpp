@@ -202,6 +202,21 @@ SeasonTheme WeatherService::resolvedSeason(uint32_t now) const {
   return seasonFromMonth(timeInfo->tm_mon + 1);
 }
 
+FaceId WeatherService::glanceFaceFor(uint32_t now) const {
+  if (!context_) return FaceId::CheerfulIdle;
+  bool weatherMinute = ((now / IDLE_LOOP_MS) % 2UL) == 1UL;
+  if (weatherMinute) {
+    if (!context_->wifiConnected || !context_->hasData) {
+      return FaceId::CheerfulIdle;
+    }
+    WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
+    FaceId weatherFace = faceForWeather(theme);
+    return weatherFace != FaceId::Neutral ? weatherFace : FaceId::CloudyIdle;
+  }
+  FaceId timeFace = faceForTime(localHour(now));
+  return timeFace != FaceId::Neutral ? timeFace : FaceId::CheerfulIdle;
+}
+
 FaceId WeatherService::idleFaceFor(uint32_t now) const {
   if (!context_) return FaceId::CheerfulIdle;
 
@@ -210,21 +225,16 @@ FaceId WeatherService::idleFaceFor(uint32_t now) const {
     return FaceId::CheerfulIdle;
   }
 
-  if (loopPosition < IDLE_CHEERFUL_MS + IDLE_TIME_FACE_MS) {
-    bool weatherMinute = ((now / IDLE_LOOP_MS) % 2UL) == 1UL;
-    if (weatherMinute) {
-      if (!context_->wifiConnected || !context_->hasData) {
-        return FaceId::CheerfulIdle;
-      }
-      WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
-      FaceId weatherFace = faceForWeather(theme);
-      return weatherFace != FaceId::Neutral ? weatherFace : FaceId::CloudyIdle;
-    }
-    FaceId timeFace = faceForTime(localHour(now));
-    return timeFace != FaceId::Neutral ? timeFace : FaceId::CheerfulIdle;
+  uint32_t infoStart = IDLE_CHEERFUL_MS + IDLE_TIME_FACE_MS;
+  uint32_t infoEnd = infoStart + IDLE_INFO_FACE_MS;
+  if (loopPosition < infoStart) {
+    return glanceFaceFor(now);
+  }
+  if (loopPosition < infoEnd) {
+    return FaceId::TimeWeatherInfo;
   }
 
-  return FaceId::TimeWeatherInfo;
+  return FaceId::CheerfulIdle;
 }
 
 WeatherTheme WeatherService::themeFromWeatherCode(int code, float temperatureC, float windKmh) const {

@@ -17,6 +17,7 @@ class WeatherService {
   int localHour(uint32_t now) const;
   SeasonTheme resolvedSeason(uint32_t now) const;
   FaceId idleFaceFor(uint32_t now) const;
+  FaceId glanceFaceFor(uint32_t now) const;
 
  private:
   Preferences *preferences_ = nullptr;

@@ -38,14 +38,16 @@ static constexpr int BATTERY_ADC_PIN = -1;
 // Display behavior.
 static constexpr uint32_t FACE_FRAME_MS = 60;
 static constexpr uint32_t IDLE_FACE_MS = 7000;
-static constexpr uint32_t CLOCK_FACE_MS = 5000;
 static constexpr uint32_t WEATHER_FACE_MS = 4500;
 static constexpr uint32_t NOTIFICATION_FACE_MS = 6500;
 static constexpr uint32_t NAVIGATION_REFRESH_MS = 350;
 static constexpr uint32_t MODE_PREVIEW_TIMEOUT_MS = 20000;
 static constexpr uint32_t IDLE_LOOP_MS = 60000;
-static constexpr uint32_t IDLE_CHEERFUL_MS = 50000;
+static constexpr uint32_t IDLE_CHEERFUL_MS = 40000;
 static constexpr uint32_t IDLE_TIME_FACE_MS = 5000;
+static constexpr uint32_t IDLE_INFO_FACE_MS = 5000;
+static constexpr uint32_t ACTIVE_STATUS_FACE_MS = 20000;
+static constexpr uint32_t COMPLETION_SCREEN_MS = 60000;
 static constexpr uint32_t GREETING_FACE_MS = 5200;
 static constexpr uint32_t PETTING_FACE_MS = 5200;
 static constexpr uint32_t WEATHER_CHANGE_FACE_MS = 18000;
@@ -55,7 +57,6 @@ static constexpr uint32_t STATS_DECAY_INTERVAL_MS = 5UL * 60UL * 1000UL;
 
 // Personalization knobs.
 static constexpr bool ENABLE_IDLE_FACE = true;
-static constexpr bool ENABLE_CLOCK_FACE = true;
 static constexpr bool ENABLE_WEATHER_FACE = true;
 static constexpr bool ENABLE_NOTIFICATIONS = true;
 static constexpr bool ENABLE_NAVIGATION = true;
