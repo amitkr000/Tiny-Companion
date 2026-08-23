@@ -372,6 +372,13 @@ static void drawSettingInfo(Adafruit_SSD1306 &display, const AppState &state, bo
   drawCentered(display, state.dashboardToken.length() ? state.dashboardToken : String("Token missing"), 54);
 }
 
+static void drawWifiSetupFailed(Adafruit_SSD1306 &display) {
+  drawCentered(display, "WiFi failed", 10);
+  drawCentered(display, "Check name/pass", 25);
+  drawCentered(display, "2.4GHz only", 38);
+  drawCentered(display, "Face in 30s", 53);
+}
+
 static uint32_t displayEpochFromState(const AppState &state) {
   if (state.weather.epochAtSync == 0 || state.weather.lastSyncAt == 0) {
     return 0;
@@ -718,7 +725,9 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
       drawWrappedText(display, shortText(ssid, 32), 0, 32, 21, 2);
       break;
     case DeviceMode::Online:
-      if (ipVisible) {
+      if (timerActive(state.wifiSetupFailedUntil, now)) {
+        drawWifiSetupFailed(display);
+      } else if (ipVisible) {
         drawCentered(display, "Dashboard", 12);
         drawCentered(display, String(ip[0]) + "." + String(ip[1]) + ".", 28);
         drawCentered(display, String(ip[2]) + "." + String(ip[3]), 40);

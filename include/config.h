@@ -18,6 +18,7 @@ static constexpr bool START_SETUP_AP_ON_BOOT = false;
 static constexpr uint32_t ONLINE_IP_SCREEN_MS = 30000;
 static constexpr uint32_t WIFI_CONNECT_TIMEOUT_MS = 15000;
 static constexpr uint32_t WIFI_RECONNECT_INTERVAL_MS = 30000;
+static constexpr uint32_t WIFI_SETUP_FAILED_SCREEN_MS = 30000;
 
 // ESP32-C3 Super Mini + SSD1306 OLED defaults from The Mochi wiring guide.
 static constexpr int I2C_SDA_PIN = 3;

@@ -310,6 +310,8 @@ static bool connectToSavedWifi(uint32_t timeoutMs) {
   app.currentMessage = "Joining WiFi";
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
+  WiFi.setTxPower(WIFI_POWER_19_5dBm);
+  WiFi.setAutoReconnect(true);
   WiFi.begin(savedSsid.c_str(), preferences.getString("password", "").c_str());
 
   while (millis() - connectingStartedAt < timeoutMs) {
@@ -319,6 +321,7 @@ static bool connectToSavedWifi(uint32_t timeoutMs) {
       app.sleepRequested = false;
       app.hasReactionFace = false;
       app.showIpUntil = millis() + ONLINE_IP_SCREEN_MS;
+      app.wifiSetupFailedUntil = 0;
       app.currentMessage = "Connected";
       startWebServer();
       startMdns();
@@ -332,7 +335,9 @@ static bool connectToSavedWifi(uint32_t timeoutMs) {
     delay(60);
   }
 
-  WiFi.disconnect();
+  Serial.print("[wifi] connect failed status ");
+  Serial.println(WiFi.status());
+  WiFi.disconnect(false);
   return false;
 }
 
@@ -343,7 +348,13 @@ static void saveWifiAndConnect(const String &ssid, const String &password) {
 
   WiFi.softAPdisconnect(false);
   if (!connectToSavedWifi(WIFI_CONNECT_TIMEOUT_MS)) {
-    startSetupPortal();
+    startSetupPortal(false);
+    app.wifiSetupFailedUntil = millis() + WIFI_SETUP_FAILED_SCREEN_MS;
+    app.currentFace = FaceId::Error;
+    app.currentMessage = "WiFi failed";
+    app.companionMode = CompanionMode::Idle;
+    app.hasReactionFace = false;
+    renderDisplay(display, app, pomodoro, reminders, false, 0, SETUP_AP_SSID, SETUP_AP_IP);
   }
 }
 
@@ -373,6 +384,7 @@ static void startSetupPortal(bool showSetupScreen) {
     app.currentMessage = "WiFi optional";
     app.showIpUntil = 0;
   }
+  app.wifiSetupFailedUntil = 0;
   app.weather.wifiConnected = false;
   portalRunning = true;
 
@@ -587,6 +599,13 @@ void loop() {
 
   if (WiFi.isConnected()) {
     startMdns();
+  }
+
+  if (app.wifiSetupFailedUntil != 0 && static_cast<int32_t>(app.wifiSetupFailedUntil - now) <= 0) {
+    app.wifiSetupFailedUntil = 0;
+    app.currentMessage = "Face mode";
+    app.currentFace = FaceId::CheerfulIdle;
+    app.companionMode = CompanionMode::Idle;
   }
 
   server.handleClient();

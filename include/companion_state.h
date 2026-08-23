@@ -193,6 +193,7 @@ struct AppState {
   bool sleepRequested = false;
   bool lowBattery = false;
   uint32_t showIpUntil = 0;
+  uint32_t wifiSetupFailedUntil = 0;
   uint32_t pomodoroCompleteUntil = 0;
   uint32_t hydrationCompleteUntil = 0;
   uint32_t lastInteractionAt = 0;
