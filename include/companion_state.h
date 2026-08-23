@@ -139,6 +139,8 @@ struct WeatherContext {
   int weatherCode = -1;
   bool isDay = true;
   uint32_t lastSyncAt = 0;
+  uint32_t lastWeatherSyncAt = 0;
+  uint32_t lastWeatherChangeAt = 0;
   uint32_t epochAtSync = 0;
 };
 

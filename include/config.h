@@ -42,6 +42,8 @@ static constexpr uint32_t WEATHER_FACE_MS = 4500;
 static constexpr uint32_t NOTIFICATION_FACE_MS = 6500;
 static constexpr uint32_t NAVIGATION_REFRESH_MS = 350;
 static constexpr uint32_t MODE_PREVIEW_TIMEOUT_MS = 20000;
+static constexpr uint32_t WEATHER_CHANGE_FACE_MS = 18000;
+static constexpr uint32_t WEATHER_GLANCE_INTERVAL_MS = 90000;
 static constexpr uint32_t WEATHER_SYNC_INTERVAL_MS = 30UL * 60UL * 1000UL;
 static constexpr uint32_t STATS_DECAY_INTERVAL_MS = 5UL * 60UL * 1000UL;
 

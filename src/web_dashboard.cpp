@@ -746,6 +746,14 @@ void WebDashboard::sendStateJson() {
   json += String(state_->weather.temperatureC, 1);
   json += F(",\"weatherCode\":");
   json += state_->weather.weatherCode;
+  json += F(",\"hasData\":");
+  json += state_->weather.hasData ? F("true") : F("false");
+  json += F(",\"lastSyncAgeSeconds\":");
+  if (state_->weather.lastWeatherSyncAt == 0) {
+    json += F("-1");
+  } else {
+    json += String((millis() - state_->weather.lastWeatherSyncAt) / 1000UL);
+  }
   json += F(",\"isDay\":");
   json += state_->weather.isDay ? F("true") : F("false");
   json += F(",\"season\":\"");

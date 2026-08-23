@@ -101,10 +101,16 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 Weather faces use Open-Meteo after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard.
 
-Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. Idle faces can reflect:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. Most of the time it shows the time-of-day idle face:
+
+- Morning: waking up / nap energy.
+- Afternoon: sleepy and lower energy.
+- Evening: tea-time mood.
+- Night: sleeping with zzz.
+
+Weather faces appear briefly after weather changes, plus occasional short weather glances:
 
 - Sunny, rainy, cloudy, stormy, foggy, windy, hot, or cold weather.
-- Morning, afternoon, evening, or night.
 - New moon, crescent, half moon, or full moon.
 - Spring, summer, monsoon, autumn, or winter.
 
@@ -182,3 +188,4 @@ If weather faces do not update:
 - Confirm the ESP32 is online.
 - Check latitude, longitude, timezone, and UTC offset.
 - Use the dashboard `Sync weather` button.
+- Open `http://ESP32_IP/api/state` and check `weather.hasData` and `weather.lastSyncAgeSeconds`.

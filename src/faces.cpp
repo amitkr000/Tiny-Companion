@@ -269,20 +269,40 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawFastHLine(48, 52, 28, SSD1306_WHITE);
       break;
     case FaceId::MorningIdle:
-      drawSun(display, 103, 17);
-      drawEyes(display, 26, 15, 9, 51);
+      drawSun(display, 108, 16);
+      display.fillRoundRect(31, 29, 23, 9, 5, SSD1306_WHITE);
+      display.drawFastHLine(74, 32, 23, SSD1306_WHITE);
+      display.drawFastHLine(49, 51, 30, SSD1306_WHITE);
+      display.drawPixel(24, 22, SSD1306_WHITE);
+      display.drawPixel(20, 27, SSD1306_WHITE);
       break;
     case FaceId::AfternoonIdle:
-      drawEyes(display, 22, 15, 15, 50);
-      display.drawRect(100, 45, 18, 9, SSD1306_WHITE);
-      display.drawFastHLine(102, 48, 14, SSD1306_WHITE);
+      display.fillRoundRect(32, 31, 22, 7, 4, SSD1306_WHITE);
+      display.fillRoundRect(74, 31, 22, 7, 4, SSD1306_WHITE);
+      display.drawFastHLine(49, 53, 30, SSD1306_WHITE);
+      display.drawLine(101, 24, 96, 34, SSD1306_WHITE);
+      display.drawCircle(96, 37, 3, SSD1306_WHITE);
       break;
     case FaceId::EveningIdle:
-      drawEyes(display, 24, 13, 13, 51);
-      display.drawCircle(102, 23, 7, SSD1306_WHITE);
-      display.drawFastHLine(91, 33, 23, SSD1306_WHITE);
+      drawEyes(display, 25, 12, 12, 51);
+      display.drawRoundRect(98, 35, 18, 13, 3, SSD1306_WHITE);
+      display.drawCircle(118, 40, 4, SSD1306_WHITE);
+      display.drawFastHLine(96, 49, 23, SSD1306_WHITE);
+      display.drawPixel(103, 27, SSD1306_WHITE);
+      display.drawPixel(108, 24, SSD1306_WHITE);
+      display.drawPixel(112, 28, SSD1306_WHITE);
       break;
     case FaceId::NightIdle:
+      display.drawFastHLine(32, 31, 23, SSD1306_WHITE);
+      display.drawFastHLine(74, 31, 23, SSD1306_WHITE);
+      display.drawFastHLine(49, 51, 30, SSD1306_WHITE);
+      display.setCursor(99, 15);
+      display.print("z");
+      display.setCursor(108, 8);
+      display.print("z");
+      display.drawCircle(17, 18, 6, SSD1306_WHITE);
+      display.fillCircle(20, 16, 6, SSD1306_BLACK);
+      break;
     case FaceId::NewMoonIdle:
       drawMoon(display, MoonPhase::NewMoon);
       break;

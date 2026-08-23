@@ -44,10 +44,10 @@ Mode faces appear while a mode is active: focused Pomodoro, break time, reminder
 
 Reaction faces appear briefly after touch or dashboard actions: poke, feed, full, love, angry, annoyed, proud, and wake. These reactions immediately replace the idle face.
 
-Face mode uses idle faces when nothing urgent is happening:
+Face mode mostly uses time-of-day idle faces when nothing urgent is happening. Weather faces appear briefly when weather changes, plus occasional short weather glances:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
-- Time: morning, afternoon, evening, night.
+- Time: morning waking/nap energy, afternoon low energy, evening tea, night sleep/zzz.
 - Moon: new moon, crescent, half moon, full moon.
 - Season: spring, summer, monsoon, autumn, winter.
 - Weather effects are drawn around the face. Rain uses falling drops, and storm/heavy rain can add lightning without hiding the expression.

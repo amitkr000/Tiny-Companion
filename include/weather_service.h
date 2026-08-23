@@ -26,8 +26,8 @@ class WeatherService {
   WeatherTheme themeFromWeatherCode(int code, float temperatureC, float windKmh) const;
   MoonPhase moonFromEpoch(uint32_t epoch) const;
   SeasonTheme seasonFromMonth(int month) const;
+  FaceId faceForTime(int hour) const;
   FaceId faceForWeather(WeatherTheme theme) const;
   FaceId faceForSeason(SeasonTheme season) const;
   FaceId faceForMoon(MoonPhase phase) const;
 };
-

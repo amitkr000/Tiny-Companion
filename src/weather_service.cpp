@@ -34,9 +34,11 @@ void WeatherService::loadSettings() {
   context_->temperatureC = preferences_->getFloat("tempC", 0.0f);
   context_->weatherCode = preferences_->getInt("wCode", -1);
   context_->isDay = preferences_->getBool("isDay", true);
-  context_->lastSyncAt = preferences_->getULong("wSyncMs", 0);
-  context_->epochAtSync = preferences_->getULong("epochSync", 0);
   context_->hasData = preferences_->getBool("hasWeather", false);
+  context_->lastSyncAt = preferences_->getULong("timeSyncMs", preferences_->getULong("wSyncMs", 0));
+  context_->lastWeatherSyncAt = preferences_->getULong("weatherMs", context_->hasData ? preferences_->getULong("wSyncMs", 0) : 0);
+  context_->lastWeatherChangeAt = 0;
+  context_->epochAtSync = preferences_->getULong("epochSync", 0);
 }
 
 void WeatherService::saveSettings() {
@@ -56,7 +58,9 @@ void WeatherService::saveSettings() {
   preferences_->putFloat("tempC", context_->temperatureC);
   preferences_->putInt("wCode", context_->weatherCode);
   preferences_->putBool("isDay", context_->isDay);
-  preferences_->putULong("wSyncMs", context_->lastSyncAt);
+  preferences_->putULong("timeSyncMs", context_->lastSyncAt);
+  preferences_->putULong("weatherMs", context_->lastWeatherSyncAt);
+  preferences_->putULong("wSyncMs", context_->lastWeatherSyncAt);
   preferences_->putULong("epochSync", context_->epochAtSync);
   preferences_->putBool("hasWeather", context_->hasData);
 }
@@ -84,8 +88,8 @@ void WeatherService::update(uint32_t now, bool wifiConnected) {
     return;
   }
 
-  bool neverSynced = context_->lastSyncAt == 0;
-  if (neverSynced || now - context_->lastSyncAt >= WEATHER_SYNC_INTERVAL_MS) {
+  bool neverSynced = !context_->hasData || context_->lastWeatherSyncAt == 0;
+  if (neverSynced || now - context_->lastWeatherSyncAt >= WEATHER_SYNC_INTERVAL_MS) {
     if (now - lastAttemptAt_ >= 60000UL || neverSynced) {
       lastAttemptAt_ = now;
       fetchNow();
@@ -114,6 +118,8 @@ bool WeatherService::fetchNow() {
   http.begin(url);
   int status = http.GET();
   if (status != 200) {
+    Serial.print("[weather] fetch failed status ");
+    Serial.println(status);
     http.end();
     return false;
   }
@@ -122,22 +128,37 @@ bool WeatherService::fetchNow() {
   DeserializationError err = deserializeJson(doc, http.getString());
   http.end();
   if (err) {
+    Serial.println("[weather] invalid json");
     return false;
   }
 
   JsonObject current = doc["current"];
+  WeatherTheme previousTheme = context_->manualWeather ? context_->overrideTheme : context_->theme;
+  int previousCode = context_->weatherCode;
+  bool firstWeather = !context_->hasData;
+
   context_->temperatureC = current["temperature_2m"] | context_->temperatureC;
   context_->weatherCode = current["weather_code"] | context_->weatherCode;
   context_->isDay = (current["is_day"] | 1) == 1;
   float windKmh = current["wind_speed_10m"] | 0.0f;
   context_->theme = themeFromWeatherCode(context_->weatherCode, context_->temperatureC, windKmh);
+  WeatherTheme resolvedTheme = context_->manualWeather ? context_->overrideTheme : context_->theme;
+  if (firstWeather || previousTheme != resolvedTheme || previousCode != context_->weatherCode) {
+    context_->lastWeatherChangeAt = millis();
+  }
   context_->hasData = true;
-  context_->lastSyncAt = millis();
+  context_->lastWeatherSyncAt = millis();
   time_t nowEpoch;
   time(&nowEpoch);
   context_->epochAtSync = static_cast<uint32_t>(nowEpoch);
   context_->moon = moonFromEpoch(context_->epochAtSync);
   context_->season = resolvedSeason(millis());
+  Serial.print("[weather] synced ");
+  Serial.print(weatherThemeName(context_->theme));
+  Serial.print(" code ");
+  Serial.print(context_->weatherCode);
+  Serial.print(" temp ");
+  Serial.println(context_->temperatureC, 1);
   saveSettings();
   return true;
 }
@@ -181,26 +202,20 @@ FaceId WeatherService::idleFaceFor(uint32_t now) const {
   if (!context_) return FaceId::Neutral;
 
   int hour = localHour(now);
-  if (hour >= DEFAULT_QUIET_START_HOUR || hour < DEFAULT_QUIET_END_HOUR || !context_->isDay) {
-    switch (context_->moon) {
-      case MoonPhase::NewMoon: return FaceId::NewMoonIdle;
-      case MoonPhase::Crescent: return FaceId::CrescentMoonIdle;
-      case MoonPhase::Half: return FaceId::HalfMoonIdle;
-      case MoonPhase::Full: return FaceId::FullMoonIdle;
-    }
-  }
-
   WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
   FaceId weatherFace = faceForWeather(theme);
-  if (weatherFace != FaceId::Neutral) {
+  bool weatherChangedRecently = context_->lastWeatherChangeAt != 0 && now - context_->lastWeatherChangeAt < WEATHER_CHANGE_FACE_MS;
+  bool weatherGlance = context_->hasData && ((now + 13000UL) % WEATHER_GLANCE_INTERVAL_MS) < WEATHER_FACE_MS;
+  if (weatherFace != FaceId::Neutral && (weatherChangedRecently || weatherGlance)) {
     return weatherFace;
   }
 
-  if (hour < 11) return FaceId::MorningIdle;
-  if (hour < 17) return FaceId::AfternoonIdle;
-  if (hour < 21) return FaceId::EveningIdle;
+  if ((hour >= DEFAULT_QUIET_START_HOUR || hour < DEFAULT_QUIET_END_HOUR) && ((now + 31000UL) % WEATHER_GLANCE_INTERVAL_MS) < WEATHER_FACE_MS) {
+    return faceForMoon(context_->moon);
+  }
 
-  return faceForSeason(resolvedSeason(now));
+  FaceId timeFace = faceForTime(hour);
+  return timeFace != FaceId::Neutral ? timeFace : faceForSeason(resolvedSeason(now));
 }
 
 WeatherTheme WeatherService::themeFromWeatherCode(int code, float temperatureC, float windKmh) const {
@@ -242,6 +257,14 @@ SeasonTheme WeatherService::seasonFromMonth(int month) const {
   return SeasonTheme::Winter;
 }
 
+FaceId WeatherService::faceForTime(int hour) const {
+  if (hour < DEFAULT_QUIET_END_HOUR || hour >= DEFAULT_QUIET_START_HOUR) return FaceId::NightIdle;
+  if (hour < 11) return FaceId::MorningIdle;
+  if (hour < 17) return FaceId::AfternoonIdle;
+  if (hour < 21) return FaceId::EveningIdle;
+  return FaceId::NightIdle;
+}
+
 FaceId WeatherService::faceForWeather(WeatherTheme theme) const {
   switch (theme) {
     case WeatherTheme::Sunny: return FaceId::SunnyIdle;
@@ -254,6 +277,16 @@ FaceId WeatherService::faceForWeather(WeatherTheme theme) const {
     case WeatherTheme::Cold: return FaceId::ColdIdle;
     case WeatherTheme::Unknown:
     default: return FaceId::Neutral;
+  }
+}
+
+FaceId WeatherService::faceForMoon(MoonPhase phase) const {
+  switch (phase) {
+    case MoonPhase::Crescent: return FaceId::CrescentMoonIdle;
+    case MoonPhase::Half: return FaceId::HalfMoonIdle;
+    case MoonPhase::Full: return FaceId::FullMoonIdle;
+    case MoonPhase::NewMoon:
+    default: return FaceId::NewMoonIdle;
   }
 }
 
