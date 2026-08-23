@@ -108,53 +108,48 @@ static void drawHeartEyes(Adafruit_SSD1306 &display) {
 
 static void drawCheerfulIdle(Adafruit_SSD1306 &display) {
   uint32_t now = millis();
-  uint8_t frame = (now / 140) % 30;
-  uint8_t gaze = (now / 1800) % 8;
+  uint8_t frame = (now / 140) % 32;
+  uint8_t gaze = (now / 1700) % 7;
   int8_t bob = frame < 8 ? -1 : (frame < 16 ? 0 : (frame < 24 ? 1 : 0));
   bool blink = frame == 24 || frame == 25 || gaze == 6;
-  bool bigSmile = frame % 12 < 6;
-  int8_t pupilX = 0;
-  int8_t pupilY = 0;
+  int8_t lookX = 0;
+  int8_t lookY = 0;
 
   switch (gaze) {
-    case 0: pupilX = -3; break;
-    case 1: pupilX = 3; break;
-    case 2: pupilY = -2; break;
-    case 3: pupilY = 2; break;
-    case 4: pupilX = -2; pupilY = -1; break;
-    case 5: pupilX = 2; pupilY = 1; break;
+    case 0: lookX = -4; break;
+    case 1: lookX = 4; break;
+    case 2: lookY = -2; break;
+    case 3: lookY = 2; break;
+    case 4: lookX = -3; lookY = -1; break;
+    case 5: lookX = 3; lookY = 1; break;
     default: break;
   }
 
+  int16_t panelY = 8 + bob;
+  int16_t eyeY = 19 + bob + lookY;
+  int16_t leftEyeX = 31 + lookX;
+  int16_t rightEyeX = 80 + lookX;
+
+  display.drawRoundRect(18, panelY, 92, 50, 10, SSD1306_WHITE);
+
   if (blink) {
-    display.drawFastHLine(25, 30 + bob, 32, SSD1306_WHITE);
-    display.drawFastHLine(71, 30 + bob, 32, SSD1306_WHITE);
-    display.drawFastHLine(29, 31 + bob, 24, SSD1306_WHITE);
-    display.drawFastHLine(75, 31 + bob, 24, SSD1306_WHITE);
+    display.drawFastHLine(30, 30 + bob, 18, SSD1306_WHITE);
+    display.drawFastHLine(31, 31 + bob, 16, SSD1306_WHITE);
+    display.drawFastHLine(79, 30 + bob, 18, SSD1306_WHITE);
+    display.drawFastHLine(80, 31 + bob, 16, SSD1306_WHITE);
   } else {
-    display.drawRoundRect(23, 15 + bob, 36, 27, 8, SSD1306_WHITE);
-    display.drawRoundRect(69, 15 + bob, 36, 27, 8, SSD1306_WHITE);
-    display.fillCircle(41 + pupilX, 28 + bob + pupilY, 7, SSD1306_WHITE);
-    display.fillCircle(87 + pupilX, 28 + bob + pupilY, 7, SSD1306_WHITE);
-    display.drawPixel(43 + pupilX, 25 + bob + pupilY, SSD1306_BLACK);
-    display.drawPixel(89 + pupilX, 25 + bob + pupilY, SSD1306_BLACK);
+    display.fillRoundRect(leftEyeX, eyeY, 16, 22, 6, SSD1306_WHITE);
+    display.fillRoundRect(rightEyeX, eyeY, 16, 22, 6, SSD1306_WHITE);
+    display.drawPixel(leftEyeX + 10, eyeY + 5, SSD1306_BLACK);
+    display.drawPixel(rightEyeX + 10, eyeY + 5, SSD1306_BLACK);
   }
 
-  display.drawRoundRect(44, 47 + bob, 40, bigSmile ? 11 : 9, 5, SSD1306_WHITE);
-  display.drawFastHLine(53, 50 + bob, 22, SSD1306_WHITE);
-  if (bigSmile) {
-    display.drawPixel(50, 52 + bob, SSD1306_WHITE);
-    display.drawPixel(77, 52 + bob, SSD1306_WHITE);
-  }
-
-  display.drawPixel(14, 15 + (frame % 5), SSD1306_WHITE);
-  display.drawPixel(18, 15 + (frame % 5), SSD1306_WHITE);
-  display.drawPixel(16, 13 + (frame % 5), SSD1306_WHITE);
-  display.drawPixel(16, 17 + (frame % 5), SSD1306_WHITE);
-  display.drawPixel(110, 43 - (frame % 6), SSD1306_WHITE);
-  display.drawPixel(114, 43 - (frame % 6), SSD1306_WHITE);
-  display.drawPixel(112, 41 - (frame % 6), SSD1306_WHITE);
-  display.drawPixel(112, 45 - (frame % 6), SSD1306_WHITE);
+  display.fillRoundRect(59, 43 + bob, 10, 4, 2, SSD1306_WHITE);
+  display.drawPixel(58, 42 + bob, SSD1306_WHITE);
+  display.drawPixel(69, 42 + bob, SSD1306_WHITE);
+  display.drawLine(24, 55 + bob, 31, 58 + bob, SSD1306_WHITE);
+  display.drawFastHLine(31, 58 + bob, 66, SSD1306_WHITE);
+  display.drawLine(97, 58 + bob, 104, 55 + bob, SSD1306_WHITE);
 }
 
 static void drawGreeting(Adafruit_SSD1306 &display, const String &userName) {
