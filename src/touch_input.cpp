@@ -6,12 +6,10 @@ TouchInput::TouchInput(int pin, uint32_t tapWindowMs, uint32_t longPressMs)
 void TouchInput::begin() {
   if (pin_ >= 0) {
     pinMode(pin_, INPUT_PULLDOWN);
-    idleLevel_ = digitalRead(pin_);
     rawDown_ = readPressed();
     stableDown_ = rawDown_;
     lastRawChangeAt_ = millis();
     pressedAt_ = rawDown_ ? lastRawChangeAt_ : 0;
-    longPressSent_ = rawDown_;
     tapCount_ = 0;
   }
 }
@@ -26,7 +24,7 @@ bool TouchInput::isEnabled() const {
 }
 
 bool TouchInput::readPressed() const {
-  return digitalRead(pin_) != idleLevel_;
+  return digitalRead(pin_) == (TOUCH_ACTIVE_HIGH ? HIGH : LOW);
 }
 
 TouchGesture TouchInput::update(uint32_t now) {
@@ -44,17 +42,17 @@ TouchGesture TouchInput::update(uint32_t now) {
     stableDown_ = rawDown_;
     if (stableDown_) {
       pressedAt_ = now;
-      longPressSent_ = false;
-    } else if (!longPressSent_) {
+    } else {
+      uint32_t pressDuration = now - pressedAt_;
+      if (pressedAt_ != 0 && pressDuration >= longPressMs_) {
+        tapCount_ = 0;
+        pressedAt_ = 0;
+        return TouchGesture::LongPress;
+      }
       tapCount_ = min<uint8_t>(3, tapCount_ + 1);
       lastReleaseAt_ = now;
+      pressedAt_ = 0;
     }
-  }
-
-  if (stableDown_ && !longPressSent_ && now - pressedAt_ >= longPressMs_) {
-    longPressSent_ = true;
-    tapCount_ = 0;
-    return TouchGesture::LongPress;
   }
 
   if (!stableDown_ && tapCount_ > 0 && now - lastReleaseAt_ >= tapWindowMs_) {

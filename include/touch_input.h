@@ -27,10 +27,8 @@ class TouchInput {
   int pin_;
   uint32_t tapWindowMs_;
   uint32_t longPressMs_;
-  bool idleLevel_ = LOW;
   bool rawDown_ = false;
   bool stableDown_ = false;
-  bool longPressSent_ = false;
   uint8_t tapCount_ = 0;
   uint32_t lastRawChangeAt_ = 0;
   uint32_t pressedAt_ = 0;

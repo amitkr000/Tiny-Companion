@@ -363,6 +363,7 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
   Serial.print("[touch] face ");
   Serial.println(gestureName(gesture));
   app.showIpUntil = 0;
+  app.companionMode = CompanionMode::Idle;
 
   bool greetedToday = triggerDailyTouchGreeting(now);
 
@@ -394,7 +395,7 @@ static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
     pokeCount = 0;
     app.stats.happiness = clampStat(app.stats.happiness + 15);
     app.stats.energy = clampStat(app.stats.energy + 4);
-    if (!greetedToday) triggerReaction(app, FaceId::Love, "Loved", now);
+    if (!greetedToday) triggerReaction(app, FaceId::Playful, "Played", now);
     toneOnce(1319, 45);
   } else if (gesture == TouchGesture::LongPress) {
     pokeCount = 0;

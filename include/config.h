@@ -77,10 +77,11 @@ static constexpr int DEFAULT_STRETCH_MINUTES = 90;
 static constexpr int DEFAULT_QUIET_START_HOUR = 23;
 static constexpr int DEFAULT_QUIET_END_HOUR = 7;
 
-// Touch timing.
+// Touch timing. TTP223 modules normally idle LOW and go HIGH while touched.
+static constexpr bool TOUCH_ACTIVE_HIGH = true;
 static constexpr uint32_t TOUCH_DEBOUNCE_MS = 35;
 static constexpr uint32_t TOUCH_TAP_WINDOW_MS = 420;
-static constexpr uint32_t TOUCH_LONG_PRESS_MS = 900;
+static constexpr uint32_t TOUCH_LONG_PRESS_MS = 1200;
 static constexpr uint32_t SETUP_RESET_HOLD_MS = 2500;
 static constexpr uint32_t POKE_WINDOW_MS = 10000;
 static constexpr uint8_t ANNOYED_POKE_COUNT = 5;
