@@ -6,7 +6,8 @@ TouchInput::TouchInput(int pin, uint32_t tapWindowMs, uint32_t longPressMs)
 void TouchInput::begin() {
   if (pin_ >= 0) {
     pinMode(pin_, INPUT_PULLDOWN);
-    rawDown_ = digitalRead(pin_) == HIGH;
+    idleLevel_ = digitalRead(pin_);
+    rawDown_ = readPressed();
     stableDown_ = rawDown_;
     lastRawChangeAt_ = millis();
     pressedAt_ = rawDown_ ? lastRawChangeAt_ : 0;
@@ -24,12 +25,16 @@ bool TouchInput::isEnabled() const {
   return pin_ >= 0;
 }
 
+bool TouchInput::readPressed() const {
+  return digitalRead(pin_) != idleLevel_;
+}
+
 TouchGesture TouchInput::update(uint32_t now) {
   if (!isEnabled()) {
     return TouchGesture::None;
   }
 
-  bool rawDown = digitalRead(pin_) == HIGH;
+  bool rawDown = readPressed();
   if (rawDown != rawDown_) {
     rawDown_ = rawDown;
     lastRawChangeAt_ = now;

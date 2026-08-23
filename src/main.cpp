@@ -159,6 +159,16 @@ static String greetingActionText(const __FlashStringHelper *prefix) {
   return text;
 }
 
+static const char *gestureName(TouchGesture gesture) {
+  switch (gesture) {
+    case TouchGesture::SingleTap: return "single";
+    case TouchGesture::DoubleTap: return "double";
+    case TouchGesture::TripleTap: return "triple";
+    case TouchGesture::LongPress: return "long";
+    case TouchGesture::None:
+    default: return "none";
+  }
+}
 static bool triggerDailyTouchGreeting(uint32_t now) {
   uint32_t localDay = currentLocalDay(now);
   if (localDay == 0 || localDay == app.lastGreetingDay) {
@@ -349,6 +359,10 @@ static void startSetupPortal(bool showSetupScreen) {
 
 static void handleFaceGesture(TouchGesture gesture, uint32_t now) {
   if (gesture == TouchGesture::None) return;
+
+  Serial.print("[touch] face ");
+  Serial.println(gestureName(gesture));
+  app.showIpUntil = 0;
 
   bool greetedToday = triggerDailyTouchGreeting(now);
 

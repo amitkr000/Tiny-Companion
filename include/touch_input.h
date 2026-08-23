@@ -22,9 +22,12 @@ class TouchInput {
   bool isEnabled() const;
 
  private:
+  bool readPressed() const;
+
   int pin_;
   uint32_t tapWindowMs_;
   uint32_t longPressMs_;
+  bool idleLevel_ = LOW;
   bool rawDown_ = false;
   bool stableDown_ = false;
   bool longPressSent_ = false;
