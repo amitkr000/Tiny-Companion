@@ -32,10 +32,10 @@ On first boot, Tiny Companion starts a setup Wi-Fi network:
 ```text
 SSID: TinyBotSetup
 Password: none
-Setup page: http://192.168.4.1
+Setup page: Wi-Fi captive portal
 ```
 
-Connect your phone or computer to that network, open `http://192.168.4.1`, choose your home Wi-Fi, enter the password, and save.
+Connect your phone or computer to that network, open the Wi-Fi setup prompt/captive portal, choose your home Wi-Fi, enter the password, and save.
 
 After connection, the OLED shows online status. Open the ESP32 local dashboard at the IP shown on the OLED and copy the access token. Then open the hosted dashboard and enter the ESP32 IP address plus that token:
 
@@ -190,7 +190,7 @@ If Wi-Fi setup does not appear:
 - Restart the device.
 - Hold either touch sensor while powering on to force setup mode.
 - Forget the setup network on your phone and reconnect.
-- Use `http://192.168.4.1` directly.
+- Open the Wi-Fi setup prompt shown by your phone/computer.
 
 If weather faces do not update:
 

@@ -9,7 +9,7 @@ static constexpr const char *MDNS_HOSTNAME = "tinycompanion";
 static constexpr const char *DEFAULT_USER_NAME = "Friend";
 
 // ESP32-hosted Wi-Fi setup portal. Connect a phone/computer to this access
-// point, then open http://192.168.4.1 to send home Wi-Fi details.
+// point, then use the captive setup page to send home Wi-Fi details.
 static constexpr const char *SETUP_AP_SSID = "TinyBotSetup";
 static constexpr const char *SETUP_AP_PASSWORD = "";
 static const IPAddress SETUP_AP_IP(192, 168, 4, 1);

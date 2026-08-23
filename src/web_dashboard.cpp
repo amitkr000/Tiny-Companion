@@ -284,7 +284,7 @@ void WebDashboard::sendSetupPage() {
   String body;
   body.reserve(4200);
   body += F("<h1>Tiny Companion Setup</h1>");
-  body += F("<p>Enter your home Wi-Fi details. After saving, reconnect to your normal Wi-Fi and open the IP shown on the OLED.</p>");
+  body += F("<p>Enter your home Wi-Fi details. After saving, reconnect to your normal Wi-Fi. The connected dashboard address will be shown after Wi-Fi joins.</p>");
   body += F("<form method=\"post\" action=\"/save\">");
   body += F("<label for=\"ssid\">Wi-Fi name</label><input id=\"ssid\" name=\"ssid\" autocomplete=\"off\" required>");
   body += F("<label for=\"password\">Wi-Fi password</label><input id=\"password\" name=\"password\" type=\"password\" autocomplete=\"current-password\">");
@@ -324,7 +324,7 @@ void WebDashboard::sendStatusPage() {
   } else if (state_->deviceMode == DeviceMode::SetupPortal) {
     body += F("<p class=\"status\">Setup portal is running. Connect to ");
     body += SETUP_AP_SSID;
-    body += F(" and open 192.168.4.1.</p>");
+    body += F(" and use the Wi-Fi setup page.</p>");
   } else {
     body += F("<p class=\"status\">Not connected yet.</p>");
   }

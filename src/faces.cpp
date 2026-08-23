@@ -591,7 +591,7 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
     case DeviceMode::SetupPortal:
       drawCentered(display, "Setup WiFi", 12);
       drawWrappedText(display, "Connect to " + String(SETUP_AP_SSID), 0, 27, 21, 2);
-      drawCentered(display, "192.168.4.1", 54);
+      drawCentered(display, "Use WiFi setup", 54);
       break;
     case DeviceMode::Connecting:
       drawCentered(display, "Joining WiFi", 16);

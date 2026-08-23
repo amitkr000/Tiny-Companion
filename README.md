@@ -30,7 +30,7 @@ On first boot, or when saved Wi-Fi fails, the ESP32 starts:
 ```text
 SSID: TinyBotSetup
 Password: none
-Setup page: http://192.168.4.1
+Setup page: Wi-Fi captive portal
 ```
 
 After it joins Wi-Fi, open the ESP32 local dashboard at the IP shown on the OLED and copy the access token. Then open the hosted dashboard and enter both the IP address and token.
