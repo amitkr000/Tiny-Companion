@@ -45,7 +45,7 @@ web_dashboard/
 
 Touch input produces gestures. Face-touch gestures update stats and reaction faces. Action-touch long-press cycles modes; short taps are reserved for the active mode or future mode actions.
 
-Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face.
+Weather service updates `WeatherContext` from Open-Meteo and NTP. It also calculates moon phase and season. The face renderer asks it for the best idle face, which is normally the cheerful animated face with short time/season glances.
 
 Pomodoro and reminders update non-blockingly. They never delay the loop, so touch and dashboard requests stay responsive.
 
@@ -56,7 +56,7 @@ The face renderer selects the final face using priority:
 3. Active Pomodoro or reminder.
 4. Recent reaction.
 5. Stat-driven needs.
-6. Weather/time/season/moon idle face.
+6. Cheerful idle face, with short time/season glances.
 
 In Face mode, `renderDisplay()` hides the status bar and draws only the selected face plus visual effects. Reaction faces still win first, so touch actions replace the idle face immediately.
 

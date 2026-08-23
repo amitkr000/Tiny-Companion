@@ -2,6 +2,7 @@
 
 static const FaceSpec FACE_SPECS[] = {
   {FaceId::Neutral, "neutral", "Calm and ready"},
+  {FaceId::CheerfulIdle, "cheerful", "Cheerful"},
   {FaceId::Happy, "happy", "Soft smile"},
   {FaceId::Playful, "playful", "Ready to play"},
   {FaceId::Hungry, "hungry", "Wants a snack"},

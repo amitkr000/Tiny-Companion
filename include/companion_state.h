@@ -22,6 +22,7 @@ enum class CompanionMode : uint8_t {
 
 enum class FaceId : uint8_t {
   Neutral,
+  CheerfulIdle,
   Happy,
   Playful,
   Hungry,

@@ -1,7 +1,7 @@
 const STORAGE_KEY = "tinyCompanionDevice";
 const COMMON_BASES = ["192.168.0.", "192.168.1.", "192.168.29.", "192.168.31.", "10.0.0."];
 const FACES = [
-  "neutral", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
+  "neutral", "cheerful", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
   "poke", "feed", "full", "wake", "proud", "pomodoro", "break", "hydration",
   "sunny", "rainy", "cloudy", "stormy", "foggy", "windy", "hot", "cold",
   "morning", "afternoon", "evening", "night", "new-moon", "crescent-moon",

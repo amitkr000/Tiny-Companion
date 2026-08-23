@@ -72,6 +72,36 @@ static void drawHeartEyes(Adafruit_SSD1306 &display) {
   display.drawFastHLine(48, 51, 32, SSD1306_WHITE);
 }
 
+static void drawCheerfulIdle(Adafruit_SSD1306 &display) {
+  uint8_t frame = (millis() / 180) % 16;
+  int8_t bob = frame < 4 ? -1 : (frame < 8 ? 0 : (frame < 12 ? 1 : 0));
+  bool blink = frame == 14;
+  int16_t eyeY = 23 + bob;
+
+  if (blink) {
+    display.drawFastHLine(32, eyeY + 8, 22, SSD1306_WHITE);
+    display.drawFastHLine(74, eyeY + 8, 22, SSD1306_WHITE);
+  } else {
+    display.fillRoundRect(32, eyeY, 22, 16, 7, SSD1306_WHITE);
+    display.fillRoundRect(74, eyeY, 22, 16, 7, SSD1306_WHITE);
+    display.drawPixel(45, eyeY + 5, SSD1306_BLACK);
+    display.drawPixel(87, eyeY + 5, SSD1306_BLACK);
+  }
+
+  display.drawLine(48, 50 + bob, 56, 55 + bob, SSD1306_WHITE);
+  display.drawLine(56, 55 + bob, 72, 55 + bob, SSD1306_WHITE);
+  display.drawLine(72, 55 + bob, 80, 50 + bob, SSD1306_WHITE);
+
+  display.drawPixel(17, 18 + (frame % 3), SSD1306_WHITE);
+  display.drawPixel(21, 18 + (frame % 3), SSD1306_WHITE);
+  display.drawPixel(19, 16 + (frame % 3), SSD1306_WHITE);
+  display.drawPixel(19, 20 + (frame % 3), SSD1306_WHITE);
+  display.drawPixel(108, 38 - (frame % 4), SSD1306_WHITE);
+  display.drawPixel(112, 38 - (frame % 4), SSD1306_WHITE);
+  display.drawPixel(110, 36 - (frame % 4), SSD1306_WHITE);
+  display.drawPixel(110, 40 - (frame % 4), SSD1306_WHITE);
+}
+
 static void drawSun(Adafruit_SSD1306 &display, int x, int y) {
   display.drawCircle(x, y, 8, SSD1306_WHITE);
   for (int i = -14; i <= 14; i += 7) {
@@ -155,6 +185,9 @@ static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
 
 static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &state) {
   switch (face) {
+    case FaceId::CheerfulIdle:
+      drawCheerfulIdle(display);
+      break;
     case FaceId::Happy:
     case FaceId::Poke:
       drawEyes(display, 22, 16, 16, 50);

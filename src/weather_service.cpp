@@ -199,23 +199,21 @@ SeasonTheme WeatherService::resolvedSeason(uint32_t now) const {
 }
 
 FaceId WeatherService::idleFaceFor(uint32_t now) const {
-  if (!context_) return FaceId::Neutral;
+  if (!context_) return FaceId::CheerfulIdle;
 
   int hour = localHour(now);
-  WeatherTheme theme = context_->manualWeather ? context_->overrideTheme : context_->theme;
-  FaceId weatherFace = faceForWeather(theme);
-  bool weatherChangedRecently = context_->lastWeatherChangeAt != 0 && now - context_->lastWeatherChangeAt < WEATHER_CHANGE_FACE_MS;
-  bool weatherGlance = context_->hasData && ((now + 13000UL) % WEATHER_GLANCE_INTERVAL_MS) < WEATHER_FACE_MS;
-  if (weatherFace != FaceId::Neutral && (weatherChangedRecently || weatherGlance)) {
-    return weatherFace;
+  uint32_t glanceWindow = now % IDLE_GLANCE_INTERVAL_MS;
+  if (glanceWindow < IDLE_GLANCE_FACE_MS) {
+    uint32_t glanceIndex = now / IDLE_GLANCE_INTERVAL_MS;
+    if (glanceIndex % 2 == 0) {
+      FaceId timeFace = faceForTime(hour);
+      return timeFace != FaceId::Neutral ? timeFace : FaceId::CheerfulIdle;
+    }
+    FaceId seasonFace = faceForSeason(resolvedSeason(now));
+    return seasonFace != FaceId::Neutral ? seasonFace : FaceId::CheerfulIdle;
   }
 
-  if ((hour >= DEFAULT_QUIET_START_HOUR || hour < DEFAULT_QUIET_END_HOUR) && ((now + 31000UL) % WEATHER_GLANCE_INTERVAL_MS) < WEATHER_FACE_MS) {
-    return faceForMoon(context_->moon);
-  }
-
-  FaceId timeFace = faceForTime(hour);
-  return timeFace != FaceId::Neutral ? timeFace : faceForSeason(resolvedSeason(now));
+  return FaceId::CheerfulIdle;
 }
 
 WeatherTheme WeatherService::themeFromWeatherCode(int code, float temperatureC, float windKmh) const {

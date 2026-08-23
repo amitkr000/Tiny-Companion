@@ -18,7 +18,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 
 ## Supported Features
 
-- OLED face system with weather, time, moon, season, action, reaction, reminder, and system faces.
+- OLED face system with a cheerful animated default idle face plus weather, time, moon, season, action, reaction, reminder, and system faces.
 - Wi-Fi setup portal at `TinyBotSetup`.
 - GitHub Pages hosted dashboard after Wi-Fi connection.
 - ESP32 fallback page plus local JSON API.
@@ -31,7 +31,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Face touch gestures: poke, feed, love, sleep/wake.
 - Action touch gestures: long-press mode cycling with automatic return to face mode.
 - Face mode shows only the face and visual effects, without labels, status icons, or extra text.
-- Pomodoro timer with configurable focus, short break, long break, and long-break rounds.
+- Pomodoro timer with configurable duration.
 - Hydration and stretch reminders.
 - OLED brightness, invert, and face-animation settings.
 - JSON status endpoint at `/api/state`.
@@ -44,13 +44,13 @@ Mode faces appear while a mode is active: Pomodoro timer, reminders, stretch bre
 
 Reaction faces appear briefly after touch or dashboard actions: poke, feed, full, love, angry, annoyed, proud, and wake. These reactions immediately replace the idle face.
 
-Face mode mostly uses time-of-day idle faces when nothing urgent is happening. Weather faces appear briefly when weather changes, plus occasional short weather glances:
+Face mode uses the cheerful animated idle face as the home expression whenever nothing urgent is happening. Short time and season faces appear between cheerful stretches, then the display returns to the cheerful face automatically:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
 - Time: morning waking/nap energy, afternoon low energy, evening tea, night sleep/zzz.
 - Moon: new moon, crescent, half moon, full moon.
 - Season: spring, summer, monsoon, autumn, winter.
-- Weather effects are drawn around the face. Rain uses falling drops, and storm/heavy rain can add lightning without hiding the expression.
+- Weather effects are available as preview/override faces. Rain uses falling drops, and storm/heavy rain can add lightning without hiding the expression.
 
 ## Touch Behavior
 
@@ -61,12 +61,12 @@ Face mode mostly uses time-of-day idle faces when nothing urgent is happening. W
 | Face touch | Triple tap | Love/play reaction |
 | Face touch | Long press | Sleep or wake |
 | Face touch | Repeated taps | Annoyed, then angry |
-| Face mode | No recent touch | Shows clean idle face and visual effects only |
+| Face mode | No recent touch | Shows the cheerful animated face, with short time/season glances |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single/double/triple tap | Reserved for current/future mode actions |
 | Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, and Status modes |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |
-| Website | Pomodoro controls | Start, pause, reset, and switch phase |
+| Website | Pomodoro controls | Start, pause, and reset |
 | Website | Mode test controls | Cycle mode, Face mode, and Pomodoro mode |
 
 ## Dashboard/API Summary

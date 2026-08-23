@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Tiny Companion is a small desk pet with expressive OLED faces. It reacts to touch, shows weather/time/season/moon idle faces, runs a Pomodoro timer, and reminds you to drink water or stretch.
+Tiny Companion is a small desk pet with expressive OLED faces. It reacts to touch, usually shows a cheerful animated idle face, briefly shows time/season faces between cheerful stretches, runs a Pomodoro timer, and reminds you to drink water or stretch.
 
 In Face mode, the OLED shows only the face and its visual effects. Labels, status icons, and extra text are hidden so touch reactions like poke/feed/love can take over cleanly.
 
@@ -98,17 +98,16 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 Weather faces use Open-Meteo after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard.
 
-Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. Most of the time it shows the time-of-day idle face:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. Most of the time it shows a cheerful animated idle face. For a short moment between cheerful stretches, it shows the current time-of-day or season face:
 
 - Morning: waking up / nap energy.
 - Afternoon: sleepy and lower energy.
 - Evening: tea-time mood.
 - Night: sleeping with zzz.
 
-Weather faces appear briefly after weather changes, plus occasional short weather glances:
+Weather faces are available as preview/override faces in the dashboard:
 
 - Sunny, rainy, cloudy, stormy, foggy, windy, hot, or cold weather.
-- New moon, crescent, half moon, or full moon.
 - Spring, summer, monsoon, autumn, or winter.
 
 Rainy faces use falling drops around the expression. Storm/heavy rain faces can also show lightning.
@@ -122,8 +121,8 @@ The dashboard lets you:
 - Connect to the ESP32 by saved IP, manual IP, `tinycompanion.local`, or best-effort local scan.
 - Preview faces.
 - Trigger poke/feed/play/love/sleep/wake.
-- Test mode cycling with Face, Pomodoro, Break, and Cycle Mode buttons.
-- Start, pause, reset, and switch Pomodoro.
+- Test mode cycling with Face, Pomodoro, and Cycle Mode buttons.
+- Start, pause, and reset Pomodoro.
 - Configure reminders.
 - Configure weather location and timezone.
 - Override weather or season.
@@ -138,8 +137,11 @@ If your browser blocks local-network access from the hosted page, open `http://E
 
 | Face | Meaning |
 | --- | --- |
-| Sunny/rainy/cloudy | Current weather idle |
-| Moon faces | Night idle, based on moon phase |
+| Cheerful | Default animated face mode expression |
+| Morning/afternoon/evening/night | Short time-of-day glance |
+| Spring/summer/monsoon/autumn/winter | Short season glance |
+| Sunny/rainy/cloudy | Weather preview or override face |
+| Moon faces | Moon phase preview face |
 | Hungry | Fullness is low |
 | Sleepy | Energy is low or sleep mode is active |
 | Lonely/bored | Happiness is low |
