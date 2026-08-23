@@ -251,6 +251,40 @@ static void updateHomePanel(uint32_t now) {
   }
 }
 
+static FaceId activeIdleCameoFace(uint32_t now, bool pomodoroActive, bool hydrationActive) {
+  if (!pomodoroActive && !hydrationActive) {
+    return weather.idleFaceFor(now);
+  }
+
+  uint32_t activeStart = IDLE_LOOP_MS - ACTIVE_STATUS_FACE_MS;
+  uint32_t loopPosition = now % IDLE_LOOP_MS;
+  if (loopPosition >= activeStart) {
+    return FaceId::CheerfulIdle;
+  }
+
+  constexpr uint32_t cameoSlotMs = 5000;
+  uint32_t slotCount = max<uint32_t>(1, activeStart / cameoSlotMs);
+  uint32_t slot = loopPosition / cameoSlotMs;
+  uint32_t minute = now / IDLE_LOOP_MS;
+
+  if (pomodoroActive && hydrationActive) {
+    uint32_t pomodoroSlot = (minute * 3UL + 1UL) % slotCount;
+    uint32_t hydrationSlot = (minute * 5UL + 4UL) % slotCount;
+    if (hydrationSlot == pomodoroSlot) {
+      hydrationSlot = (hydrationSlot + 3UL) % slotCount;
+    }
+    if (slot == pomodoroSlot) return FaceId::Pomodoro;
+    if (slot == hydrationSlot) return FaceId::Hydration;
+  } else {
+    uint32_t cameoSlot = (minute * 7UL + (pomodoroActive ? 2UL : 5UL)) % slotCount;
+    if (slot == cameoSlot) {
+      return pomodoroActive ? FaceId::Pomodoro : FaceId::Hydration;
+    }
+  }
+
+  return FaceId::CheerfulIdle;
+}
+
 static void renderNow() {
   uint32_t now = millis();
   if (now - lastFrameAt < FACE_FRAME_MS) {
@@ -258,8 +292,10 @@ static void renderNow() {
   }
   lastFrameAt = now;
   updateCompletionNotices(now);
-  FaceId idleFace = app.companionMode == CompanionMode::Idle && (pomodoro.isRunning() || app.reminderSettings.hydrationEnabled)
-    ? FaceId::CheerfulIdle
+  bool pomodoroActive = pomodoro.isRunning();
+  bool hydrationActive = app.reminderSettings.hydrationEnabled;
+  FaceId idleFace = app.companionMode == CompanionMode::Idle
+    ? activeIdleCameoFace(now, pomodoroActive, hydrationActive)
     : weather.idleFaceFor(now);
   app.currentFace = selectFace(app, pomodoro, reminders, idleFace, now);
   updateHomePanel(now);
