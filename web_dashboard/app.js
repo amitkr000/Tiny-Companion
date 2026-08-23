@@ -56,7 +56,6 @@ function setStatus(online, message) {
 }
 
 function updateFaceArt(face) {
-  $("#faceLabel").textContent = face || "neutral";
   const art = $("#faceArt");
   art.className = `face-art face-${face || "neutral"}`;
 }

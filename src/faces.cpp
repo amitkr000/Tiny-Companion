@@ -1,7 +1,5 @@
 #include "faces.h"
 
-#include <time.h>
-
 static String shortText(const String &text, size_t maxLen) {
   if (text.length() <= maxLen) return text;
   return text.substring(0, maxLen - 3) + "...";
@@ -91,6 +89,26 @@ static void drawCloud(Adafruit_SSD1306 &display, int x, int y) {
   display.drawFastHLine(x - 7, y + 8, 36, SSD1306_WHITE);
 }
 
+static void drawRain(Adafruit_SSD1306 &display, bool heavy) {
+  uint8_t drift = (millis() / 140) % 10;
+  const int lightDrops[] = {12, 24, 104, 116};
+  const int heavyDrops[] = {8, 18, 28, 100, 110, 120, 48, 80};
+  const int *drops = heavy ? heavyDrops : lightDrops;
+  uint8_t count = heavy ? 8 : 4;
+
+  for (uint8_t i = 0; i < count; i++) {
+    int x = drops[i];
+    int y = 10 + ((i * 13 + drift) % 42);
+    display.drawLine(x, y, x - 2, y + 6, SSD1306_WHITE);
+  }
+}
+
+static void drawLightning(Adafruit_SSD1306 &display, int x, int y) {
+  display.drawLine(x, y, x - 6, y + 12, SSD1306_WHITE);
+  display.drawLine(x - 6, y + 12, x + 1, y + 12, SSD1306_WHITE);
+  display.drawLine(x + 1, y + 12, x - 8, y + 30, SSD1306_WHITE);
+}
+
 static void drawMoon(Adafruit_SSD1306 &display, MoonPhase phase) {
   display.drawCircle(64, 31, 17, SSD1306_WHITE);
   if (phase == MoonPhase::NewMoon) {
@@ -133,39 +151,6 @@ static void drawStats(Adafruit_SSD1306 &display, const AppState &state) {
   display.print(state.stats.energy);
   display.drawRoundRect(82, 20, 30, 22, 5, SSD1306_WHITE);
   display.fillRect(89, 42, 16, 4, SSD1306_WHITE);
-}
-
-static uint32_t estimatedEpoch(const AppState &state, uint32_t now) {
-  if (state.weather.epochAtSync == 0 || state.weather.lastSyncAt == 0) {
-    return 0;
-  }
-  return state.weather.epochAtSync + ((now - state.weather.lastSyncAt) / 1000UL);
-}
-
-static void drawTimeWeatherInfo(Adafruit_SSD1306 &display, const AppState &state) {
-  uint32_t now = millis();
-  uint32_t epoch = estimatedEpoch(state, now);
-  char timeBuffer[8] = "--:--";
-  char dateBuffer[16] = "time sync";
-
-  if (epoch != 0) {
-    time_t localEpoch = epoch + state.weather.timezoneOffsetMinutes * 60L;
-    struct tm *timeInfo = gmtime(&localEpoch);
-    if (timeInfo) {
-      snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d", timeInfo->tm_hour, timeInfo->tm_min);
-      snprintf(dateBuffer, sizeof(dateBuffer), "%02d/%02d", timeInfo->tm_mday, timeInfo->tm_mon + 1);
-    }
-  }
-
-  WeatherTheme theme = state.weather.manualWeather ? state.weather.overrideTheme : state.weather.theme;
-  String weatherLine = state.weather.hasData || state.weather.manualWeather
-    ? String(weatherThemeName(theme)) + " " + String(state.weather.temperatureC, 0) + "C"
-    : "Weather sync";
-
-  drawCentered(display, timeBuffer, 14, 2);
-  drawCentered(display, shortText(dateBuffer, 16), 33);
-  drawCentered(display, shortText(weatherLine, 21), 44);
-  drawCentered(display, shortText(String(seasonThemeName(state.weather.season)) + " " + moonPhaseName(state.weather.moon), 21), 55);
 }
 
 static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &state) {
@@ -237,35 +222,38 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       display.drawCircle(101, 37, 7, SSD1306_WHITE);
       break;
     case FaceId::SunnyIdle:
-      drawSun(display, 102, 22);
+      drawSun(display, 108, 18);
       drawEyes(display, 25, 13, 13, 51);
       break;
     case FaceId::RainyIdle:
+      drawRain(display, false);
+      drawEyes(display, 24, 10, 10, 51);
+      break;
     case FaceId::MonsoonIdle:
-      drawCloud(display, 76, 18);
-      for (int x = 78; x < 112; x += 10) display.drawLine(x, 36, x - 3, 43, SSD1306_WHITE);
-      drawEyes(display, 30, 9, 9, 53);
+      drawRain(display, true);
+      drawEyes(display, 24, 9, 9, 52);
       break;
     case FaceId::CloudyIdle:
-      drawCloud(display, 75, 20);
-      drawEyes(display, 31, 11, 11, 52);
+      drawCloud(display, 92, 15);
+      drawEyes(display, 26, 11, 11, 52);
       break;
     case FaceId::StormyIdle:
-      drawCloud(display, 74, 17);
-      display.drawLine(88, 34, 81, 45, SSD1306_WHITE);
-      display.drawLine(81, 45, 91, 43, SSD1306_WHITE);
-      display.drawLine(91, 43, 84, 55, SSD1306_WHITE);
-      drawEyes(display, 31, 8, 8, 53);
+      drawRain(display, true);
+      drawLightning(display, 112, 9);
+      drawEyes(display, 26, 8, 8, 53);
       break;
     case FaceId::FoggyIdle:
       drawEyes(display, 24, 10, 10, 50);
-      for (int y = 18; y <= 52; y += 10) display.drawFastHLine(18, y, 92, SSD1306_WHITE);
+      for (int y = 17; y <= 49; y += 11) {
+        display.drawFastHLine(4, y, 25, SSD1306_WHITE);
+        display.drawFastHLine(99, y + 4, 25, SSD1306_WHITE);
+      }
       break;
     case FaceId::WindyIdle:
       drawEyes(display, 24, 14, 7, 50);
-      display.drawFastHLine(82, 18, 32, SSD1306_WHITE);
-      display.drawFastHLine(76, 26, 42, SSD1306_WHITE);
-      display.drawFastHLine(88, 34, 26, SSD1306_WHITE);
+      display.drawFastHLine(4, 16, 28, SSD1306_WHITE);
+      display.drawFastHLine(92, 24, 30, SSD1306_WHITE);
+      display.drawFastHLine(6, 38, 22, SSD1306_WHITE);
       break;
     case FaceId::HotIdle:
       drawSun(display, 101, 19);
@@ -286,8 +274,8 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       break;
     case FaceId::AfternoonIdle:
       drawEyes(display, 22, 15, 15, 50);
-      display.drawRect(16, 45, 18, 9, SSD1306_WHITE);
-      display.drawFastHLine(18, 48, 14, SSD1306_WHITE);
+      display.drawRect(100, 45, 18, 9, SSD1306_WHITE);
+      display.drawFastHLine(102, 48, 14, SSD1306_WHITE);
       break;
     case FaceId::EveningIdle:
       drawEyes(display, 24, 13, 13, 51);
@@ -371,7 +359,6 @@ static void drawFace(Adafruit_SSD1306 &display, FaceId face, const AppState &sta
       drawEyes(display, 24, 16, 16, 50);
       break;
   }
-  drawCentered(display, shortText(faceName(face), 21), 55);
 }
 
 void applyDisplaySettings(Adafruit_SSD1306 &display, const DisplaySettings &settings) {
@@ -415,7 +402,17 @@ FaceId selectFace(AppState &state, const PomodoroTimer &pomodoro, const Reminder
 
 void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const PomodoroTimer &pomodoro, const ReminderService &reminders, bool wifiConnected, int rssi, const String &ssid, const IPAddress &ip) {
   display.clearDisplay();
-  drawStatusBar(display, state, wifiConnected, rssi);
+  bool faceOnlyScreen = state.deviceMode == DeviceMode::Online
+    && state.displaySettings.idleAnimationEnabled
+    && (state.showIpUntil == 0 || static_cast<int32_t>(state.showIpUntil - millis()) <= 0)
+    && (state.hasReactionFace || state.companionMode == CompanionMode::Idle)
+    && state.companionMode != CompanionMode::Pomodoro
+    && state.companionMode != CompanionMode::Break
+    && state.companionMode != CompanionMode::Status
+    && state.companionMode != CompanionMode::Reminders;
+  if (!faceOnlyScreen) {
+    drawStatusBar(display, state, wifiConnected, rssi);
+  }
 
   switch (state.deviceMode) {
     case DeviceMode::SetupPortal:
@@ -448,8 +445,6 @@ void renderDisplay(Adafruit_SSD1306 &display, const AppState &state, const Pomod
         drawCentered(display, "Hydrate in", 14);
         drawCentered(display, String(reminders.minutesUntilHydration(millis())) + " min", 28, 2);
         drawCentered(display, "Stretch " + String(reminders.minutesUntilStretch(millis())) + "m", 54);
-      } else if (state.companionMode == CompanionMode::Idle && (millis() % (IDLE_FACE_MS + WEATHER_FACE_MS)) >= IDLE_FACE_MS) {
-        drawTimeWeatherInfo(display, state);
       } else {
         drawFace(display, state.currentFace, state);
       }

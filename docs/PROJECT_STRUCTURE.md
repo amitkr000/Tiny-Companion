@@ -58,7 +58,7 @@ The face renderer selects the final face using priority:
 5. Stat-driven needs.
 6. Weather/time/season/moon idle face.
 
-In Face mode, `renderDisplay()` alternates between the selected idle face and a time/weather information screen. Reaction faces still win first, so touch actions interrupt the idle/info cycle immediately.
+In Face mode, `renderDisplay()` hides the status bar and draws only the selected face plus visual effects. Reaction faces still win first, so touch actions replace the idle face immediately.
 
 The hosted GitHub Pages dashboard talks to the ESP32 through JSON API routes. Settings are saved to ESP32 Preferences/NVS.
 

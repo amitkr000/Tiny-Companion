@@ -30,7 +30,7 @@ Use a protected LiPo or TP4056 protection module. A basic TP4056 is a charger, n
 - Companion stats: fullness, happiness, and energy.
 - Face touch gestures: poke, feed, love, sleep/wake.
 - Action touch gestures: long-press mode cycling with automatic return to face mode.
-- Face mode alternates between expressive idle faces and time/weather information.
+- Face mode shows only the face and visual effects, without labels, status icons, or extra text.
 - Pomodoro timer with configurable focus, short break, long break, and long-break rounds.
 - Hydration and stretch reminders.
 - OLED brightness, invert, and face-animation settings.
@@ -42,15 +42,15 @@ System faces have highest priority: boot, setup, connecting, low battery, and er
 
 Mode faces appear while a mode is active: focused Pomodoro, break time, reminders, sleep.
 
-Reaction faces appear briefly after touch or dashboard actions: poke, feed, full, love, angry, annoyed, proud, and wake. These reactions interrupt the Face mode idle/info cycle immediately.
+Reaction faces appear briefly after touch or dashboard actions: poke, feed, full, love, angry, annoyed, proud, and wake. These reactions immediately replace the idle face.
 
-Face mode alternates between idle faces and a compact time/weather information screen when nothing urgent is happening:
+Face mode uses idle faces when nothing urgent is happening:
 
 - Weather: sunny, rainy, cloudy, stormy, foggy, windy, hot, cold.
 - Time: morning, afternoon, evening, night.
 - Moon: new moon, crescent, half moon, full moon.
 - Season: spring, summer, monsoon, autumn, winter.
-- Info screen: time, date, weather, temperature, season, and moon phase.
+- Weather effects are drawn around the face. Rain uses falling drops, and storm/heavy rain can add lightning without hiding the expression.
 
 ## Touch Behavior
 
@@ -61,8 +61,8 @@ Face mode alternates between idle faces and a compact time/weather information s
 | Face touch | Triple tap | Love/play reaction |
 | Face touch | Long press | Sleep or wake |
 | Face touch | Repeated taps | Annoyed, then angry |
-| Face mode | No recent touch | Alternates idle face and time/weather info |
-| Face mode | Any touch/dashboard action | Interrupts the cycle and shows the reaction face |
+| Face mode | No recent touch | Shows clean idle face and visual effects only |
+| Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single/double/triple tap | Reserved for current/future mode actions |
 | Action touch | Long press | Cycle Face, Pomodoro, Break, Clock, Reminders, and Status modes |
 | Action touch | Paused/preview mode timeout | Returns automatically to face mode after about 20 seconds |

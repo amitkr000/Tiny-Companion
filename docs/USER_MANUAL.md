@@ -4,7 +4,7 @@
 
 Tiny Companion is a small desk pet with expressive OLED faces. It reacts to touch, shows weather/time/season/moon idle faces, runs Pomodoro focus sessions, and reminds you to drink water or stretch.
 
-In Face mode, the OLED automatically alternates between the current idle face and a compact time/weather information screen. Any touch input interrupts that cycle and shows the correct reaction face immediately.
+In Face mode, the OLED shows only the face and its visual effects. Labels, status icons, and extra text are hidden so touch reactions like poke/feed/love can take over cleanly.
 
 ## Wiring Overview
 
@@ -101,12 +101,14 @@ When a reminder appears, use the dashboard action to mark it done. The face will
 
 Weather faces use Open-Meteo after Wi-Fi setup. Set your latitude, longitude, timezone, and UTC offset in the dashboard.
 
-Face mode cycles between idle faces and an info screen with time, date, weather, temperature, season, and moon phase. Idle faces can reflect:
+Face mode keeps the display clean: no face labels, no status bar, and no extra text while a face is showing. Idle faces can reflect:
 
 - Sunny, rainy, cloudy, stormy, foggy, windy, hot, or cold weather.
 - Morning, afternoon, evening, or night.
 - New moon, crescent, half moon, or full moon.
 - Spring, summer, monsoon, autumn, or winter.
+
+Rainy faces use falling drops around the expression. Storm/heavy rain faces can also show lightning.
 
 Manual weather and season overrides are available in the dashboard.
 

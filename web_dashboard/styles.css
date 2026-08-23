@@ -180,20 +180,10 @@ button:disabled {
   background: #111b1e;
   color: #e8fff1;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr;
   align-items: center;
   justify-items: center;
   box-shadow: inset 0 0 0 6px #243034;
-}
-
-.face-label {
-  align-self: end;
-  width: 100%;
-  padding: 0 10px 13px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .face-art {
