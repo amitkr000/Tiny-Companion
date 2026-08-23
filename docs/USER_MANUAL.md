@@ -45,7 +45,7 @@ https://amitkr000.github.io/Tiny-Companion/
 
 The IP address stays on screen for about 30 seconds, then Tiny Companion returns to face mode.
 
-To force setup mode, hold either touch sensor while powering on the ESP32. This clears saved Wi-Fi credentials and starts the setup network again.
+After Wi-Fi is saved, Tiny Companion reconnects automatically after a power cycle. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on the ESP32 for about 2.5 seconds.
 
 ## Daily Touch Controls
 
@@ -188,7 +188,7 @@ If touch does not work:
 If Wi-Fi setup does not appear:
 
 - Restart the device.
-- Hold either touch sensor while powering on to force setup mode.
+- Hold both touch sensors while powering on for about 2.5 seconds to intentionally clear saved Wi-Fi and force setup mode.
 - Forget the setup network on your phone and reconnect.
 - Open the Wi-Fi setup prompt shown by your phone/computer.
 

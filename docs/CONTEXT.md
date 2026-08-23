@@ -64,7 +64,7 @@ Face mode uses a repeating 60-second idle loop whenever nothing urgent is happen
 | Face touch | Long press | Pet/rub affection with animated love face |
 | Face touch | Repeated taps | Annoyed, then angry |
 | Face touch | First touch of a new local day | Greets the saved user name |
-| Face mode | No recent touch | Loops 40s cheerful face, 10s time face, 10s weather face |
+| Face mode | No recent touch | Loops 40s cheerful face, 5s weather face, 5s time face, 10s time/weather info |
 | Face mode | Any touch/dashboard action | Shows the reaction face immediately |
 | Action touch | Single/double/triple tap | Reserved for current/future mode actions |
 | Action touch | Long press | Cycle Face, Pomodoro, Clock, Reminders, Status, and Setting modes |

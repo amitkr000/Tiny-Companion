@@ -445,6 +445,21 @@ static void handleActionGesture(TouchGesture gesture, uint32_t now) {
   saveCompanionState();
 }
 
+static bool setupResetGestureHeld() {
+  if (FACE_TOUCH_PIN < 0 || ACTION_TOUCH_PIN < 0) {
+    return false;
+  }
+
+  uint32_t startedAt = millis();
+  while (millis() - startedAt < SETUP_RESET_HOLD_MS) {
+    if (digitalRead(FACE_TOUCH_PIN) != HIGH || digitalRead(ACTION_TOUCH_PIN) != HIGH) {
+      return false;
+    }
+    delay(25);
+  }
+  return true;
+}
+
 static void decayStats(uint32_t now) {
   if (app.lastStatsDecayAt == 0) {
     app.lastStatsDecayAt = now;
@@ -484,7 +499,10 @@ void setup() {
   faceTouch.begin();
   actionTouch.begin();
   delay(80);
-  forceSetupOnBoot = (FACE_TOUCH_PIN >= 0 && digitalRead(FACE_TOUCH_PIN) == HIGH) || (ACTION_TOUCH_PIN >= 0 && digitalRead(ACTION_TOUCH_PIN) == HIGH);
+  forceSetupOnBoot = setupResetGestureHeld();
+  if (forceSetupOnBoot) {
+    Serial.println("[boot] setup reset gesture held");
+  }
 
   if (ENABLE_SOUND && BUZZER_PIN >= 0) {
     ledcSetup(BUZZER_CHANNEL, 2000, BUZZER_RESOLUTION_BITS);
@@ -511,15 +529,24 @@ void setup() {
   dashboard.setCallbacks(saveCompanionState, saveRuntimeSettings, applyDisplayCallback, saveWifiAndConnect, forgetWifi, forceWeatherSync);
 
   savedSsid = preferences.getString("ssid", "");
-  if (START_SETUP_AP_ON_BOOT || forceSetupOnBoot) {
-    Serial.println("[boot] setup AP requested");
-    if (forceSetupOnBoot) {
-      preferences.remove("ssid");
-      preferences.remove("password");
-      savedSsid = "";
-    }
+  if (START_SETUP_AP_ON_BOOT) {
+    Serial.println("[boot] setup AP requested by config");
     startSetupPortal();
-  } else if (!connectToSavedWifi(WIFI_CONNECT_TIMEOUT_MS)) {
+  } else if (forceSetupOnBoot) {
+    Serial.println("[boot] clearing saved WiFi from reset gesture");
+    preferences.remove("ssid");
+    preferences.remove("password");
+    savedSsid = "";
+    startSetupPortal();
+  } else if (savedSsid.length() > 0) {
+    Serial.print("[boot] saved WiFi found: ");
+    Serial.println(savedSsid);
+    if (!connectToSavedWifi(WIFI_CONNECT_TIMEOUT_MS)) {
+      Serial.println("[boot] saved WiFi failed, starting setup AP");
+      startSetupPortal();
+    }
+  } else {
+    Serial.println("[boot] no saved WiFi, starting setup AP");
     startSetupPortal();
   }
 }

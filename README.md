@@ -36,7 +36,7 @@ Setup page: Wi-Fi captive portal
 After it joins Wi-Fi, open the ESP32 local dashboard at the IP shown on the OLED and copy the access token. Then open the hosted dashboard and enter both the IP address and token.
 The IP address is shown for about 30 seconds after connection, then the companion returns to face mode.
 
-To force setup mode, hold either touch sensor while powering on. This clears saved Wi-Fi credentials and starts the setup network again.
+After Wi-Fi is saved, normal power cycling reconnects automatically. To intentionally clear saved Wi-Fi and force setup mode, hold both touch sensors while powering on for about 2.5 seconds.
 
 ## Build And Flash
 

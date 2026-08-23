@@ -81,6 +81,7 @@ static constexpr int DEFAULT_QUIET_END_HOUR = 7;
 static constexpr uint32_t TOUCH_DEBOUNCE_MS = 35;
 static constexpr uint32_t TOUCH_TAP_WINDOW_MS = 420;
 static constexpr uint32_t TOUCH_LONG_PRESS_MS = 900;
+static constexpr uint32_t SETUP_RESET_HOLD_MS = 2500;
 static constexpr uint32_t POKE_WINDOW_MS = 10000;
 static constexpr uint8_t ANNOYED_POKE_COUNT = 5;
 static constexpr uint8_t ANGRY_POKE_COUNT = 8;
