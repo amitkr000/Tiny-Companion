@@ -2,12 +2,12 @@
 
 void PomodoroTimer::begin(const PomodoroSettings &settings) {
   settings_ = settings;
-  setPhase(PomodoroPhase::Focus, millis(), false);
+  reset(millis());
 }
 
 void PomodoroTimer::applySettings(const PomodoroSettings &settings, uint32_t now) {
   settings_ = settings;
-  setPhase(phase_, now, false);
+  reset(now);
 }
 
 void PomodoroTimer::update(uint32_t now) {
@@ -15,13 +15,9 @@ void PomodoroTimer::update(uint32_t now) {
     return;
   }
 
-  if (phase_ == PomodoroPhase::Focus) {
-    completedRounds_++;
-    bool longBreak = settings_.roundsBeforeLongBreak > 0 && completedRounds_ % settings_.roundsBeforeLongBreak == 0;
-    setPhase(longBreak ? PomodoroPhase::LongBreak : PomodoroPhase::ShortBreak, now, false);
-  } else {
-    setPhase(PomodoroPhase::Focus, now, false);
-  }
+  remainingAtPause_ = 0;
+  running_ = false;
+  completedSessions_++;
 }
 
 void PomodoroTimer::start(uint32_t now) {
@@ -40,39 +36,30 @@ void PomodoroTimer::startPause(uint32_t now) {
   if (running_) {
     remainingAtPause_ = remainingSeconds(now);
     running_ = false;
-  } else {
-    durationSeconds_ = max<uint32_t>(1, remainingAtPause_);
-    startedAt_ = now;
-    running_ = true;
+    return;
   }
+
+  if (remainingAtPause_ == 0) {
+    remainingAtPause_ = configuredDurationSeconds();
+  }
+  durationSeconds_ = remainingAtPause_;
+  startedAt_ = now;
+  running_ = true;
 }
 
 void PomodoroTimer::reset(uint32_t now) {
-  setPhase(phase_, now, false);
-}
-
-void PomodoroTimer::switchPhase(uint32_t now) {
-  if (phase_ == PomodoroPhase::Focus) {
-    setPhase(PomodoroPhase::ShortBreak, now, false);
-  } else {
-    setPhase(PomodoroPhase::Focus, now, false);
-  }
-}
-
-void PomodoroTimer::selectPhase(PomodoroPhase phase, uint32_t now) {
-  setPhase(phase, now, false);
+  running_ = false;
+  durationSeconds_ = configuredDurationSeconds();
+  remainingAtPause_ = durationSeconds_;
+  startedAt_ = now;
 }
 
 bool PomodoroTimer::isRunning() const {
   return running_;
 }
 
-PomodoroPhase PomodoroTimer::phase() const {
-  return phase_;
-}
-
-uint8_t PomodoroTimer::completedRounds() const {
-  return completedRounds_;
+uint8_t PomodoroTimer::completedSessions() const {
+  return completedSessions_;
 }
 
 uint32_t PomodoroTimer::remainingSeconds(uint32_t now) const {
@@ -88,31 +75,9 @@ uint32_t PomodoroTimer::remainingSeconds(uint32_t now) const {
 }
 
 uint32_t PomodoroTimer::durationSeconds() const {
-  return running_ ? durationSeconds_ : durationFor(phase_);
+  return running_ ? durationSeconds_ : configuredDurationSeconds();
 }
 
-String PomodoroTimer::phaseName() const {
-  switch (phase_) {
-    case PomodoroPhase::ShortBreak: return "Short break";
-    case PomodoroPhase::LongBreak: return "Long break";
-    case PomodoroPhase::Focus:
-    default: return "Focus";
-  }
-}
-
-uint32_t PomodoroTimer::durationFor(PomodoroPhase phase) const {
-  switch (phase) {
-    case PomodoroPhase::ShortBreak: return max<uint16_t>(1, settings_.shortBreakMinutes) * 60UL;
-    case PomodoroPhase::LongBreak: return max<uint16_t>(1, settings_.longBreakMinutes) * 60UL;
-    case PomodoroPhase::Focus:
-    default: return max<uint16_t>(1, settings_.focusMinutes) * 60UL;
-  }
-}
-
-void PomodoroTimer::setPhase(PomodoroPhase phase, uint32_t now, bool run) {
-  phase_ = phase;
-  durationSeconds_ = durationFor(phase);
-  remainingAtPause_ = durationSeconds_;
-  startedAt_ = now;
-  running_ = run;
+uint32_t PomodoroTimer::configuredDurationSeconds() const {
+  return max<uint16_t>(1, settings_.focusMinutes) * 60UL;
 }

@@ -16,7 +16,6 @@ enum class CompanionMode : uint8_t {
   Idle,
   Clock,
   Pomodoro,
-  Break,
   Reminders,
   Status,
 };
@@ -35,7 +34,7 @@ enum class FaceId : uint8_t {
   Full,
   Wake,
   Proud,
-  Focused,
+  Pomodoro,
   BreakTime,
   Hydration,
   SunnyIdle,
@@ -103,12 +102,6 @@ enum class ReminderKind : uint8_t {
   Stretch,
 };
 
-enum class PomodoroPhase : uint8_t {
-  Focus,
-  ShortBreak,
-  LongBreak,
-};
-
 struct FaceSpec {
   FaceId id;
   const char *name;
@@ -146,9 +139,6 @@ struct WeatherContext {
 
 struct PomodoroSettings {
   uint16_t focusMinutes = DEFAULT_FOCUS_MINUTES;
-  uint16_t shortBreakMinutes = DEFAULT_SHORT_BREAK_MINUTES;
-  uint16_t longBreakMinutes = DEFAULT_LONG_BREAK_MINUTES;
-  uint8_t roundsBeforeLongBreak = DEFAULT_POMODORO_ROUNDS;
 };
 
 struct ReminderSettings {

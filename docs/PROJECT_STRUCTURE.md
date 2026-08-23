@@ -21,7 +21,7 @@ src/
   faces.cpp             OLED drawing and face priority
   touch_input.cpp       Debounced single/double/triple/long press logic
   weather_service.cpp   Open-Meteo, NTP, idle face context
-  pomodoro.cpp          Focus/break timer behavior
+  pomodoro.cpp          Single Pomodoro countdown behavior
   reminders.cpp         Reminder scheduling
   web_dashboard.cpp     Dashboard pages, settings, actions, JSON API
 

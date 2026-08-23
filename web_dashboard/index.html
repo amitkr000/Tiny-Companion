@@ -59,7 +59,6 @@
             <button data-action="modeCycle" class="secondary">Cycle Mode</button>
             <button data-action="modeFace" class="secondary">Face Mode</button>
             <button data-action="modePomodoro" class="secondary">Pomodoro Mode</button>
-            <button data-action="modeBreak" class="secondary">Break Mode</button>
           </div>
         </div>
       </section>
@@ -71,21 +70,17 @@
       <section class="tab-panel" id="pomodoro">
         <div class="split">
           <div>
-            <h2 id="pomoPhase">Focus</h2>
+            <h2 id="pomoPhase">Pomodoro paused</h2>
             <div class="timer" id="pomoTimer">25:00</div>
             <div class="button-row">
               <button id="pomoStartBtn" data-action="pomoStart">Start</button>
               <button id="pomoPauseBtn" data-action="pomoPause" class="secondary">Pause</button>
               <button data-action="pomoReset" class="secondary">Reset</button>
-              <button data-action="pomoSwitch" class="secondary">Switch Phase</button>
               <button data-action="modeFace" class="secondary">Face Mode</button>
             </div>
           </div>
           <form id="pomodoroForm" class="settings-grid">
-            <label>Focus minutes<input name="focusMinutes" type="number" min="1" max="120"></label>
-            <label>Short break<input name="shortBreakMinutes" type="number" min="1" max="60"></label>
-            <label>Long break<input name="longBreakMinutes" type="number" min="1" max="90"></label>
-            <label>Rounds<input name="roundsBeforeLongBreak" type="number" min="1" max="12"></label>
+            <label>Pomodoro minutes<input name="focusMinutes" type="number" min="1" max="120"></label>
             <button type="submit">Save Pomodoro</button>
           </form>
         </div>

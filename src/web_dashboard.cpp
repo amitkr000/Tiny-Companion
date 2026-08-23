@@ -43,8 +43,7 @@ static String jsonEscape(const String &value) {
 static CompanionMode nextDashboardMode(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Idle: return CompanionMode::Pomodoro;
-    case CompanionMode::Pomodoro: return CompanionMode::Break;
-    case CompanionMode::Break: return CompanionMode::Clock;
+    case CompanionMode::Pomodoro: return CompanionMode::Clock;
     case CompanionMode::Clock: return CompanionMode::Reminders;
     case CompanionMode::Reminders: return CompanionMode::Status;
     case CompanionMode::Status:
@@ -52,18 +51,9 @@ static CompanionMode nextDashboardMode(CompanionMode mode) {
   }
 }
 
-static CompanionMode modeForPomodoroPhase(const PomodoroTimer &pomodoro) {
-  return pomodoro.phase() == PomodoroPhase::Focus ? CompanionMode::Pomodoro : CompanionMode::Break;
-}
-
 static void prepareDashboardMode(CompanionMode mode, PomodoroTimer &pomodoro, uint32_t now) {
-  if (pomodoro.isRunning()) {
-    return;
-  }
-  if (mode == CompanionMode::Pomodoro && pomodoro.phase() != PomodoroPhase::Focus) {
-    pomodoro.selectPhase(PomodoroPhase::Focus, now);
-  } else if (mode == CompanionMode::Break && pomodoro.phase() == PomodoroPhase::Focus) {
-    pomodoro.selectPhase(PomodoroPhase::ShortBreak, now);
+  if (mode == CompanionMode::Pomodoro && !pomodoro.isRunning()) {
+    pomodoro.reset(now);
   }
 }
 
@@ -318,7 +308,7 @@ void WebDashboard::sendDashboardPage() {
   body += F("</p></div>");
 
   body += F("<div class=\"card\"><h2>Pomodoro</h2><p class=\"status\">");
-  body += pomodoro_->phaseName();
+  body += F("Pomodoro");
   body += pomodoro_->isRunning() ? F(" running") : F(" paused");
   body += F("<br>Remaining ");
   uint32_t remaining = pomodoro_->remainingSeconds(millis());
@@ -330,7 +320,7 @@ void WebDashboard::sendDashboardPage() {
   body += F("</section>");
 
   body += F("<section class=\"card\" style=\"margin-top:12px\"><h2>Fallback Actions</h2><div class=\"row actions\">");
-  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}, {"modeBreak", "Break mode"}};
+  const char *actions[][2] = {{"poke", "Poke"}, {"feed", "Feed"}, {"play", "Play"}, {"sleep", "Sleep"}, {"wake", "Wake"}, {"love", "Love"}, {"modeCycle", "Cycle mode"}, {"modeFace", "Face mode"}, {"modePomodoro", "Pomodoro mode"}};
   for (const auto &action : actions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -338,7 +328,7 @@ void WebDashboard::sendDashboardPage() {
     body += action[1];
     body += F("</button></form>");
   }
-  const char *pomoActions[][2] = {{"pomoStart", "Start"}, {"pomoPause", "Pause"}, {"pomoReset", "Reset"}, {"pomoSwitch", "Switch phase"}};
+  const char *pomoActions[][2] = {{"pomoStart", "Start"}, {"pomoPause", "Pause"}, {"pomoReset", "Reset"}};
   for (const auto &action : pomoActions) {
     body += F("<form method=\"post\" action=\"/action\"><input type=\"hidden\" name=\"action\" value=\"");
     body += action[0];
@@ -404,24 +394,20 @@ bool WebDashboard::applyAction(const String &action) {
     triggerReaction(*state_, FaceId::Love, "Loved", now);
   } else if (action == "pomoStart") {
     pomodoro_->start(now);
-    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
-    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro started", now);
+    state_->companionMode = CompanionMode::Pomodoro;
+    triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro started", now);
   } else if (action == "pomoPause") {
     pomodoro_->pause(now);
-    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
-    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro paused", now);
+    state_->companionMode = CompanionMode::Pomodoro;
+    triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro paused", now);
   } else if (action == "pomoToggle") {
     pomodoro_->startPause(now);
-    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
-    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro toggle", now);
+    state_->companionMode = CompanionMode::Pomodoro;
+    triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro toggle", now);
   } else if (action == "pomoReset") {
     pomodoro_->reset(now);
-    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
-    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro reset", now);
-  } else if (action == "pomoSwitch") {
-    pomodoro_->switchPhase(now);
-    state_->companionMode = modeForPomodoroPhase(*pomodoro_);
-    triggerReaction(*state_, pomodoro_->phase() == PomodoroPhase::Focus ? FaceId::Focused : FaceId::BreakTime, "Pomodoro phase", now);
+    state_->companionMode = CompanionMode::Pomodoro;
+    triggerReaction(*state_, FaceId::Pomodoro, "Pomodoro reset", now);
   } else if (action == "doneHydration") {
     reminders_->markDone(ReminderKind::Hydration, now);
     state_->activeReminder = ReminderKind::None;
@@ -439,8 +425,6 @@ bool WebDashboard::applyAction(const String &action) {
     setDashboardMode(*state_, *pomodoro_, CompanionMode::Idle, now);
   } else if (action == "modePomodoro") {
     setDashboardMode(*state_, *pomodoro_, CompanionMode::Pomodoro, now);
-  } else if (action == "modeBreak") {
-    setDashboardMode(*state_, *pomodoro_, CompanionMode::Break, now);
   } else {
     return false;
   }
@@ -475,9 +459,6 @@ bool WebDashboard::applySettingsFromRequest() {
   state_->displaySettings.inverted = server_->hasArg("invert");
   state_->displaySettings.idleAnimationEnabled = server_->hasArg("idleAnim");
   if (server_->hasArg("focus")) state_->pomodoroSettings.focusMinutes = constrain(server_->arg("focus").toInt(), 1, 120);
-  if (server_->hasArg("shortBreak")) state_->pomodoroSettings.shortBreakMinutes = constrain(server_->arg("shortBreak").toInt(), 1, 60);
-  if (server_->hasArg("longBreak")) state_->pomodoroSettings.longBreakMinutes = constrain(server_->arg("longBreak").toInt(), 1, 90);
-  if (server_->hasArg("rounds")) state_->pomodoroSettings.roundsBeforeLongBreak = constrain(server_->arg("rounds").toInt(), 1, 12);
   state_->reminderSettings.hydrationEnabled = server_->hasArg("hydrationOn");
   state_->reminderSettings.stretchEnabled = server_->hasArg("stretchOn");
   if (server_->hasArg("hydration")) state_->reminderSettings.hydrationMinutes = constrain(server_->arg("hydration").toInt(), 5, 240);
@@ -528,9 +509,6 @@ bool WebDashboard::applySettingsFromJson() {
   JsonObject pomo = root["pomodoro"];
   if (!pomo.isNull()) {
     if (!pomo["focusMinutes"].isNull()) state_->pomodoroSettings.focusMinutes = constrain(pomo["focusMinutes"].as<int>(), 1, 120);
-    if (!pomo["shortBreakMinutes"].isNull()) state_->pomodoroSettings.shortBreakMinutes = constrain(pomo["shortBreakMinutes"].as<int>(), 1, 60);
-    if (!pomo["longBreakMinutes"].isNull()) state_->pomodoroSettings.longBreakMinutes = constrain(pomo["longBreakMinutes"].as<int>(), 1, 90);
-    if (!pomo["roundsBeforeLongBreak"].isNull()) state_->pomodoroSettings.roundsBeforeLongBreak = constrain(pomo["roundsBeforeLongBreak"].as<int>(), 1, 12);
   }
 
   JsonObject reminder = root["reminders"];
@@ -668,12 +646,6 @@ void WebDashboard::sendSettingsJson() {
   json += state_->displaySettings.idleAnimationEnabled ? F("true") : F("false");
   json += F("},\"pomodoro\":{\"focusMinutes\":");
   json += state_->pomodoroSettings.focusMinutes;
-  json += F(",\"shortBreakMinutes\":");
-  json += state_->pomodoroSettings.shortBreakMinutes;
-  json += F(",\"longBreakMinutes\":");
-  json += state_->pomodoroSettings.longBreakMinutes;
-  json += F(",\"roundsBeforeLongBreak\":");
-  json += state_->pomodoroSettings.roundsBeforeLongBreak;
   json += F("},\"reminders\":{\"hydrationEnabled\":");
   json += state_->reminderSettings.hydrationEnabled ? F("true") : F("false");
   json += F(",\"stretchEnabled\":");
@@ -735,7 +707,7 @@ void WebDashboard::sendStateJson() {
   json += F(",\"energy\":");
   json += state_->stats.energy;
   json += F(",\"pomodoro\":{\"phase\":\"");
-  json += pomodoro_->phaseName();
+  json += F("Pomodoro");
   json += F("\",\"running\":");
   json += pomodoro_->isRunning() ? F("true") : F("false");
   json += F(",\"remainingSeconds\":");

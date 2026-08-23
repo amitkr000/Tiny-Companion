@@ -14,7 +14,7 @@ static const FaceSpec FACE_SPECS[] = {
   {FaceId::Full, "full", "Too full"},
   {FaceId::Wake, "wake", "Waking up"},
   {FaceId::Proud, "proud", "Proud helper"},
-  {FaceId::Focused, "focused", "Focus mode"},
+  {FaceId::Pomodoro, "pomodoro", "Pomodoro timer"},
   {FaceId::BreakTime, "break", "Break time"},
   {FaceId::Hydration, "hydration", "Drink water"},
   {FaceId::SunnyIdle, "sunny", "Sunny"},
@@ -177,7 +177,6 @@ const char *companionModeName(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Clock: return "Clock";
     case CompanionMode::Pomodoro: return "Pomodoro";
-    case CompanionMode::Break: return "Break";
     case CompanionMode::Reminders: return "Reminders";
     case CompanionMode::Status: return "Status";
     case CompanionMode::Idle:

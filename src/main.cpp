@@ -70,9 +70,6 @@ static void saveRuntimeSettings() {
   preferences.putBool("touch", runtimeTouchEnabled);
   preferences.putBool("sound", runtimeSoundEnabled);
   preferences.putUShort("focus", app.pomodoroSettings.focusMinutes);
-  preferences.putUShort("shortBreak", app.pomodoroSettings.shortBreakMinutes);
-  preferences.putUShort("longBreak", app.pomodoroSettings.longBreakMinutes);
-  preferences.putUChar("rounds", app.pomodoroSettings.roundsBeforeLongBreak);
   preferences.putBool("hydOn", app.reminderSettings.hydrationEnabled);
   preferences.putBool("stretchOn", app.reminderSettings.stretchEnabled);
   preferences.putUShort("hydMin", app.reminderSettings.hydrationMinutes);
@@ -98,9 +95,6 @@ static void loadRuntimeSettings() {
   runtimeSoundEnabled = preferences.getBool("sound", ENABLE_SOUND);
 
   app.pomodoroSettings.focusMinutes = constrain(preferences.getUShort("focus", DEFAULT_FOCUS_MINUTES), 1, 120);
-  app.pomodoroSettings.shortBreakMinutes = constrain(preferences.getUShort("shortBreak", DEFAULT_SHORT_BREAK_MINUTES), 1, 60);
-  app.pomodoroSettings.longBreakMinutes = constrain(preferences.getUShort("longBreak", DEFAULT_LONG_BREAK_MINUTES), 1, 90);
-  app.pomodoroSettings.roundsBeforeLongBreak = constrain(preferences.getUChar("rounds", DEFAULT_POMODORO_ROUNDS), 1, 12);
   app.reminderSettings.hydrationEnabled = preferences.getBool("hydOn", true);
   app.reminderSettings.stretchEnabled = preferences.getBool("stretchOn", true);
   app.reminderSettings.hydrationMinutes = constrain(preferences.getUShort("hydMin", DEFAULT_HYDRATION_MINUTES), 5, 240);
@@ -262,8 +256,7 @@ static void startSetupPortal() {
 static CompanionMode nextCompanionMode(CompanionMode mode) {
   switch (mode) {
     case CompanionMode::Idle: return CompanionMode::Pomodoro;
-    case CompanionMode::Pomodoro: return CompanionMode::Break;
-    case CompanionMode::Break: return CompanionMode::Clock;
+    case CompanionMode::Pomodoro: return CompanionMode::Clock;
     case CompanionMode::Clock: return CompanionMode::Reminders;
     case CompanionMode::Reminders: return CompanionMode::Status;
     case CompanionMode::Status:
@@ -272,13 +265,8 @@ static CompanionMode nextCompanionMode(CompanionMode mode) {
 }
 
 static void prepareModePreview(CompanionMode mode, uint32_t now) {
-  if (pomodoro.isRunning()) {
-    return;
-  }
-  if (mode == CompanionMode::Pomodoro && pomodoro.phase() != PomodoroPhase::Focus) {
-    pomodoro.selectPhase(PomodoroPhase::Focus, now);
-  } else if (mode == CompanionMode::Break && pomodoro.phase() == PomodoroPhase::Focus) {
-    pomodoro.selectPhase(PomodoroPhase::ShortBreak, now);
+  if (mode == CompanionMode::Pomodoro && !pomodoro.isRunning()) {
+    pomodoro.reset(now);
   }
 }
 
@@ -293,10 +281,7 @@ static void selectCompanionMode(CompanionMode mode, uint32_t now) {
 
 static bool currentModeIsStarted() {
   if (app.companionMode == CompanionMode::Pomodoro) {
-    return pomodoro.isRunning() && pomodoro.phase() == PomodoroPhase::Focus;
-  }
-  if (app.companionMode == CompanionMode::Break) {
-    return (pomodoro.isRunning() && pomodoro.phase() != PomodoroPhase::Focus) || app.activeReminder != ReminderKind::None;
+    return pomodoro.isRunning();
   }
   return false;
 }
@@ -374,7 +359,7 @@ static void handleActionGesture(TouchGesture gesture, uint32_t now) {
     return;
   }
 
-  if (app.companionMode == CompanionMode::Pomodoro || app.companionMode == CompanionMode::Break) {
+  if (app.companionMode == CompanionMode::Pomodoro) {
     return;
   }
 

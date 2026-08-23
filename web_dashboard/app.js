@@ -2,7 +2,7 @@ const STORAGE_KEY = "tinyCompanionDevice";
 const COMMON_BASES = ["192.168.0.", "192.168.1.", "192.168.29.", "192.168.31.", "10.0.0."];
 const FACES = [
   "neutral", "happy", "playful", "hungry", "sleepy", "excited", "sad", "love",
-  "poke", "feed", "full", "wake", "proud", "focused", "break", "hydration",
+  "poke", "feed", "full", "wake", "proud", "pomodoro", "break", "hydration",
   "sunny", "rainy", "cloudy", "stormy", "foggy", "windy", "hot", "cold",
   "morning", "afternoon", "evening", "night", "new-moon", "crescent-moon",
   "half-moon", "full-moon", "spring", "summer", "monsoon", "autumn", "winter",
@@ -80,7 +80,7 @@ function updateState(state) {
   setStatus(true, `${state.device || "Tiny Companion"} at ${deviceBase.replace("http://", "")}`);
   updateFaceArt(state.face);
   updateMetrics(state);
-  $("#pomoPhase").textContent = `${state.pomodoro?.phase || "Focus"} ${state.pomodoro?.running ? "running" : "paused"}`;
+  $("#pomoPhase").textContent = `Pomodoro ${state.pomodoro?.running ? "running" : "paused"}`;
   $("#pomoTimer").textContent = formatTimer(state.pomodoro?.remainingSeconds);
   $("#pomoStartBtn").disabled = Boolean(state.pomodoro?.running);
   $("#pomoPauseBtn").disabled = !state.pomodoro?.running;
@@ -154,9 +154,6 @@ function fillSettings(settings) {
 
   const pomo = $("#pomodoroForm");
   pomo.focusMinutes.value = settings.pomodoro.focusMinutes;
-  pomo.shortBreakMinutes.value = settings.pomodoro.shortBreakMinutes;
-  pomo.longBreakMinutes.value = settings.pomodoro.longBreakMinutes;
-  pomo.roundsBeforeLongBreak.value = settings.pomodoro.roundsBeforeLongBreak;
 
   const reminder = $("#reminderForm");
   reminder.hydrationEnabled.checked = settings.reminders.hydrationEnabled;
@@ -257,9 +254,6 @@ function installEvents() {
     const form = event.currentTarget;
     saveSettings({ pomodoro: {
       focusMinutes: Number(form.focusMinutes.value),
-      shortBreakMinutes: Number(form.shortBreakMinutes.value),
-      longBreakMinutes: Number(form.longBreakMinutes.value),
-      roundsBeforeLongBreak: Number(form.roundsBeforeLongBreak.value),
     }}).catch((err) => $("#connectHint").textContent = err.message);
   });
 

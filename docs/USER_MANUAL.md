@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Tiny Companion is a small desk pet with expressive OLED faces. It reacts to touch, shows weather/time/season/moon idle faces, runs Pomodoro focus sessions, and reminds you to drink water or stretch.
+Tiny Companion is a small desk pet with expressive OLED faces. It reacts to touch, shows weather/time/season/moon idle faces, runs a Pomodoro timer, and reminds you to drink water or stretch.
 
 In Face mode, the OLED shows only the face and its visual effects. Labels, status icons, and extra text are hidden so touch reactions like poke/feed/love can take over cleanly.
 
@@ -64,7 +64,7 @@ Action touch sensor:
 | Gesture | Normal Mode |
 | --- | --- |
 | Single/double/triple tap | Reserved for the current mode or future modes |
-| Long press | Cycle modes: Face, Pomodoro, Break, Clock, Reminders, Status |
+| Long press | Cycle modes: Face, Pomodoro, Clock, Reminders, Status |
 
 In Pomodoro mode:
 
@@ -77,14 +77,11 @@ If a selected mode is only being previewed and no timer/reminder is active, Tiny
 
 ## Pomodoro
 
-Use the hosted dashboard to start and control Pomodoro mode. Pomodoro is website-only so accidental physical touches do not break a focus session.
+Use the hosted dashboard to start and control Pomodoro mode. Pomodoro is website-only so accidental physical touches do not interrupt the timer.
 
 Default timing:
 
-- Focus: 25 minutes
-- Short break: 5 minutes
-- Long break: 15 minutes
-- Long break after: 4 focus rounds
+- Pomodoro: 25 minutes
 
 You can change these from the dashboard settings.
 
@@ -147,8 +144,8 @@ If your browser blocks local-network access from the hosted page, open `http://E
 | Sleepy | Energy is low or sleep mode is active |
 | Lonely/bored | Happiness is low |
 | Annoyed/angry | Too many pokes too quickly |
-| Focused | Pomodoro focus session |
-| Break | Pomodoro break or stretch reminder |
+| Pomodoro | Pomodoro timer |
+| Break | Stretch reminder |
 | Hydration | Drink water reminder |
 
 ## Charging And Power
